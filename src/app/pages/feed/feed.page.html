@@ -1,0 +1,122 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'FEED_PAGE.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="container py-4">
+
+    <!-- Barre de recherche -->
+    <div class="relative mb-4">
+
+      <ion-icon
+        name="search-outline"
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10">
+      </ion-icon>
+
+      <input
+        type="text"
+        (input)="onSearchChange($event)"
+        [placeholder]="'FEED_PAGE.SEARCH_PLACEHOLDER' | translate"
+        class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-primary-50/60 dark:bg-primary-800/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none shadow-lg transition" />
+
+    </div>
+
+    <!-- Squelette de chargement -->
+    <div class="space-y-4 pb-8" *ngIf="loading">
+      <div *ngFor="let i of [0,1,2]" class="rounded-3xl shadow-lg overflow-hidden" style="background: var(--stud-surface)">
+        <div class="flex items-center gap-3 p-3">
+          <app-skeleton width="2.75rem" height="2.75rem" [circle]="true" logoSize="1.2rem"></app-skeleton>
+          <div class="flex-1 flex flex-col gap-2 justify-center">
+            <app-skeleton width="45%" height="0.75rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+            <app-skeleton width="30%" height="0.65rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+          </div>
+        </div>
+        <app-skeleton width="100%" height="13rem" radius="0" [showLogo]="false"></app-skeleton>
+      </div>
+    </div>
+
+    <!-- Fil d'actualité -->
+    <div class="space-y-4 pb-8" *ngIf="!loading">
+
+      <div
+        *ngFor="let post of filteredPosts"
+        class="rounded-3xl shadow-lg overflow-hidden"
+        style="background: var(--stud-surface)">
+
+        <!-- Publieur -->
+        <div class="flex items-center gap-3 p-3">
+
+          <img
+            [src]="post.authorAvatar"
+            [alt]="post.authorName"
+            class="w-11 h-11 rounded-full object-cover flex-shrink-0" />
+
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-sm text-slate-800 dark:text-white truncate">{{ post.authorName }}</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ post.authorRole }}</p>
+          </div>
+
+          <span class="text-[10px] text-slate-400 dark:text-slate-500 flex-shrink-0">{{ post.timeAgo }}</span>
+
+        </div>
+
+        <!-- Description -->
+        <p
+          class="px-3 text-sm text-slate-700 dark:text-slate-200 leading-relaxed"
+          [class.pb-3]="post.description.length <= 90"
+          [class.line-clamp-2]="!post.expanded">
+          {{ post.description }}
+        </p>
+
+        <button
+          *ngIf="post.description.length > 90"
+          (click)="toggleExpand(post)"
+          class="px-3 pb-3 pt-1 text-xs font-semibold text-primary-600 dark:text-primary-300 block">
+          {{ (post.expanded ? 'FEED_PAGE.SEE_LESS' : 'FEED_PAGE.SEE_MORE') | translate }}
+        </button>
+
+        <!-- Image -->
+        <img
+          [src]="post.image"
+          [alt]="post.description"
+          class="w-full h-56 object-cover" />
+
+        <!-- Likes / commentaires -->
+        <div class="flex items-center gap-5 px-3 py-3">
+
+          <button
+            (click)="toggleLike(post)"
+            class="flex items-center gap-1.5 active:scale-90 transition">
+
+            <ion-icon
+              [name]="post.liked ? 'heart' : 'heart-outline'"
+              [class]="post.liked ? 'text-primary-500 text-xl' : 'text-slate-500 dark:text-slate-300 text-xl'">
+            </ion-icon>
+
+            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ post.likes }}</span>
+
+          </button>
+
+          <div class="flex items-center gap-1.5 text-slate-500 dark:text-slate-300">
+            <ion-icon name="chatbubble-outline" class="text-lg"></ion-icon>
+            <span class="text-xs font-semibold">{{ post.comments }}</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Aucun résultat -->
+      <div *ngIf="filteredPosts.length === 0" class="flex flex-col items-center justify-center py-16 text-center">
+        <ion-icon name="newspaper-outline" class="text-4xl text-slate-300 dark:text-slate-600 mb-2"></ion-icon>
+        <p class="text-sm text-slate-400 dark:text-slate-500">{{ 'FEED_PAGE.NO_RESULTS' | translate }}</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>

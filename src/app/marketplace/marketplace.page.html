@@ -1,0 +1,346 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'MARKETPLACE_PAGE.TITLE' | translate }}</ion-title>
+
+    <ion-buttons slot="end">
+      <button
+        (click)="openSellModal()"
+        [attr.aria-label]="'MARKETPLACE_PAGE.SELL_FAB' | translate"
+        class="w-9 h-9 mr-2 rounded-full bg-primary-500 flex items-center justify-center active:scale-90 transition shadow-md">
+        <ion-icon name="add" class="text-white text-xl"></ion-icon>
+      </button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content
+  [fullscreen]="true"
+>
+  <div class="container py-4 space-y-4 animate-fade-in">
+
+    <!-- Barre recherche -->
+    <div class="relative">
+      <input
+        type="text"
+        (input)="onSearchChange($event)"
+        [placeholder]="'MARKETPLACE_PAGE.SEARCH_PLACEHOLDER' | translate"
+        class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-primary-50/60 dark:bg-primary-800/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none shadow-lg transition"
+      />
+
+      <ion-icon
+        name="search-outline"
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+      ></ion-icon>
+    </div>
+
+    <!-- Filtres catégories -->
+    <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+      <button
+        *ngFor="let category of categories"
+        (click)="selectCategory(category)"
+        class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200"
+        [ngClass]="selectedCategory === category
+        ? 'bg-primary-500 text-white shadow-md'
+        : 'bg-primary-50 dark:bg-primary-800 text-slate-500 dark:text-slate-300'"
+      >
+        {{ 'CATEGORIES.' + category | translate }}
+      </button>
+    </div>
+
+    <!-- Compteur -->
+    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">
+      {{ 'MARKETPLACE_PAGE.RESULTS_COUNT' | translate: { count: filteredProducts.length } }}
+    </div>
+
+    <!-- Squelette de chargement -->
+    <div class="grid grid-cols-2 gap-3 pb-8" *ngIf="loading">
+      <div *ngFor="let i of [0,1,2,3,4,5]" class="rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg flex flex-col">
+        <app-skeleton height="8rem" radius="0"></app-skeleton>
+        <div class="p-2 flex flex-col gap-2">
+          <app-skeleton width="70%" height="0.75rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+          <app-skeleton width="40%" height="0.9rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Produits -->
+    <div class="grid grid-cols-2 gap-3 pb-8" *ngIf="!loading">
+
+      <div
+        *ngFor="let product of filteredProducts"
+        [routerLink]="['/detailsproduit', product.id]"
+        class="rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg flex flex-col active:scale-[0.98] transition"
+      >
+        <!-- Image -->
+        <div class="relative h-32 bg-primary-50 dark:bg-primary-900 overflow-hidden">
+          <img
+            [src]="product.image"
+            [alt]="product.title"
+            class="w-full h-full object-cover"
+          />
+
+          <div
+            class="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-[9px] font-semibold"
+          >
+            {{ 'CONDITIONS.' + product.condition | translate }}
+          </div>
+        </div>
+
+        <!-- Contenu -->
+        <div class="p-2 flex flex-col flex-1">
+
+          <span
+            class="inline-block bg-primary-50 dark:bg-primary-700/40 text-primary-700 dark:text-primary-200 text-[9px] px-2 py-1 rounded-full w-fit mb-1 font-semibold"
+          >
+            {{ 'CATEGORIES.' + product.category | translate }}
+          </span>
+
+          <h3
+            class="font-bold text-slate-800 dark:text-white text-[11px] leading-4 line-clamp-2"
+          >
+            {{ product.title }}
+          </h3>
+
+          <p class="text-slate-400 dark:text-slate-400 text-[10px] mt-1 flex items-center gap-1">
+            <ion-icon name="location-outline" class="text-primary-600"></ion-icon>
+            {{ product.city }}
+          </p>
+
+          <div class="mt-2">
+            <p class="text-[10px] text-slate-400">{{ 'MARKETPLACE_PAGE.SELLER_LABEL' | translate: { name: product.seller } }}</p>
+
+            <p class="font-extrabold text-primary-700 dark:text-primary-300 text-sm mt-0.5">
+              {{ product.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+
+          <button
+            class="mt-2 w-full bg-primary-500 text-white text-[10px] font-semibold py-2 rounded-lg active:scale-95 transition-all"
+          >
+            {{ 'MARKETPLACE_PAGE.CONTACT_SELLER' | translate }}
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Aucun résultat -->
+    <div
+      *ngIf="filteredProducts.length === 0"
+      class="text-center py-16"
+    >
+      <ion-icon
+        name="pricetags-outline"
+        class="text-6xl text-primary-100 mb-4"
+        style="display:block"
+      ></ion-icon>
+
+      <p class="text-slate-700 dark:text-slate-200 font-semibold">
+        {{ 'MARKETPLACE_PAGE.NO_RESULTS' | translate }}
+      </p>
+
+      <p class="text-sm text-slate-400 mt-2">
+        {{ 'COMMON.TRY_OTHER_SEARCH' | translate }}
+      </p>
+    </div>
+
+  </div>
+</ion-content>
+
+<!-- Modale : vendre un article -->
+<ion-modal
+  [isOpen]="showSellModal"
+  [initialBreakpoint]="0.92"
+  [breakpoints]="[0, 0.92]"
+  (didDismiss)="closeSellModal()">
+  <ng-template>
+
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title class="text-slate-800 dark:text-white font-bold text-base">
+          {{ 'MARKETPLACE_PAGE.SELL_TITLE' | translate }}
+        </ion-title>
+        <ion-buttons slot="end">
+          <button
+            (click)="closeSellModal()"
+            class="w-9 h-9 mr-2 rounded-full bg-slate-100 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+            <ion-icon name="close" class="text-slate-600 dark:text-white text-lg"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+
+      <p class="text-sm text-slate-400 dark:text-slate-300 -mt-1 mb-5">
+        {{ 'MARKETPLACE_PAGE.SELL_SUBTITLE' | translate }}
+      </p>
+
+      <form (ngSubmit)="publishProduct()" #publishForm="ngForm">
+
+        <!-- Message d'erreur -->
+        <div *ngIf="sellError" class="mb-5 flex items-center gap-2 bg-red-50 dark:bg-red-500/10 text-red-500 text-xs font-medium px-4 py-3 rounded-2xl">
+          <ion-icon name="alert-circle-outline" class="text-base"></ion-icon>
+          <span>{{ sellError | translate }}</span>
+        </div>
+
+        <!-- Photo -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'MARKETPLACE_PAGE.SELL_PHOTO_ADD' | translate }}
+          </label>
+
+          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onPhotoSelected($event)">
+
+          <div
+            (click)="fileInput.click()"
+            class="mt-2 w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 dark:border-primary-700 flex items-center justify-center overflow-hidden cursor-pointer bg-slate-50 dark:bg-primary-800/40 active:scale-[0.98] transition">
+
+            <img *ngIf="sellForm.photoDataUrl" [src]="sellForm.photoDataUrl" class="w-full h-full object-cover" />
+
+            <div *ngIf="!sellForm.photoDataUrl" class="flex flex-col items-center gap-1.5 text-slate-400">
+              <ion-icon name="camera-outline" class="text-2xl"></ion-icon>
+              <span class="text-xs font-medium">{{ 'MARKETPLACE_PAGE.SELL_PHOTO_ADD' | translate }}</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Titre -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'MARKETPLACE_PAGE.SELL_TITLE_LABEL' | translate }}
+          </label>
+
+          <div class="mt-2 flex items-center gap-3 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="pricetag-outline" class="text-lg text-primary-500"></ion-icon>
+            <input
+              type="text"
+              name="title"
+              [(ngModel)]="sellForm.title"
+              [placeholder]="'MARKETPLACE_PAGE.SELL_TITLE_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <!-- Catégorie + État -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+
+          <div>
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+              {{ 'MARKETPLACE_PAGE.SELL_CATEGORY_LABEL' | translate }}
+            </label>
+
+            <div class="mt-2 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-1">
+              <ion-select
+                interface="popover"
+                name="category"
+                [(ngModel)]="sellForm.category"
+                [placeholder]="'MARKETPLACE_PAGE.SELL_CATEGORY_PLACEHOLDER' | translate"
+                style="--padding-start: 0; --padding-end: 0;"
+                class="w-full text-sm text-slate-800 dark:text-white">
+                <ion-select-option *ngFor="let category of sellCategories" [value]="category">{{ 'CATEGORIES.' + category | translate }}</ion-select-option>
+              </ion-select>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+              {{ 'MARKETPLACE_PAGE.SELL_CONDITION_LABEL' | translate }}
+            </label>
+
+            <div class="mt-2 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-1">
+              <ion-select
+                interface="popover"
+                name="condition"
+                [(ngModel)]="sellForm.condition"
+                [placeholder]="'MARKETPLACE_PAGE.SELL_CONDITION_PLACEHOLDER' | translate"
+                style="--padding-start: 0; --padding-end: 0;"
+                class="w-full text-sm text-slate-800 dark:text-white">
+                <ion-select-option *ngFor="let condition of conditions" [value]="condition">{{ 'CONDITIONS.' + condition | translate }}</ion-select-option>
+              </ion-select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Prix -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'MARKETPLACE_PAGE.SELL_PRICE_LABEL' | translate }}
+          </label>
+
+          <div class="mt-2 flex items-center gap-3 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="cash-outline" class="text-lg text-primary-500"></ion-icon>
+            <input
+              type="number"
+              min="0"
+              name="price"
+              [(ngModel)]="sellForm.price"
+              placeholder="0"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+            <span class="text-xs font-semibold text-slate-400">{{ 'COMMON.CURRENCY' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Négociable -->
+        <div class="flex items-center justify-between mb-4 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5">
+          <span class="text-sm font-semibold text-slate-700 dark:text-white">{{ 'MARKETPLACE_PAGE.SELL_NEGOTIABLE_LABEL' | translate }}</span>
+          <ion-toggle name="negotiable" [(ngModel)]="sellForm.negotiable"></ion-toggle>
+        </div>
+
+        <!-- Ville -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'MARKETPLACE_PAGE.SELL_CITY_LABEL' | translate }}
+          </label>
+
+          <div class="mt-2 flex items-center gap-3 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="location-outline" class="text-lg text-primary-500"></ion-icon>
+            <input
+              type="text"
+              name="city"
+              [(ngModel)]="sellForm.city"
+              [placeholder]="'MARKETPLACE_PAGE.SELL_CITY_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'MARKETPLACE_PAGE.SELL_DESCRIPTION_LABEL' | translate }}
+          </label>
+
+          <div class="mt-2 bg-white dark:bg-primary-800/60 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <textarea
+              name="description"
+              [(ngModel)]="sellForm.description"
+              [placeholder]="'MARKETPLACE_PAGE.SELL_DESCRIPTION_PLACEHOLDER' | translate"
+              rows="3"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400 resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Bouton -->
+        <button
+          type="submit"
+          [disabled]="sellLoading"
+          class="w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all duration-200 disabled:opacity-60">
+
+          <ion-icon *ngIf="sellLoading" name="reload-outline" class="animate-spin align-middle mr-2"></ion-icon>
+          {{ (sellLoading ? 'MARKETPLACE_PAGE.SELL_PUBLISHING' : 'MARKETPLACE_PAGE.SELL_PUBLISH_BUTTON') | translate }}
+
+        </button>
+
+        <div style="height: calc(7rem + env(safe-area-inset-bottom))"></div>
+
+      </form>
+
+    </ion-content>
+
+  </ng-template>
+</ion-modal>

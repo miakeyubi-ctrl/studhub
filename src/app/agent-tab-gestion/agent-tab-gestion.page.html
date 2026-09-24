@@ -1,0 +1,320 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'AGENT_TABS.GESTION' | translate }}</ion-title>
+
+    <ion-buttons slot="end">
+      <button
+        (click)="openAddModal()"
+        [attr.aria-label]="'AGENT_DASHBOARD.ADD_BUTTON' | translate"
+        class="w-9 h-9 mr-2 rounded-full bg-primary-500 flex items-center justify-center active:scale-90 transition shadow-md">
+        <ion-icon name="add" class="text-white text-xl"></ion-icon>
+      </button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="container py-4 pb-10">
+
+    <div class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
+      {{ 'AGENT_DASHBOARD.STATS_PROPERTIES' | translate }} : {{ properties.length }}
+    </div>
+
+    <div class="space-y-3" *ngIf="properties.length > 0">
+
+      <div
+        *ngFor="let property of properties"
+        class="flex gap-3 p-2 rounded-2xl shadow-lg"
+        style="background: var(--stud-surface)">
+
+        <img
+          [src]="property.image"
+          [alt]="property.title"
+          class="w-24 h-24 rounded-xl object-cover flex-shrink-0" />
+
+        <div class="flex-1 py-1 flex flex-col min-w-0">
+
+          <span class="inline-block bg-primary-50 dark:bg-primary-700/40 text-primary-700 dark:text-primary-200 text-[9px] px-2 py-1 rounded-full w-fit font-semibold">
+            {{ 'CATEGORIES.' + property.category | translate }}
+          </span>
+
+          <h5 class="text-sm font-bold text-slate-800 dark:text-white mt-1.5 leading-4 truncate">{{ property.title }}</h5>
+
+          <p class="text-xs text-slate-500 dark:text-slate-300 mt-1 flex items-center gap-1 truncate">
+            <ion-icon name="location-outline" class="text-primary-600 flex-shrink-0"></ion-icon>
+            {{ property.city }}
+          </p>
+
+          <div class="flex items-center justify-between mt-auto">
+
+            <p class="font-extrabold text-primary-700 dark:text-primary-300 text-sm">
+              {{ property.price }} <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">{{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</span>
+            </p>
+
+            <div class="flex items-center gap-1.5">
+              <button
+                (click)="openEditModal(property)"
+                class="w-7 h-7 rounded-full bg-primary-50 dark:bg-primary-700 flex items-center justify-center active:scale-90 transition">
+                <ion-icon name="create-outline" class="text-primary-600 dark:text-primary-200 text-sm"></ion-icon>
+              </button>
+              <button
+                (click)="confirmDelete(property)"
+                class="w-7 h-7 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center active:scale-90 transition">
+                <ion-icon name="trash-outline" class="text-red-500 text-sm"></ion-icon>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Aucun bien -->
+    <div *ngIf="properties.length === 0" class="text-center py-16">
+      <ion-icon name="business-outline" class="text-6xl text-primary-100 mb-4" style="display:block"></ion-icon>
+      <p class="text-slate-700 dark:text-slate-200 font-semibold">{{ 'AGENT_DASHBOARD.NO_PROPERTIES' | translate }}</p>
+      <p class="text-sm text-slate-400 mt-2">{{ 'AGENT_DASHBOARD.NO_PROPERTIES_DESC' | translate }}</p>
+
+      <button
+        (click)="openAddModal()"
+        class="mt-5 bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl active:scale-95 transition">
+        {{ 'AGENT_DASHBOARD.ADD_BUTTON' | translate }}
+      </button>
+    </div>
+
+  </div>
+
+</ion-content>
+
+<!-- Modale : publier / modifier un bien -->
+<ion-modal
+  [isOpen]="showFormModal"
+  [initialBreakpoint]="0.92"
+  [breakpoints]="[0, 0.92]"
+  (didDismiss)="closeFormModal()">
+  <ng-template>
+
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title class="text-slate-800 dark:text-white font-bold text-base">
+          {{ (editingId !== null ? 'AGENT_DASHBOARD.EDIT_TITLE' : 'AGENT_DASHBOARD.ADD_TITLE') | translate }}
+        </ion-title>
+        <ion-buttons slot="end">
+          <button
+            (click)="closeFormModal()"
+            class="w-9 h-9 mr-2 rounded-full bg-slate-100 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+            <ion-icon name="close" class="text-slate-600 dark:text-white text-lg"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+
+      <form (ngSubmit)="savePropertyForm()" #propertyForm="ngForm">
+
+        <!-- Message d'erreur -->
+        <div *ngIf="formError" class="mb-5 flex items-center gap-2 bg-red-50 dark:bg-red-500/10 text-red-500 text-xs font-medium px-4 py-3 rounded-2xl">
+          <ion-icon name="alert-circle-outline" class="text-base"></ion-icon>
+          <span>{{ formError | translate }}</span>
+        </div>
+
+        <!-- Photo -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'AGENT_DASHBOARD.PHOTO_ADD' | translate }}
+          </label>
+
+          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onPhotoSelected($event)">
+
+          <div
+            (click)="fileInput.click()"
+            class="mt-2 w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 dark:border-primary-700 flex items-center justify-center overflow-hidden cursor-pointer bg-slate-50 dark:bg-primary-800/40 active:scale-[0.98] transition">
+
+            <img *ngIf="form.photoDataUrl" [src]="form.photoDataUrl" class="w-full h-full object-cover" />
+
+            <div *ngIf="!form.photoDataUrl" class="flex flex-col items-center gap-1.5 text-slate-400">
+              <ion-icon name="camera-outline" class="text-2xl"></ion-icon>
+              <span class="text-xs font-medium">{{ 'AGENT_DASHBOARD.PHOTO_ADD' | translate }}</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Titre -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'AGENT_DASHBOARD.PROPERTY_TITLE_LABEL' | translate }}
+          </label>
+
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="home-outline" class="text-lg text-primary-500"></ion-icon>
+            <input
+              type="text"
+              name="title"
+              [(ngModel)]="form.title"
+              [placeholder]="'AGENT_DASHBOARD.PROPERTY_TITLE_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'AGENT_DASHBOARD.CATEGORY_LABEL' | translate }}
+          </label>
+
+          <div style="background: var(--stud-surface)" class="mt-2 border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-1">
+            <ion-select
+              interface="popover"
+              name="category"
+              [(ngModel)]="form.category"
+              [placeholder]="'AGENT_DASHBOARD.CATEGORY_PLACEHOLDER' | translate"
+              style="--padding-start: 0; --padding-end: 0;"
+              class="w-full text-sm text-slate-800 dark:text-white">
+              <ion-select-option *ngFor="let category of categories" [value]="category">{{ 'CATEGORIES.' + category | translate }}</ion-select-option>
+            </ion-select>
+          </div>
+        </div>
+
+        <!-- Ville + Adresse -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'AGENT_DASHBOARD.CITY_LABEL' | translate }}
+          </label>
+
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="location-outline" class="text-lg text-primary-500"></ion-icon>
+            <input
+              type="text"
+              name="city"
+              [(ngModel)]="form.city"
+              [placeholder]="'AGENT_DASHBOARD.CITY_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'AGENT_DASHBOARD.ADDRESS_LABEL' | translate }}
+          </label>
+
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="map-outline" class="text-lg text-primary-500"></ion-icon>
+            <input
+              type="text"
+              name="address"
+              [(ngModel)]="form.address"
+              [placeholder]="'AGENT_DASHBOARD.ADDRESS_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <!-- Prix + Surface -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+
+          <div>
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+              {{ 'AGENT_DASHBOARD.PRICE_LABEL' | translate }}
+            </label>
+
+            <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-2 border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-3.5 focus-within:border-primary-500 transition-colors">
+              <input
+                type="number"
+                min="0"
+                name="price"
+                [(ngModel)]="form.price"
+                placeholder="0"
+                class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+              <span class="text-[10px] font-semibold text-slate-400 flex-shrink-0">{{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+              {{ 'AGENT_DASHBOARD.SURFACE_LABEL' | translate }}
+            </label>
+
+            <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-2 border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-3.5 focus-within:border-primary-500 transition-colors">
+              <input
+                type="number"
+                min="0"
+                name="surface"
+                [(ngModel)]="form.surface"
+                placeholder="0"
+                class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+              <span class="text-[10px] font-semibold text-slate-400 flex-shrink-0">m²</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pièces + Meublé -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+
+          <div>
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+              {{ 'DETAILS_IMMO.PIECES' | translate }}
+            </label>
+
+            <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-2 border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-3.5 focus-within:border-primary-500 transition-colors">
+              <input
+                type="number"
+                min="0"
+                name="rooms"
+                [(ngModel)]="form.rooms"
+                placeholder="0"
+                class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+            </div>
+          </div>
+
+          <div class="flex items-end">
+            <div style="background: var(--stud-surface)" class="w-full flex items-center justify-between border border-slate-200 dark:border-primary-700 rounded-2xl px-3 py-3">
+              <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ 'DETAILS_IMMO.MEUBLE' | translate }}</span>
+              <ion-toggle name="furnished" [(ngModel)]="form.furnished"></ion-toggle>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'DETAILS.DESCRIPTION' | translate }}
+          </label>
+
+          <div style="background: var(--stud-surface)" class="mt-2 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <textarea
+              name="description"
+              [(ngModel)]="form.description"
+              [placeholder]="'AGENT_DASHBOARD.DESCRIPTION_PLACEHOLDER' | translate"
+              rows="4"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400 resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Bouton -->
+        <button
+          type="submit"
+          [disabled]="formLoading"
+          class="w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all duration-200 disabled:opacity-60">
+
+          <ion-icon *ngIf="formLoading" name="reload-outline" class="animate-spin align-middle mr-2"></ion-icon>
+          {{ (formLoading ? 'AGENT_DASHBOARD.SAVING' : (editingId !== null ? 'AGENT_DASHBOARD.SAVE_BUTTON' : 'AGENT_DASHBOARD.PUBLISH_BUTTON')) | translate }}
+
+        </button>
+
+        <div style="height: calc(7rem + env(safe-area-inset-bottom))"></div>
+
+      </form>
+
+    </ion-content>
+
+  </ng-template>
+</ion-modal>

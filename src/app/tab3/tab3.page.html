@@ -1,0 +1,262 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'PROFILE_PAGE.TITLE' | translate }}</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content
+  [fullscreen]="true">
+
+  <div class="container py-4 space-y-6 pb-10">
+
+    <!-- Carte profil -->
+    <div class="bg-gradient-to-br from-primary-700 to-primary-500 rounded-3xl p-5 shadow-lg">
+
+      <div class="flex items-center gap-4">
+
+        <img
+          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"
+          class="w-16 h-16 rounded-full object-cover shadow-lg" />
+
+        <div>
+          <h2 class="text-white font-bold text-lg">{{ userName }}</h2>
+          <p class="text-white/80 text-xs mt-1">{{ userEmail }}</p>
+        </div>
+
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 mt-5">
+
+        <div
+          *ngFor="let stat of stats"
+          class="bg-white/15 rounded-2xl py-3 text-center">
+
+          <p class="text-white font-extrabold text-lg">{{ stat.value }}</p>
+          <p class="text-white/80 text-[10px] mt-0.5">{{ stat.label | translate }}</p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Apparence -->
+    <div class="rounded-2xl dark:bg-primary-800 shadow-lg flex items-center gap-3 px-4 py-3.5">
+
+      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
+        <ion-icon
+          [name]="theme.isDark ? 'moon-outline' : 'sunny-outline'"
+          class="text-primary-700 dark:text-primary-200">
+        </ion-icon>
+      </div>
+
+      <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ 'PROFILE_PAGE.DARK_MODE' | translate }}</span>
+
+      <ion-toggle
+        [checked]="theme.isDark"
+        (ionChange)="theme.toggleTheme()">
+      </ion-toggle>
+
+    </div>
+
+    <!-- Langue -->
+    <div class="rounded-2xl dark:bg-primary-800 shadow-lg flex items-center gap-3 px-4 py-3.5">
+
+      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
+        <ion-icon name="language-outline" class="text-primary-700 dark:text-primary-200"></ion-icon>
+      </div>
+
+      <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ 'LANGUAGE.TITLE' | translate }}</span>
+
+      <select
+        [ngModel]="language.currentLanguage"
+        (ngModelChange)="language.setLanguage($event)"
+        class="bg-primary-50 dark:bg-primary-700 text-primary-700 dark:text-primary-200 text-xs font-semibold rounded-full px-3 py-2 border-none outline-none">
+        <option *ngFor="let lang of language.languages" [value]="lang.code">{{ lang.labelKey | translate }}</option>
+      </select>
+
+    </div>
+
+    <!-- Espace agent immobilier -->
+    <div class="rounded-2xl bg-gradient-to-br from-primary-800 to-primary-600 shadow-lg flex items-center gap-3 px-4 py-4">
+
+      <div class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+        <ion-icon name="business-outline" class="text-white text-lg"></ion-icon>
+      </div>
+
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-white">{{ 'PROFILE_PAGE.AGENT_SECTION_TITLE' | translate }}</p>
+        <p class="text-[11px] text-white/75 mt-0.5">{{ 'PROFILE_PAGE.AGENT_SECTION_DESC' | translate }}</p>
+      </div>
+
+      <a
+        [routerLink]="agentAuth.isLoggedIn ? '/agent-dashboard' : '/agent-login'"
+        class="flex-shrink-0 bg-white text-primary-700 text-xs font-bold px-4 py-2.5 rounded-full active:scale-95 transition text-decoration-none whitespace-nowrap">
+        {{ (agentAuth.isLoggedIn ? 'PROFILE_PAGE.AGENT_ACCESS_BUTTON' : 'PROFILE_PAGE.AGENT_LOGIN_BUTTON') | translate }}
+      </a>
+
+    </div>
+
+    <!-- STUD Partners -->
+    <div>
+
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'PROFILE_PAGE.PARTNERS_TITLE' | translate }}</h4>
+        <a class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1" *ngIf="loading">
+        <app-skeleton *ngFor="let i of [0,1,2]" width="11rem" height="7.5rem" radius="1rem"></app-skeleton>
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1" *ngIf="!loading">
+
+        <div
+          *ngFor="let partner of partners"
+          class="flex-shrink-0 w-44 rounded-2xl dark:bg-primary-800 shadow-lg p-3">
+
+          <img
+            [src]="partner.logo"
+            [alt]="partner.name"
+            class="w-10 h-10 rounded-full object-cover" />
+
+          <h5 class="text-xs font-bold text-slate-800 dark:text-white mt-2 leading-4">{{ partner.name }}</h5>
+          <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold mt-0.5">{{ partner.category }}</p>
+          <p class="text-[10px] text-slate-500 dark:text-slate-300 mt-1 line-clamp-2">{{ partner.offer }}</p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Mes favoris -->
+    <div>
+
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'PROFILE_PAGE.FAVORITES_TITLE' | translate }}</h4>
+        <a routerLink="/tabs/tab2" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+
+        <div
+          *ngFor="let property of favoris"
+          class="relative flex-shrink-0 w-36 h-28 rounded-2xl overflow-hidden">
+
+          <img
+            [src]="property.image"
+            [alt]="property.title"
+            class="w-full h-full object-cover" />
+
+          <button
+            (click)="removeFavori(property.id, $event)"
+            class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-white/90 flex items-center justify-center active:scale-90 transition">
+            <ion-icon name="heart" class="text-red-500 text-xs"></ion-icon>
+          </button>
+
+          <div class="absolute bottom-1.5 left-1.5 right-1.5 text-white">
+            <p class="text-[10px] font-semibold drop-shadow">{{ property.city }}</p>
+            <p class="text-[9px] text-white/85">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</p>
+          </div>
+
+        </div>
+
+        <div
+          *ngIf="favoris.length === 0"
+          class="text-xs text-slate-400 dark:text-slate-500 py-4">
+          {{ 'PROFILE_PAGE.NO_FAVORITES' | translate }}
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Mes réservations -->
+    <div>
+
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'PROFILE_PAGE.RESERVATIONS_TITLE' | translate }}</h4>
+      </div>
+
+      <div class="space-y-3">
+
+        <div
+          *ngFor="let reservation of reservations"
+          class="flex gap-3 p-2 rounded-2xl dark:bg-primary-800 shadow-lg">
+
+          <img
+            [src]="reservation.image"
+            [alt]="reservation.title"
+            class="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+
+          <div class="flex-1">
+
+            <div class="flex items-start justify-between gap-2">
+              <h5 class="text-xs font-bold text-slate-800 dark:text-white leading-4">{{ reservation.title }}</h5>
+
+              <span
+                class="px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
+                [ngClass]="statusClass(reservation.status)">
+                {{ statusLabel(reservation.status) | translate }}
+              </span>
+            </div>
+
+            <p class="text-[10px] text-slate-500 dark:text-slate-300 mt-1">{{ reservation.city }}</p>
+
+            <p class="text-[10px] font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ reservation.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Menu -->
+    <div class="rounded-2xl dark:bg-primary-800 shadow-lg overflow-hidden">
+
+      <a
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        class="flex items-center gap-3 px-4 py-3.5 text-decoration-none active:bg-primary-50/60 dark:active:bg-primary-700/40 transition"
+      >
+        <div
+          class="w-9 h-9 rounded-full flex items-center justify-center"
+          [ngClass]="item.danger ? 'bg-red-50 dark:bg-red-900/30' : 'bg-primary-50 dark:bg-primary-700'">
+
+          <ion-icon
+            [name]="item.icon"
+            [class]="item.danger ? 'text-red-500' : 'text-primary-700 dark:text-primary-200'">
+          </ion-icon>
+
+        </div>
+
+        <span
+          class="flex-1 text-sm font-semibold"
+          [ngClass]="item.danger ? 'text-red-500' : 'text-slate-700 dark:text-white'">
+          {{ item.label | translate }}
+        </span>
+
+        <span
+          *ngIf="item.badge"
+          class="bg-primary-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+          {{ item.badge }}
+        </span>
+
+        <ion-icon name="chevron-forward-outline" class="text-slate-300 dark:text-slate-500"></ion-icon>
+
+      </a>
+
+    </div>
+
+    <p class="text-center text-[11px] text-slate-300 dark:text-slate-600">{{ 'PROFILE_PAGE.FOOTER_TAGLINE' | translate }}</p>
+
+  </div>
+
+</ion-content>

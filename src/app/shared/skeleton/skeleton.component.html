@@ -1,0 +1,16 @@
+<div
+  class="skeleton-box"
+  [class.skeleton-circle]="circle"
+  [style.width]="width"
+  [style.height]="height"
+  [style.border-radius]="circle ? '50%' : radius">
+
+  <img
+    *ngIf="showLogo"
+    src="assets/images/logo.png"
+    alt=""
+    class="skeleton-logo"
+    [style.width]="logoSize"
+    [style.height]="logoSize" />
+
+</div>

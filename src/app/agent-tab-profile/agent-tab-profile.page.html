@@ -1,0 +1,111 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'AGENT_TABS.PROFILE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="container py-4 space-y-6 pb-10">
+
+    <!-- Carte agent -->
+    <div class="bg-gradient-to-br from-primary-800 to-primary-600 rounded-3xl p-5 shadow-lg">
+
+      <div class="flex items-center gap-4">
+
+        <div class="w-16 h-16 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+          <ion-icon name="business" class="text-2xl text-white"></ion-icon>
+        </div>
+
+        <div class="min-w-0">
+          <h2 class="text-white font-bold text-lg truncate">{{ agent.agencyName }}</h2>
+          <p class="text-white/80 text-xs mt-1 truncate">{{ agent.fullName }}</p>
+          <p class="text-white/70 text-[11px] mt-0.5 truncate" *ngIf="agent.email">{{ agent.email }}</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Contact -->
+    <div class="rounded-2xl shadow-lg px-4 py-3.5" style="background: var(--stud-surface)" *ngIf="agent.phone">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
+          <ion-icon name="call-outline" class="text-primary-700 dark:text-primary-200"></ion-icon>
+        </div>
+        <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ agent.phone }}</span>
+      </div>
+    </div>
+
+    <!-- Apparence -->
+    <div class="rounded-2xl shadow-lg flex items-center gap-3 px-4 py-3.5" style="background: var(--stud-surface)">
+
+      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
+        <ion-icon
+          [name]="theme.isDark ? 'moon-outline' : 'sunny-outline'"
+          class="text-primary-700 dark:text-primary-200">
+        </ion-icon>
+      </div>
+
+      <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ 'PROFILE_PAGE.DARK_MODE' | translate }}</span>
+
+      <ion-toggle
+        [checked]="theme.isDark"
+        (ionChange)="theme.toggleTheme()">
+      </ion-toggle>
+
+    </div>
+
+    <!-- Langue -->
+    <div class="rounded-2xl shadow-lg flex items-center gap-3 px-4 py-3.5" style="background: var(--stud-surface)">
+
+      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
+        <ion-icon name="language-outline" class="text-primary-700 dark:text-primary-200"></ion-icon>
+      </div>
+
+      <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ 'LANGUAGE.TITLE' | translate }}</span>
+
+      <select
+        [ngModel]="language.currentLanguage"
+        (ngModelChange)="language.setLanguage($event)"
+        class="bg-primary-50 dark:bg-primary-700 text-primary-700 dark:text-primary-200 text-xs font-semibold rounded-full px-3 py-2 border-none outline-none">
+        <option *ngFor="let lang of language.languages" [value]="lang.code">{{ lang.labelKey | translate }}</option>
+      </select>
+
+    </div>
+
+    <!-- Espace étudiant -->
+    <a
+      routerLink="/tabs/tab1"
+      class="flex items-center gap-3 rounded-2xl shadow-lg px-4 py-3.5 text-decoration-none"
+      style="background: var(--stud-surface)">
+
+      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
+        <ion-icon name="school-outline" class="text-primary-700 dark:text-primary-200"></ion-icon>
+      </div>
+
+      <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ 'AGENT_DASHBOARD.BACK_TO_STUDENT' | translate }}</span>
+
+      <ion-icon name="chevron-forward-outline" class="text-slate-300 dark:text-slate-500"></ion-icon>
+
+    </a>
+
+    <!-- Déconnexion -->
+    <button
+      (click)="logout()"
+      class="w-full flex items-center gap-3 rounded-2xl shadow-lg px-4 py-3.5"
+      style="background: var(--stud-surface)">
+
+      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-red-50 dark:bg-red-900/30">
+        <ion-icon name="log-out-outline" class="text-red-500"></ion-icon>
+      </div>
+
+      <span class="flex-1 text-sm font-semibold text-red-500 text-left">{{ 'AGENT_DASHBOARD.LOGOUT' | translate }}</span>
+
+    </button>
+
+    <p class="text-center text-[11px] text-slate-300 dark:text-slate-600">{{ 'PROFILE_PAGE.FOOTER_TAGLINE' | translate }}</p>
+
+  </div>
+
+</ion-content>

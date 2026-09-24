@@ -1,0 +1,82 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/messages" text=""></ion-back-button>
+    </ion-buttons>
+
+    <div class="flex items-center gap-2.5 py-1" *ngIf="conversation">
+
+      <div class="relative flex-shrink-0">
+        <img [src]="conversation.avatar" [alt]="conversation.name" class="w-9 h-9 rounded-full object-cover" />
+        <span
+          *ngIf="conversation.online"
+          class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-primary-900 rounded-full">
+        </span>
+      </div>
+
+      <div class="min-w-0">
+        <h2 class="text-sm font-bold text-slate-800 dark:text-white leading-tight truncate">{{ conversation.name }}</h2>
+        <p class="text-[10px] text-slate-400 leading-tight truncate">
+          {{ conversation.online ? ('MESSAGES_PAGE.ONLINE' | translate) : conversation.role }}
+        </p>
+      </div>
+
+    </div>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="container py-4 space-y-3" *ngIf="conversation">
+
+    <div
+      *ngFor="let message of conversation.messages"
+      class="flex"
+      [ngClass]="message.fromMe ? 'justify-end' : 'justify-start'">
+
+      <div
+        class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm shadow-sm"
+        [ngClass]="message.fromMe
+          ? 'bg-primary-600 text-white rounded-br-md'
+          : 'bg-slate-100 dark:bg-primary-800 text-slate-800 dark:text-white rounded-bl-md'">
+
+        <p class="leading-relaxed">{{ message.text }}</p>
+
+        <p
+          class="text-[9px] mt-1 text-right"
+          [ngClass]="message.fromMe ? 'text-white/70' : 'text-slate-400 dark:text-slate-400'">
+          {{ message.time }}
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div
+    class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-primary-900 border-t border-slate-100 dark:border-primary-800"
+    style="padding-bottom: calc(10px + env(safe-area-inset-bottom))">
+
+    <input
+      type="text"
+      name="draft"
+      [(ngModel)]="draft"
+      (keyup.enter)="send()"
+      [placeholder]="'CONVERSATION_PAGE.INPUT_PLACEHOLDER' | translate"
+      class="flex-1 bg-slate-100 dark:bg-primary-800 rounded-full px-4 py-2.5 text-sm outline-none text-slate-800 dark:text-white placeholder-slate-400" />
+
+    <button
+      (click)="send()"
+      [disabled]="!draft.trim()"
+      class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white disabled:opacity-40 active:scale-95 transition flex-shrink-0">
+      <ion-icon name="send" class="text-base"></ion-icon>
+    </button>
+
+  </div>
+</ion-footer>

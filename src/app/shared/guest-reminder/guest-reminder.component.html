@@ -1,0 +1,18 @@
+<div
+  *ngIf="visible"
+  class="fixed left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 max-w-[92%] bg-slate-900/80 dark:bg-black/70 backdrop-blur-md text-white pl-3 pr-2 py-2 rounded-full shadow-lg animate-slide-up"
+  style="bottom: calc(env(safe-area-inset-bottom) + 74px)">
+
+  <ion-icon name="lock-closed-outline" class="text-xs text-white/60 flex-shrink-0"></ion-icon>
+
+  <span class="text-[11px] text-white/80 truncate">{{ 'GUEST_REMINDER.MESSAGE' | translate }}</span>
+
+  <a routerLink="/login" (click)="dismiss()" class="text-[11px] font-semibold text-primary-300 text-decoration-none flex-shrink-0">
+    {{ 'GUEST_REMINDER.LOGIN_BUTTON' | translate }}
+  </a>
+
+  <button (click)="dismiss()" class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white/40 active:text-white/70 transition-colors">
+    <ion-icon name="close-outline" class="text-sm"></ion-icon>
+  </button>
+
+</div>

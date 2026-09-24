@@ -1,0 +1,319 @@
+<ion-content [fullscreen]="true">
+
+  <div class="fixed inset-0 bg-primary-900 overflow-hidden">
+
+    <!-- Bouton Passer -->
+    <div class="absolute top-[6%] right-5 z-20">
+      <button
+        (click)="enterApp()"
+        class="group flex items-center gap-2 text-white text-sm font-medium bg-white/15 backdrop-blur-md px-4 py-2 rounded-full shadow-lg">
+
+        <span>{{ 'ONBOARDING.SKIP' | translate }}</span>
+
+        <ion-icon
+          name="arrow-forward-outline"
+          class="text-base animate-bounce-right">
+        </ion-icon>
+
+      </button>
+    </div>
+
+    <!-- Logo -->
+    <div class="absolute top-[6%] left-5 z-20 w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+      <img src="../../../assets/images/logo.png" class="w-6 h-6 object-contain" alt="StudHub" />
+    </div>
+
+    <!-- Slider -->
+    <div id="onboarding-slider" class="splide absolute inset-0 z-10">
+
+      <div class="splide__track h-full">
+
+        <ul class="splide__list h-full">
+
+          <!-- Slide 1 : Bienvenue / vue d'ensemble -->
+          <li class="splide__slide h-full">
+
+            <div class="relative w-full h-full">
+
+              <img
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1000&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover"
+                alt="Étudiants qui collaborent">
+
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"></div>
+
+              <div class="relative z-10 h-full flex flex-col justify-end items-center text-center px-7 pb-16">
+
+                <h1 class="text-3xl font-extrabold text-white drop-shadow">
+                  {{ 'ONBOARDING.WELCOME_TITLE' | translate }}
+                </h1>
+
+                <p class="text-white/85 mt-3 text-sm leading-relaxed max-w-sm">
+                  {{ 'ONBOARDING.WELCOME_DESC' | translate }}
+                </p>
+
+                <!-- Aperçu des 4 espaces -->
+                <div class="grid grid-cols-4 gap-3 mt-7 w-full max-w-xs">
+
+                  <div class="flex flex-col items-center gap-1.5">
+                    <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+                      <ion-icon name="business-outline" class="text-lg text-white"></ion-icon>
+                    </div>
+                    <span class="text-[10px] font-semibold text-white/85">{{ 'ONBOARDING.SPACE_IMMO' | translate }}</span>
+                  </div>
+
+                  <div class="flex flex-col items-center gap-1.5">
+                    <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+                      <ion-icon name="storefront-outline" class="text-lg text-white"></ion-icon>
+                    </div>
+                    <span class="text-[10px] font-semibold text-white/85">{{ 'ONBOARDING.SPACE_MARKETPLACE' | translate }}</span>
+                  </div>
+
+                  <div class="flex flex-col items-center gap-1.5">
+                    <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+                      <ion-icon name="briefcase-outline" class="text-lg text-white"></ion-icon>
+                    </div>
+                    <span class="text-[10px] font-semibold text-white/85">{{ 'ONBOARDING.SPACE_SERVICES' | translate }}</span>
+                  </div>
+
+                  <div class="flex flex-col items-center gap-1.5">
+                    <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+                      <ion-icon name="person-outline" class="text-lg text-white"></ion-icon>
+                    </div>
+                    <span class="text-[10px] font-semibold text-white/85">{{ 'ONBOARDING.SPACE_PROFILE' | translate }}</span>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </li>
+
+          <!-- Slide 2 : STUD Immo -->
+          <li class="splide__slide h-full">
+
+            <div class="relative w-full h-full">
+
+              <img
+                src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1000&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover"
+                alt="Studio étudiant moderne">
+
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"></div>
+
+              <div class="relative z-10 h-full flex flex-col justify-end items-center text-center px-7 pb-16">
+
+                <div class="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-5">
+                  <ion-icon name="business-outline" class="text-2xl text-white"></ion-icon>
+                </div>
+
+                <h1 class="text-3xl font-extrabold text-white drop-shadow">
+                  {{ 'ONBOARDING.IMMO_TITLE' | translate }}
+                </h1>
+
+                <p class="text-white/85 mt-3 text-sm leading-relaxed max-w-sm">
+                  {{ 'ONBOARDING.IMMO_DESC' | translate }}
+                </p>
+
+                <div class="w-full max-w-sm mt-6 space-y-2.5 text-left">
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.IMMO_F1' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.IMMO_F2' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.IMMO_F3' | translate }}</p>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </li>
+
+          <!-- Slide 3 : STUD Marketplace -->
+          <li class="splide__slide h-full">
+
+            <div class="relative w-full h-full">
+
+              <img
+                src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?q=80&w=1000&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover"
+                alt="Marché entre étudiants">
+
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"></div>
+
+              <div class="relative z-10 h-full flex flex-col justify-end items-center text-center px-7 pb-16">
+
+                <div class="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-5">
+                  <ion-icon name="storefront-outline" class="text-2xl text-white"></ion-icon>
+                </div>
+
+                <h1 class="text-3xl font-extrabold text-white drop-shadow">
+                  {{ 'ONBOARDING.MARKETPLACE_TITLE' | translate }}
+                </h1>
+
+                <p class="text-white/85 mt-3 text-sm leading-relaxed max-w-sm">
+                  {{ 'ONBOARDING.MARKETPLACE_DESC' | translate }}
+                </p>
+
+                <div class="w-full max-w-sm mt-6 space-y-2.5 text-left">
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.MP_F1' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.MP_F2' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.MP_F3' | translate }}</p>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </li>
+
+          <!-- Slide 4 : STUD Services -->
+          <li class="splide__slide h-full">
+
+            <div class="relative w-full h-full">
+
+              <img
+                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover"
+                alt="Prestataires étudiants au travail">
+
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"></div>
+
+              <div class="relative z-10 h-full flex flex-col justify-end items-center text-center px-7 pb-16">
+
+                <div class="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-5">
+                  <ion-icon name="briefcase-outline" class="text-2xl text-white"></ion-icon>
+                </div>
+
+                <h1 class="text-3xl font-extrabold text-white drop-shadow">
+                  {{ 'ONBOARDING.SERVICES_TITLE' | translate }}
+                </h1>
+
+                <p class="text-white/85 mt-3 text-sm leading-relaxed max-w-sm">
+                  {{ 'ONBOARDING.SERVICES_DESC' | translate }}
+                </p>
+
+                <div class="w-full max-w-sm mt-6 space-y-2.5 text-left">
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.SV_F1' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.SV_F2' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.SV_F3' | translate }}</p>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </li>
+
+          <!-- Slide 5 : Profil -->
+          <li class="splide__slide h-full">
+
+            <div class="relative w-full h-full">
+
+              <img
+                src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1000&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover"
+                alt="Communauté d'étudiants">
+
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"></div>
+
+              <div class="relative z-10 h-full flex flex-col justify-end items-center text-center px-7 pb-8">
+
+                <div class="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-5">
+                  <ion-icon name="person-outline" class="text-2xl text-white"></ion-icon>
+                </div>
+
+                <h1 class="text-3xl font-extrabold text-white drop-shadow">
+                  {{ 'ONBOARDING.PROFILE_TITLE' | translate }}
+                </h1>
+
+                <p class="text-white/85 mt-3 text-sm leading-relaxed max-w-sm">
+                  {{ 'ONBOARDING.PROFILE_DESC' | translate }}
+                </p>
+
+                <div class="w-full max-w-sm mt-6 space-y-2.5 text-left">
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.PR_F1' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.PR_F2' | translate }}</p>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <ion-icon name="checkmark-circle" class="text-lg text-white flex-shrink-0 mt-0.5"></ion-icon>
+                    <p class="text-sm text-white/90">{{ 'ONBOARDING.PR_F3' | translate }}</p>
+                  </div>
+
+                </div>
+
+                <!-- Bouton Commencer -->
+                <div class="w-full max-w-sm mt-7">
+
+                  <button
+                    (click)="enterApp()"
+                    class="w-full py-3 rounded-2xl bg-white text-primary-700 font-bold text-lg shadow-2xl active:scale-95 transition-all duration-200">
+
+                    {{ 'ONBOARDING.START_BUTTON' | translate }}
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>

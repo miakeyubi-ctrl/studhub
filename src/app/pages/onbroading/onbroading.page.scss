@@ -1,0 +1,56 @@
+.splide__pagination {
+  bottom: 8px !important;
+  gap: 8px;
+  z-index: 20;
+}
+
+.splide__pagination__page {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.35) !important;
+  margin: 0 !important;
+  transition: all .35s ease !important;
+}
+
+.splide__pagination__page.is-active {
+  width: 22px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: white !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transform: none !important;
+}
+
+.splide,
+.splide__track,
+.splide__list,
+.splide__slide {
+  height: 100%;
+}
+
+.splide__slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+ion-content {
+  --background: transparent;
+}
+
+
+@keyframes bounceRight {
+  0%, 100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-bounce-right {
+  animation: bounceRight 1.2s infinite;
+}

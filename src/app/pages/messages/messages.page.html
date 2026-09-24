@@ -1,0 +1,112 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab3" text=""></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-slate-800 dark:text-white font-bold">
+      {{ 'MESSAGES_PAGE.TITLE' | translate }}
+      <span *ngIf="totalUnread > 0" class="text-primary-600 dark:text-primary-300">({{ totalUnread }})</span>
+    </ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="container py-4">
+
+    <!-- Barre recherche -->
+    <div class="relative mb-4">
+
+      <ion-icon
+        name="search-outline"
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10">
+      </ion-icon>
+
+      <input
+        type="text"
+        (input)="onSearchChange($event)"
+        [placeholder]="'MESSAGES_PAGE.SEARCH_PLACEHOLDER' | translate"
+        class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-primary-50/60 dark:bg-primary-800/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none shadow-lg transition" />
+
+    </div>
+
+    <!-- Squelette de chargement -->
+    <div class="space-y-2" *ngIf="loading">
+      <div *ngFor="let i of [0,1,2,3,4,5]" class="flex items-center gap-3 px-2 py-2.5">
+        <app-skeleton width="3.5rem" height="3.5rem" radius="999px"></app-skeleton>
+        <div class="flex-1 space-y-2">
+          <app-skeleton height="0.75rem" radius="0.5rem" width="55%"></app-skeleton>
+          <app-skeleton height="0.65rem" radius="0.5rem" width="80%"></app-skeleton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des conversations -->
+    <div class="space-y-1" *ngIf="!loading">
+
+      <div
+        *ngFor="let conversation of filteredConversations"
+        (click)="openConversation(conversation.id)"
+        class="flex items-center gap-3 px-2 py-2.5 rounded-2xl active:bg-primary-50/60 dark:active:bg-primary-800/40 transition cursor-pointer">
+
+        <div class="relative flex-shrink-0">
+
+          <img
+            [src]="conversation.avatar"
+            [alt]="conversation.name"
+            class="w-14 h-14 rounded-full object-cover" />
+
+          <span
+            *ngIf="conversation.online"
+            class="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-primary-900 rounded-full">
+          </span>
+
+        </div>
+
+        <div class="flex-1 min-w-0">
+
+          <div class="flex items-center justify-between gap-2">
+            <h5 class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ conversation.name }}</h5>
+            <span class="text-[10px] text-slate-400 flex-shrink-0">{{ conversation.lastMessageTime }}</span>
+          </div>
+
+          <p class="text-[10.5px] text-primary-600 dark:text-primary-300 font-semibold truncate mt-0.5">
+            {{ conversation.role }}
+          </p>
+
+          <div class="flex items-center justify-between gap-2 mt-1">
+
+            <p
+              class="text-xs truncate"
+              [ngClass]="conversation.unreadCount > 0
+                ? 'font-semibold text-slate-700 dark:text-white'
+                : 'text-slate-500 dark:text-slate-400'">
+              {{ lastMessageOf(conversation) }}
+            </p>
+
+            <span
+              *ngIf="conversation.unreadCount > 0"
+              class="bg-primary-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0">
+              {{ conversation.unreadCount }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Aucun résultat -->
+      <div *ngIf="filteredConversations.length === 0" class="text-center py-16">
+        <ion-icon name="chatbubbles-outline" class="text-4xl text-slate-300 dark:text-slate-600"></ion-icon>
+        <p class="text-sm text-slate-400 dark:text-slate-500 mt-3">{{ 'MESSAGES_PAGE.NO_RESULTS' | translate }}</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>

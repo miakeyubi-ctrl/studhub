@@ -1,0 +1,452 @@
+<ion-content [fullscreen]="true">
+
+<!-- Zone teal unique : header + recherche + bannière promo, sans coupure -->
+<div class="relative bg-gradient-to-br from-primary-800 via-primary-700 to-primary-500 rounded-b-[32px] overflow-hidden"
+     style="padding-top: env(safe-area-inset-top)">
+
+  <div class="container pt-3 pb-6">
+
+    <!-- Utilisateur -->
+    <div class="flex items-center justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <img
+          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"
+          class="w-11 h-11 rounded-full object-cover shadow-lg" />
+
+        <div>
+          <p class="text-[11px] text-white/70 leading-none">{{ 'HOME.GREETING' | translate }} 👋</p>
+          <h2 class="text-sm font-bold text-white mt-1">{{ userName }}</h2>
+        </div>
+
+      </div>
+
+      <div class="flex items-center gap-2">
+
+        <!-- Mode clair / sombre -->
+        <button
+          (click)="theme.toggleTheme()"
+          class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center active:scale-95 transition">
+
+          <ion-icon [name]="theme.isDark ? 'sunny-outline' : 'moon-outline'" class="text-lg text-white"></ion-icon>
+
+        </button>
+
+        <!-- Notification -->
+        <button
+          routerLink="/login"
+          class="relative w-10 h-10 rounded-full bg-white/15 flex items-center justify-center active:scale-95 transition">
+
+          <ion-icon name="notifications-outline" class="text-lg text-white"></ion-icon>
+          <span class="absolute top-2 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="relative mt-4">
+
+      <ion-icon
+        name="search-outline"
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10">
+      </ion-icon>
+
+      <input
+        type="text"
+        [placeholder]="'HOME.SEARCH_PLACEHOLDER' | translate"
+        class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-sm text-slate-800 placeholder-slate-400 focus:outline-none shadow-lg transition" />
+
+    </div>
+
+    <!-- Bannière promo -->
+    <div id="promo-carousel" class="splide mt-5">
+      <div class="splide__track">
+        <ul class="splide__list">
+
+          <!-- Slide 1 : Immo -->
+          <li class="splide__slide">
+            <div class="relative min-h-[110px]">
+
+              <div class="relative z-10 max-w-[62%]">
+
+                <h3 class="text-white font-bold text-lg leading-snug">
+                  {{ 'HOME.PROMO_TITLE' | translate }}
+                </h3>
+
+                <p class="text-white/80 text-[11px] mt-2 leading-relaxed">
+                  {{ 'HOME.PROMO_DESC' | translate }}
+                </p>
+
+                <button routerLink="/tabs/tab2" class="mt-4 bg-white text-primary-800 text-xs font-bold px-5 py-2.5 rounded-full active:scale-95 transition shadow-lg">
+                  {{ 'HOME.PROMO_BUTTON' | translate }}
+                </button>
+
+              </div>
+
+              <!-- Illustration skyline -->
+              <div class="absolute right-0 bottom-0 flex items-end gap-1.5 pr-2 h-full pointer-events-none">
+                <div class="w-5 bg-white/10 rounded-t-md" style="height:38%"></div>
+                <div class="w-6 bg-white/15 rounded-t-md" style="height:60%"></div>
+                <div class="w-7 bg-white/20 rounded-t-md" style="height:82%"></div>
+                <div class="w-5 bg-white/15 rounded-t-md" style="height:52%"></div>
+                <div class="w-8 bg-white/25 rounded-t-md" style="height:100%"></div>
+                <div class="w-5 bg-white/15 rounded-t-md" style="height:44%"></div>
+              </div>
+
+            </div>
+          </li>
+
+          <!-- Slide 2 : Marketplace -->
+          <li class="splide__slide">
+            <div class="relative min-h-[110px]">
+
+              <div class="relative z-10 max-w-[62%]">
+
+                <h3 class="text-white font-bold text-lg leading-snug">
+                  {{ 'HOME.PROMO2_TITLE' | translate }}
+                </h3>
+
+                <p class="text-white/80 text-[11px] mt-2 leading-relaxed">
+                  {{ 'HOME.PROMO2_DESC' | translate }}
+                </p>
+
+                <button routerLink="/tabs/marketplace" class="mt-4 bg-white text-primary-800 text-xs font-bold px-5 py-2.5 rounded-full active:scale-95 transition shadow-lg">
+                  {{ 'HOME.PROMO2_BUTTON' | translate }}
+                </button>
+
+              </div>
+
+              <ion-icon name="pricetags-outline" class="absolute right-2 bottom-0 text-white/15 pointer-events-none" style="font-size: 6.5rem;"></ion-icon>
+
+            </div>
+          </li>
+
+          <!-- Slide 3 : Services / Messagerie -->
+          <li class="splide__slide">
+            <div class="relative min-h-[110px]">
+
+              <div class="relative z-10 max-w-[62%]">
+
+                <h3 class="text-white font-bold text-lg leading-snug">
+                  {{ 'HOME.PROMO3_TITLE' | translate }}
+                </h3>
+
+                <p class="text-white/80 text-[11px] mt-2 leading-relaxed">
+                  {{ 'HOME.PROMO3_DESC' | translate }}
+                </p>
+
+                <button routerLink="/messages" class="mt-4 bg-white text-primary-800 text-xs font-bold px-5 py-2.5 rounded-full active:scale-95 transition shadow-lg">
+                  {{ 'HOME.PROMO3_BUTTON' | translate }}
+                </button>
+
+              </div>
+
+              <ion-icon name="chatbubbles-outline" class="absolute right-2 bottom-0 text-white/15 pointer-events-none" style="font-size: 6.5rem;"></ion-icon>
+
+            </div>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="container pb-8">
+
+  <!-- Guichet unique STUD Hub -->
+  <div class="grid grid-cols-5 gap-1.5 mt-5">
+
+    <a routerLink="/tabs/tab2" class="flex flex-col items-center text-decoration-none">
+      <div class="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-800 flex items-center justify-center shadow-sm active:scale-95 transition">
+        <ion-icon name="business-outline" class="text-primary-700 text-lg"></ion-icon>
+      </div>
+      <span class="text-[10px] mt-2 text-center text-slate-600 dark:text-slate-300 font-medium">{{ 'HOME.QUICK_IMMO' | translate }}</span>
+    </a>
+
+    <a routerLink="/tabs/marketplace" class="flex flex-col items-center text-decoration-none">
+      <div class="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-800 flex items-center justify-center shadow-sm active:scale-95 transition">
+        <ion-icon name="storefront-outline" class="text-primary-700 text-lg"></ion-icon>
+      </div>
+      <span class="text-[10px] mt-2 text-center text-slate-600 dark:text-slate-300 font-medium">{{ 'HOME.QUICK_MARKETPLACE' | translate }}</span>
+    </a>
+
+    <a routerLink="/tabs/actualites" class="flex flex-col items-center text-decoration-none">
+      <div class="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-800 flex items-center justify-center shadow-sm active:scale-95 transition">
+        <ion-icon name="briefcase-outline" class="text-primary-700 text-lg"></ion-icon>
+      </div>
+      <span class="text-[10px] mt-2 text-center text-slate-600 dark:text-slate-300 font-medium">{{ 'HOME.QUICK_SERVICES' | translate }}</span>
+    </a>
+
+    <a routerLink="/tabs/feed" class="flex flex-col items-center text-decoration-none">
+      <div class="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-800 flex items-center justify-center shadow-sm active:scale-95 transition">
+        <ion-icon name="newspaper-outline" class="text-primary-700 text-lg"></ion-icon>
+      </div>
+      <span class="text-[10px] mt-2 text-center text-slate-600 dark:text-slate-300 font-medium">{{ 'HOME.QUICK_FEED' | translate }}</span>
+    </a>
+
+    <a routerLink="/tabs/tab3" class="flex flex-col items-center text-decoration-none">
+      <div class="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-800 flex items-center justify-center shadow-sm active:scale-95 transition">
+        <ion-icon name="people-outline" class="text-primary-700 text-lg"></ion-icon>
+      </div>
+      <span class="text-[10px] mt-2 text-center text-slate-600 dark:text-slate-300 font-medium">{{ 'HOME.QUICK_PARTNERS' | translate }}</span>
+    </a>
+
+  </div>
+
+  <!-- Catégories -->
+  <div class="flex gap-2 mt-6 overflow-x-auto scrollbar-hide pb-1">
+
+    <button
+      *ngFor="let category of categories"
+      (click)="selectCategory(category)"
+      class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200"
+      [ngClass]="selectedCategory === category
+        ? 'bg-primary-500 text-white shadow-md'
+        : 'bg-primary-50 dark:bg-primary-800 text-slate-500 dark:text-slate-300'">
+
+      {{ 'CATEGORIES.' + category | translate }}
+
+    </button>
+
+  </div>
+
+  <!-- Logements à la une -->
+  <div class="flex items-center justify-between mt-6">
+
+    <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'HOME.FEATURED_TITLE' | translate }}</h4>
+
+    <a routerLink="/tabs/tab2" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+
+  </div>
+
+  <div *ngIf="loading" class="mt-3">
+    <app-skeleton height="12rem" radius="1rem"></app-skeleton>
+  </div>
+
+  <div id="featured-carousel" class="splide mt-3" *ngIf="!loading">
+    <div class="splide__track">
+      <ul class="splide__list">
+
+        <li class="splide__slide" *ngFor="let property of filteredFeatured">
+
+          <div [routerLink]="['/detailsimmo', property.id]" class="relative rounded-2xl overflow-hidden h-48">
+
+            <img
+              [src]="property.image"
+              [alt]="property.title"
+              class="w-full h-full object-cover" />
+
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0"></div>
+
+            <button
+              (click)="toggleFavorite(property.id, $event)"
+              class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center active:scale-90 transition">
+
+              <ion-icon
+                [name]="isFavorite(property.id) ? 'heart' : 'heart-outline'"
+                [class]="isFavorite(property.id) ? 'text-red-500' : 'text-slate-500'">
+              </ion-icon>
+
+            </button>
+
+            <div class="absolute bottom-3 left-3 right-3 text-white">
+              <h5 class="text-sm font-bold drop-shadow">{{ property.title }}</h5>
+              <p class="text-[11px] text-white/85 mt-0.5">
+                {{ property.city }} · <span class="font-semibold">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</span>
+              </p>
+            </div>
+
+          </div>
+
+        </li>
+
+      </ul>
+    </div>
+  </div>
+
+  <!-- Récemment consultés -->
+  <div class="flex items-center justify-between mt-6">
+
+    <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'HOME.RECENT_TITLE' | translate }}</h4>
+
+    <a routerLink="/tabs/tab2" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 mt-3" *ngIf="loading">
+    <app-skeleton *ngFor="let i of [0,1]" height="8rem" radius="1rem"></app-skeleton>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 mt-3" *ngIf="!loading">
+
+    <div
+      *ngFor="let property of recentlyViewed"
+      [routerLink]="['/detailsimmo', property.id]"
+      class="relative rounded-2xl overflow-hidden h-32">
+
+      <img
+        [src]="property.image"
+        [alt]="property.title"
+        class="w-full h-full object-cover" />
+
+      <button
+        (click)="toggleFavorite(property.id, $event)"
+        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center active:scale-90 transition">
+
+        <ion-icon
+          [name]="isFavorite(property.id) ? 'heart' : 'heart-outline'"
+          class="text-xs"
+          [class]="isFavorite(property.id) ? 'text-red-500' : 'text-slate-500'">
+        </ion-icon>
+
+      </button>
+
+      <div class="absolute bottom-2 left-2 right-2 text-white">
+        <p class="text-[11px] font-semibold drop-shadow">{{ property.city }}</p>
+        <p class="text-[10px] text-white/85">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- STUD Marketplace : quelques produits -->
+  <div class="flex items-center justify-between mt-6">
+
+    <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'HOME.PRODUCTS_TITLE' | translate }}</h4>
+
+    <a routerLink="/tabs/marketplace" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+
+  </div>
+
+  <div class="flex gap-3.5 overflow-x-auto scrollbar-hide pb-2 mt-3 -mx-0.5 px-0.5" *ngIf="loading">
+    <app-skeleton *ngFor="let i of [0,1,2]" width="148px" height="11rem" radius="1rem"></app-skeleton>
+  </div>
+
+  <div class="flex gap-3.5 overflow-x-auto scrollbar-hide pb-2 mt-3 -mx-0.5 px-0.5" *ngIf="!loading">
+
+    <div
+      *ngFor="let product of products"
+      [routerLink]="['/detailsproduit', product.id]"
+      class="flex-shrink-0 w-[148px] rounded-2xl bg-gray-50 dark:bg-primary-800 shadow-[0_6px_16px_-4px_rgba(14,51,54,0.15)] dark:shadow-none overflow-hidden active:scale-95 transition-transform duration-200">
+
+      <div class="relative h-28">
+
+        <img
+          [src]="product.image"
+          [alt]="product.title"
+          class="w-full h-full object-cover" />
+
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0"></div>
+
+        <span class="absolute top-2 left-2 bg-white/95 backdrop-blur text-primary-700 text-[8px] font-bold px-2 py-1 rounded-full shadow-sm">
+          {{ 'CATEGORIES.' + product.category | translate }}
+        </span>
+
+        <span class="absolute bottom-2 left-2 bg-black/55 text-white text-[8px] font-semibold px-2 py-0.5 rounded-full">
+          {{ product.condition }}
+        </span>
+
+      </div>
+
+      <div class="p-2.5">
+
+        <h5 class="text-[11.5px] font-bold text-slate-800 dark:text-white leading-4 line-clamp-2 min-h-[32px]">
+          {{ product.title }}
+        </h5>
+
+        <div class="flex items-center justify-between mt-2">
+
+          <p class="text-primary-700 font-extrabold text-sm">
+            {{ product.price }} <span class="text-[9px] font-semibold text-slate-400">{{ 'COMMON.CURRENCY' | translate }}</span>
+          </p>
+
+          <div class="w-6 h-6 rounded-full bg-primary-50 dark:bg-primary-700 flex items-center justify-center">
+            <ion-icon name="arrow-forward" class="text-primary-700 dark:text-white text-[11px]"></ion-icon>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- STUD Services : quelques prestataires -->
+  <div class="flex items-center justify-between mt-6">
+
+    <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'HOME.PROVIDERS_TITLE' | translate }}</h4>
+
+    <a routerLink="/tabs/actualites" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+
+  </div>
+
+  <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1 mt-3" *ngIf="loading">
+    <app-skeleton *ngFor="let i of [0,1,2]" width="10rem" height="11rem" radius="1rem"></app-skeleton>
+  </div>
+
+  <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1 mt-3" *ngIf="!loading">
+
+    <div
+      *ngFor="let prestataire of prestataires"
+      [routerLink]="['/detailsstudservices', prestataire.id]"
+      class="flex-shrink-0 w-40 rounded-2xl dark:bg-primary-800 shadow-lg p-3 text-center">
+
+      <img
+        [src]="prestataire.image"
+        [alt]="prestataire.name"
+        class="w-14 h-14 rounded-full object-cover mx-auto" />
+
+      <h5 class="text-xs font-bold text-slate-800 dark:text-white mt-2 leading-4">{{ prestataire.name }}</h5>
+      <p class="text-[10px] text-slate-500 dark:text-slate-300 mt-0.5">{{ prestataire.profession }}</p>
+
+      <div class="flex items-center justify-center gap-2 mt-2">
+        <span
+          class="px-2 py-0.5 rounded-full text-[8px] font-bold"
+          [ngClass]="tierClass(prestataire.tier)">
+          {{ 'TIERS.' + prestataire.tier | translate }}
+        </span>
+        <span class="text-[10px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-0.5">
+          <ion-icon name="star" class="text-amber-400"></ion-icon>
+          {{ prestataire.rating }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Bouton flottant Messages -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin: 0 6px calc(env(safe-area-inset-bottom) + 74px) 0;">
+
+  <div class="relative">
+
+    <button
+      routerLink="/messages"
+      class="w-14 h-14 rounded-full bg-primary-600 shadow-xl shadow-primary-600/30 flex items-center justify-center active:scale-90 transition">
+
+      <ion-icon name="chatbubbles" class="text-2xl text-white"></ion-icon>
+
+    </button>
+
+    <span
+      *ngIf="unreadMessages > 0"
+      class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-primary-900 pointer-events-none">
+      {{ unreadMessages }}
+    </span>
+
+  </div>
+
+</ion-fab>
+
+</ion-content>

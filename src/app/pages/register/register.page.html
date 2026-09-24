@@ -1,0 +1,134 @@
+<ion-content [fullscreen]="true">
+
+  <div class="min-h-screen bg-slate-50 dark:bg-primary-900 px-6" style="padding-top: env(safe-area-inset-top)">
+
+    <!-- Barre du haut -->
+    <div class="flex items-center justify-between pt-5">
+
+      <button
+        (click)="goBack()"
+        style="background: var(--stud-surface)" class="w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-slate-600 dark:text-white active:scale-95 transition">
+        <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
+      </button>
+
+      <button
+        (click)="theme.toggleTheme()"
+        style="background: var(--stud-surface)" class="w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-slate-600 dark:text-white active:scale-95 transition">
+        <ion-icon [name]="theme.isDark ? 'sunny-outline' : 'moon-outline'" class="text-lg"></ion-icon>
+      </button>
+
+    </div>
+
+    <!-- Logo -->
+    <div class="flex flex-col items-center mt-2 mb-6">
+      <img src="../../../assets/images/logo.png" class="w-14 h-14 object-contain" alt="StudHub" />
+      <h1 class="text-base font-extrabold text-primary-700 dark:text-white mt-3 tracking-tight">StudHub</h1>
+    </div>
+
+    <!-- Titre -->
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
+      {{ 'AUTH.REGISTER_TITLE' | translate }}
+    </h2>
+    <p class="text-sm text-slate-400 dark:text-slate-300 mt-1 mb-6">
+      {{ 'AUTH.REGISTER_SUBTITLE' | translate }}
+    </p>
+
+    <form>
+
+      <!-- Nom complet -->
+      <div class="mb-4">
+        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.FULL_NAME_LABEL' | translate }}</label>
+
+        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+          <ion-icon name="person-outline" class="text-lg text-primary-500"></ion-icon>
+          <input
+            type="text"
+            name="fullName"
+            [(ngModel)]="fullName"
+            [placeholder]="'AUTH.FULL_NAME_PLACEHOLDER' | translate"
+            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-4">
+        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.EMAIL_LABEL' | translate }}</label>
+
+        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+          <ion-icon name="mail-outline" class="text-lg text-primary-500"></ion-icon>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
+            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4">
+        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.PASSWORD_LABEL' | translate }}</label>
+
+        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+          <ion-icon name="lock-closed-outline" class="text-lg text-primary-500"></ion-icon>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            [placeholder]="'AUTH.PASSWORD_MIN_PLACEHOLDER' | translate"
+            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          <button type="button" (click)="togglePassword()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" class="text-lg text-slate-400"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmation -->
+      <div class="mb-5">
+        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.CONFIRM_PASSWORD_LABEL' | translate }}</label>
+
+        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+          <ion-icon name="lock-closed-outline" class="text-lg text-primary-500"></ion-icon>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
+            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+        </div>
+      </div>
+
+      <!-- Conditions -->
+      <div class="flex items-start gap-2 mb-8">
+        <ion-checkbox
+          name="acceptTerms"
+          [(ngModel)]="acceptTerms"
+          class="mt-0.5">
+        </ion-checkbox>
+        <span class="text-xs text-slate-400 dark:text-slate-300 leading-relaxed">
+          {{ 'AUTH.ACCEPT_TERMS_PREFIX' | translate }}
+          <a class="text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'AUTH.TERMS_LINK' | translate }}</a>
+          {{ 'AUTH.ACCEPT_TERMS_MIDDLE' | translate }}
+          <a class="text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'AUTH.PRIVACY_LINK' | translate }}</a>
+          {{ 'AUTH.ACCEPT_TERMS_SUFFIX' | translate }}
+        </span>
+      </div>
+
+      <!-- Bouton Inscription -->
+      <a
+        routerLink="/tabs/tab1"
+        class="block text-center w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all duration-200 text-decoration-none">
+        {{ 'AUTH.CREATE_ACCOUNT_BUTTON' | translate }}
+      </a>
+
+    </form>
+
+    <!-- Connexion -->
+    <div class="text-center mt-8 pb-10">
+      <span class="text-sm text-slate-400 dark:text-slate-300">{{ 'AUTH.HAVE_ACCOUNT' | translate }}</span>
+      <a routerLink="/login" class="text-sm font-semibold text-primary-600 dark:text-primary-300 ml-1 text-decoration-none">{{ 'AUTH.SIGN_IN_LINK' | translate }}</a>
+    </div>
+
+  </div>
+
+</ion-content>

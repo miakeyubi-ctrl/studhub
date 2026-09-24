@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.skeleton-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(100deg,
+    rgba(180, 233, 236, 0.55) 20%,
+    rgba(86, 200, 209, 0.35) 40%,
+    rgba(180, 233, 236, 0.55) 60%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+:host-context(.dark) .skeleton-box {
+  background: linear-gradient(100deg,
+    rgba(31, 115, 121, 0.55) 20%,
+    rgba(86, 200, 209, 0.22) 40%,
+    rgba(31, 115, 121, 0.55) 60%);
+  background-size: 200% 100%;
+}
+
+.skeleton-logo {
+  object-fit: contain;
+  opacity: 0.35;
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.94); }
+  50% { opacity: 0.55; transform: scale(1); }
+}

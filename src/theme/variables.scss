@@ -1,0 +1,47 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+
+:root {
+  --ion-color-primary: #56C8D1;
+  --ion-color-primary-rgb: 86, 200, 209;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #4cb0b8;
+  --ion-color-primary-tint: #67ced6;
+
+  /* Mode clair */
+  --ion-background-color: #F9FAFB;
+  --ion-background-color-rgb: 249, 250, 251;
+
+  --ion-text-color: #0E3336;
+  --ion-text-color-rgb: 14, 51, 54;
+
+  --ion-toolbar-background: #F9FAFB;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+
+  --stud-surface: #ffffff;
+  --stud-border: #EFFBFC;
+}
+
+/* Mode sombre : dérivé de la même teinte teal (#56C8D1) pour rester
+   cohérent avec la marque plutôt qu'un gris neutre générique.
+   Piloté par la classe .dark (voir ThemeService) plutôt que par les
+   préférences système, pour permettre l'interrupteur manuel. */
+:root.dark {
+  --ion-background-color: #0E3336;
+  --ion-background-color-rgb: 14, 51, 54;
+
+  --ion-text-color: #EAF6F7;
+  --ion-text-color-rgb: 234, 246, 247;
+
+  --ion-toolbar-background: #123F42;
+  --ion-item-background: #123F42;
+  --ion-card-background: #123F42;
+
+  --ion-color-primary-contrast: #0E3336;
+  --ion-color-primary-contrast-rgb: 14, 51, 54;
+
+  --stud-surface: #123F42;
+  --stud-border: #1F5B60;
+}

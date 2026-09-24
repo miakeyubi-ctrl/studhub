@@ -1,0 +1,164 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* Palette claire/sombre pilotée par les préférences système, avec des
+   couleurs personnalisées (gray-50 + teal) définies dans variables.scss
+   plutôt que la palette grise par défaut d'Ionic. */
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+*{
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings:
+  "wdth" 100;
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+html,
+body {
+  background: var(--ion-background-color);
+}
+
+/* Les headers ne doivent jamais empiéter sur la zone système
+   (heure, batterie, encoche) : on réserve la zone sécurisée en haut. */
+ion-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Masque la barre de scroll dans toute l'application */
+html,
+body,
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ion-content / ion-modal / ion-menu scrollent dans leur Shadow DOM :
+   les règles ci-dessus ne peuvent pas le traverser, on cible donc
+   la partie exposée "scroll" via ::part() */
+ion-content::part(scroll),
+ion-modal::part(content),
+ion-menu::part(container) {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+ion-content::part(scroll)::-webkit-scrollbar,
+ion-modal::part(content)::-webkit-scrollbar,
+ion-menu::part(container)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Support RTL (arabe / arabe tunisien)
+ * ----------------------------------------------------------------------------
+ * Ionic mirroire déjà nativement ses propres composants (ion-toolbar,
+ * ion-back-button, ion-tab-bar, ion-item...) dès que [dir="rtl"] est posé sur
+ * <html> par LanguageService. Les classes Tailwind ci-dessous utilisent des
+ * propriétés physiques (left/right, ml/mr, pl/pr, text-left/right) : on les
+ * inverse explicitement pour le sous-ensemble réellement utilisé dans l'app.
+ */
+html[dir="rtl"] {
+
+  .text-left { text-align: right; }
+  .text-right { text-align: left; }
+
+  .left-0\.5 { left: auto; right: 0.125rem; }
+  .right-0\.5 { right: auto; left: 0.125rem; }
+
+  .left-1 { left: auto; right: 0.25rem; }
+  .right-1 { right: auto; left: 0.25rem; }
+  .-left-1 { left: auto; right: -0.25rem; }
+  .-right-1 { right: auto; left: -0.25rem; }
+
+  .left-1\.5 { left: auto; right: 0.375rem; }
+  .right-1\.5 { right: auto; left: 0.375rem; }
+
+  .left-2 { left: auto; right: 0.5rem; }
+  .right-2 { right: auto; left: 0.5rem; }
+
+  .left-2\.5 { left: auto; right: 0.625rem; }
+  .right-2\.5 { right: auto; left: 0.625rem; }
+
+  .left-3 { left: auto; right: 0.75rem; }
+  .right-3 { right: auto; left: 0.75rem; }
+
+  .left-4 { left: auto; right: 1rem; }
+  .right-4 { right: auto; left: 1rem; }
+
+  .left-5 { left: auto; right: 1.25rem; }
+  .right-5 { right: auto; left: 1.25rem; }
+
+  .ml-1 { margin-left: 0; margin-right: 0.25rem; }
+  .mr-1 { margin-right: 0; margin-left: 0.25rem; }
+
+  .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+  .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+
+  .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+  .pr-2 { padding-right: 0; padding-left: 0.5rem; }
+  .pl-4 { padding-left: 0; padding-right: 1rem; }
+  .pr-4 { padding-right: 0; padding-left: 1rem; }
+  .pl-11 { padding-left: 0; padding-right: 2.75rem; }
+  .pr-11 { padding-right: 0; padding-left: 2.75rem; }
+}

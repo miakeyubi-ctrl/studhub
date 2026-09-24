@@ -1,0 +1,59 @@
+ion-tab-bar {
+  --background: var(--stud-surface);
+  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 -4px 6px -4px rgba(0, 0, 0, 0.1);
+  padding: 6px 10px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom));
+  height: auto;
+  min-height: 62px;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Onglet actif */
+ion-tab-button.tab-selected {
+  background: #164F53;
+  border-radius: 10px;
+  padding: 0 10px;
+  max-width: 120px;
+  flex-direction: row;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+/* Icône active */
+ion-tab-button.tab-selected ion-icon {
+  color: white !important;
+  font-size: 18px;
+  margin: 0;
+}
+
+/* Texte actif */
+ion-tab-button.tab-selected ion-label {
+  display: block;
+  color: white !important;
+  font-weight: 600;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Onglets inactifs : icône seule, sans libellé (comme la maquette) */
+ion-tab-button {
+  --background: transparent;
+  --color: #9CA9AB;
+  --color-selected: white;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.dark ion-tab-button {
+  --color: #6FA6AA;
+}
+
+ion-tab-button ion-icon {
+  font-size: 22px;
+}
+
+ion-tab-button ion-label {
+  display: none;
+}
