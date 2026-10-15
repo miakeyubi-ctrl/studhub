@@ -35,30 +35,30 @@ export class ForgotPasswordPage implements OnInit {
   async sendCode() {
     this.errorMessage = '';
 
-    if (!this.email) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) {
       this.errorMessage = 'AUTH.ERROR_EMAIL_REQUIRED';
       return;
     }
 
     this.loading = true;
-    const result = this.authService.sendResetCode(this.email.trim());
+    const result = await this.authService.sendResetCode(this.email.trim());
     this.loading = false;
 
     if (!result.success) {
-      this.errorMessage = result.message || 'AUTH.ERROR_NO_ACCOUNT_EMAIL';
+      this.errorMessage = result.message || 'AUTH.ERROR_NO_ACCOUNT';
       return;
     }
 
     const toast = await this.toastController.create({
       message: result.devCode
         ? this.translate.instant('AUTH.CODE_SENT_DEV', { code: result.devCode })
-        : this.translate.instant('AUTH.CODE_SENT'),
+        : this.translate.instant('AUTH.CODE_SENT_EMAIL'),
       duration: 4000,
       color: 'success',
       position: 'top'
     });
     await toast.present();
 
-    this.router.navigate(['/verify-code'], { queryParams: { email: this.email.trim() } });
+    this.router.navigate(['/verify-code'], { queryParams: { email: this.email.trim().toLowerCase() } });
   }
 }

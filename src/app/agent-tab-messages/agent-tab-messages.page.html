@@ -1,5 +1,18 @@
 <ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <button type="button" (click)="goBack()" class="agent-back-btn ml-1" [attr.aria-label]="'COMMON.BACK' | translate">
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
+      <button
+        type="button"
+        (click)="openMenu()"
+        [attr.aria-label]="'AGENT_MENU.OPEN' | translate"
+        class="agent-menu-trigger">
+        <span *ngIf="menuInitial">{{ menuInitial }}</span>
+        <ion-icon *ngIf="!menuInitial" name="menu-outline"></ion-icon>
+      </button>
+    </ion-buttons>
     <ion-title class="text-slate-800 dark:text-white font-bold">
       {{ 'AGENT_TABS.MESSAGES' | translate }}
       <span *ngIf="totalUnread > 0" class="text-primary-600 dark:text-primary-300">({{ totalUnread }})</span>
@@ -39,9 +52,14 @@
         <div class="relative flex-shrink-0">
 
           <img
+            *ngIf="hasPhoto(conversation)"
             [src]="conversation.avatar"
             [alt]="conversation.name"
             class="w-14 h-14 rounded-full object-cover" />
+          <div
+            *ngIf="!hasPhoto(conversation)"
+            class="w-14 h-14 rounded-full flex items-center justify-center text-white text-base font-extrabold"
+            [style.background]="avatarColor(conversation)">{{ initials(conversation) }}</div>
 
           <span
             *ngIf="conversation.online"

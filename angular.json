@@ -34,7 +34,8 @@
             "styles": ["src/global.scss",
                         "src/theme/variables.scss",
                         "node_modules/bootstrap/dist/css/bootstrap.min.css",
-                       "node_modules/@splidejs/splide/dist/css/splide.min.css"
+                       "node_modules/@splidejs/splide/dist/css/splide.min.css",
+                       "node_modules/leaflet/dist/leaflet.css"
                       ],
             "scripts": [ "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
           },
@@ -114,7 +115,8 @@
               "src/global.scss", 
               "src/theme/variables.scss", 
                "node_modules/bootstrap/dist/css/bootstrap.min.css",
-                "node_modules/@splidejs/splide/dist/css/splide.min.css"
+                "node_modules/@splidejs/splide/dist/css/splide.min.css",
+                "node_modules/leaflet/dist/leaflet.css"
               ],
             "scripts": [ "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
           },
@@ -140,7 +142,8 @@
   "cli": {
     "schematicCollections": [
       "@ionic/angular-toolkit"
-    ]
+    ],
+    "analytics": "fce8f0b7-1f48-4f0b-9555-8b3eb9efb7cc"
   },
   "schematics": {
     "@ionic/angular-toolkit:component": {

@@ -28,6 +28,14 @@ export class ThemeService {
   }
 
   private applyTheme(): void {
+    const mode = this.isDark ? 'dark' : 'light';
     document.documentElement.classList.toggle('dark', this.isDark);
+    document.documentElement.style.colorScheme = mode;
+    document.body?.classList.toggle('dark', this.isDark);
+
+    const meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta) {
+      meta.setAttribute('content', mode);
+    }
   }
 }

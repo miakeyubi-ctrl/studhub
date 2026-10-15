@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+import { ActiveRoleService } from '../../services/active-role.service';
 import { Conversation, MessagesService } from '../../services/messages.service';
+import { hasRealAvatar, initialsBg, initialsFromName } from '../../utils/avatar.util';
 
 @Component({
   selector: 'app-messages',
@@ -15,11 +18,38 @@ export class MessagesPage implements OnInit {
 
   constructor(
     private router: Router,
+    private location: Location,
+    private activeRole: ActiveRoleService,
     public messagesService: MessagesService
   ) { }
 
   ngOnInit() {
-    setTimeout(() => this.loading = false, 700);
+    void this.refresh();
+  }
+
+  ionViewWillEnter(): void {
+    void this.refresh();
+  }
+
+  private async refresh(): Promise<void> {
+    this.loading = true;
+    try {
+      await this.messagesService.getConversations();
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  goBack(): void {
+    if (this.activeRole.preferAgent()) {
+      void this.router.navigateByUrl('/agent-dashboard/dashboard');
+      return;
+    }
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+    void this.router.navigateByUrl('/tabs/tab3');
   }
 
   onSearchChange(event: any) {
@@ -33,6 +63,18 @@ export class MessagesPage implements OnInit {
 
   openConversation(id: number) {
     this.router.navigate(['/messages', id]);
+  }
+
+  hasPhoto(c: Conversation): boolean {
+    return hasRealAvatar(c.avatar);
+  }
+
+  initials(c: Conversation): string {
+    return initialsFromName(c.name);
+  }
+
+  avatarColor(c: Conversation): string {
+    return initialsBg(c.name);
   }
 
   get filteredConversations(): Conversation[] {

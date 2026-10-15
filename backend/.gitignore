@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist
+build
+coverage
+*.tsbuildinfo
+
+# Prisma
+prisma/migrations/_journal.json
+prisma/*.db
+prisma/*.db-journal
+prisma/generated/
+
+# Env - JAMAIS COMMITÉS
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Uploads de photos - ne pas versionner
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+logs
+*.log
+pino-log.log
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Tests
+test-report.html

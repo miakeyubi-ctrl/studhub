@@ -1,5 +1,18 @@
 <ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <button type="button" (click)="goBack()" class="agent-back-btn ml-1" [attr.aria-label]="'COMMON.BACK' | translate">
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
+      <button
+        type="button"
+        (click)="openMenu()"
+        [attr.aria-label]="'AGENT_MENU.OPEN' | translate"
+        class="agent-menu-trigger">
+        <span *ngIf="menuInitial">{{ menuInitial }}</span>
+        <ion-icon *ngIf="!menuInitial" name="menu-outline"></ion-icon>
+      </button>
+    </ion-buttons>
     <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'AGENT_TABS.DASHBOARD' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -18,7 +31,7 @@
         <div class="min-w-0">
           <p class="text-[11px] text-white/70 leading-none">{{ 'AGENT_DASHBOARD.WELCOME' | translate }} 👋</p>
           <h2 class="text-white font-bold text-base mt-1 truncate">{{ agent.agencyName }}</h2>
-          <p class="text-white/80 text-xs mt-0.5 truncate">{{ agent.fullName }}</p>
+          <p class="text-white/80 text-xs mt-0.5 truncate">{{ agent.email }}</p>
         </div>
       </div>
 
@@ -38,7 +51,11 @@
     <!-- Actions rapides -->
     <div class="grid grid-cols-2 gap-3">
 
-      <a routerLink="/agent-dashboard/gestion" class="flex flex-col items-center gap-2 rounded-2xl shadow-lg p-4 text-decoration-none" style="background: var(--stud-surface)">
+      <a
+        routerLink="/agent-dashboard/gestion"
+        [queryParams]="{ open: 'add' }"
+        class="flex flex-col items-center gap-2 rounded-2xl shadow-lg p-4 text-decoration-none"
+        style="background: var(--stud-surface)">
         <div class="w-11 h-11 rounded-full bg-primary-50 dark:bg-primary-700 flex items-center justify-center">
           <ion-icon name="add-circle-outline" class="text-primary-700 dark:text-primary-200 text-xl"></ion-icon>
         </div>
@@ -63,28 +80,42 @@
       </div>
 
       <div class="space-y-3" *ngIf="recentProperties.length > 0">
-        <div
+        <button
+          type="button"
           *ngFor="let property of recentProperties"
-          class="flex gap-3 p-2 rounded-2xl shadow-lg"
+          (click)="viewProperty(property)"
+          class="flex gap-3 p-2 rounded-2xl shadow-lg w-full text-left border-0 active:scale-[0.99] transition"
           style="background: var(--stud-surface)">
 
-          <img [src]="property.image" [alt]="property.title" class="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+          <img
+            [src]="agentProperties.resolvePhotoUrl(property.image)"
+            [alt]="property.title"
+            referrerpolicy="no-referrer"
+            loading="lazy"
+            class="w-16 h-16 rounded-xl object-cover flex-shrink-0 bg-slate-100" />
 
           <div class="flex-1 py-1 min-w-0">
             <span class="inline-block bg-primary-50 dark:bg-primary-700/40 text-primary-700 dark:text-primary-200 text-[9px] px-2 py-1 rounded-full w-fit font-semibold">
               {{ 'CATEGORIES.' + property.category | translate }}
             </span>
-            <h5 class="text-sm font-bold text-slate-800 dark:text-white mt-1 leading-4 truncate">{{ property.title }}</h5>
-            <p class="text-xs text-slate-500 dark:text-slate-300 mt-0.5 truncate">{{ property.city }}</p>
+            <h5 class="text-sm font-bold text-slate-800 dark:text-white mt-1 leading-4 truncate m-0">{{ property.title }}</h5>
+            <p class="text-xs text-slate-500 dark:text-slate-300 mt-0.5 truncate m-0">{{ property.city }}</p>
           </div>
 
-        </div>
+          <ion-icon name="chevron-forward" class="text-slate-400 self-center flex-shrink-0"></ion-icon>
+        </button>
       </div>
 
       <div *ngIf="recentProperties.length === 0" class="text-center py-12">
         <ion-icon name="business-outline" class="text-5xl text-primary-100 mb-3" style="display:block"></ion-icon>
         <p class="text-slate-700 dark:text-slate-200 font-semibold text-sm">{{ 'AGENT_DASHBOARD.NO_PROPERTIES' | translate }}</p>
         <p class="text-xs text-slate-400 mt-1">{{ 'AGENT_DASHBOARD.NO_PROPERTIES_DESC' | translate }}</p>
+        <a
+          routerLink="/agent-dashboard/gestion"
+          [queryParams]="{ open: 'add' }"
+          class="inline-block mt-4 bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl active:scale-95 transition text-decoration-none">
+          {{ 'AGENT_DASHBOARD.ADD_BUTTON' | translate }}
+        </a>
       </div>
 
     </div>

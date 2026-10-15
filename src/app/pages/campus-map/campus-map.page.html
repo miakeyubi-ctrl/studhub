@@ -1,0 +1,153 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start" *ngIf="!asTab">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'CAMPUS_MAP.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <button
+        type="button"
+        class="filter-btn"
+        (click)="toggleFilters()"
+        [class.active]="filtersOpen || activeFilterCount > 0">
+        <ion-icon name="options-outline"></ion-icon>
+        <span *ngIf="activeFilterCount">{{ activeFilterCount }}</span>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="campus-map-content">
+  <div class="map-shell">
+    <div id="campus-map" class="map-canvas"></div>
+
+    <div class="map-overlay">
+      <div class="chips">
+        <button
+          type="button"
+          class="chip"
+          [class.active]="!selectedCampus"
+          (click)="selectCampus(null)">
+          {{ 'CAMPUS_MAP.ALL' | translate }}
+        </button>
+        <button
+          type="button"
+          class="chip"
+          *ngFor="let c of campuses"
+          [class.active]="selectedCampus?.id === c.id"
+          (click)="selectCampus(c)">
+          {{ c.short }}
+        </button>
+      </div>
+
+      <div class="filters-panel" *ngIf="filtersOpen">
+        <div class="filters-row">
+          <p class="filters-label">{{ 'CAMPUS_MAP.FILTER_TYPE' | translate }}</p>
+          <div class="chips compact">
+            <button
+              type="button"
+              class="chip"
+              *ngFor="let cat of categories"
+              [class.active]="filterCategory === cat"
+              (click)="setCategory(cat)">
+              {{ 'CATEGORIES.' + cat | translate }}
+            </button>
+          </div>
+        </div>
+        <div class="filters-row">
+          <p class="filters-label">{{ 'CAMPUS_MAP.FILTER_PRICE' | translate }}</p>
+          <div class="chips compact">
+            <button
+              type="button"
+              class="chip"
+              [class.active]="filterMaxPrice == null"
+              (click)="setMaxPrice(null)">
+              {{ 'CAMPUS_MAP.FILTER_ANY' | translate }}
+            </button>
+            <button
+              type="button"
+              class="chip"
+              *ngFor="let p of pricePresets"
+              [class.active]="filterMaxPrice === p"
+              (click)="setMaxPrice(p)">
+              ≤ {{ p }} DT
+            </button>
+          </div>
+        </div>
+        <div class="filters-row" *ngIf="selectedCampus">
+          <p class="filters-label">{{ 'CAMPUS_MAP.FILTER_DISTANCE' | translate }}</p>
+          <div class="chips compact">
+            <button
+              type="button"
+              class="chip"
+              *ngFor="let km of kmPresets"
+              [class.active]="filterMaxKm === km"
+              (click)="setMaxKm(km)">
+              ≤ {{ km }} km
+            </button>
+          </div>
+        </div>
+        <button type="button" class="filters-reset" (click)="resetFilters()">
+          {{ 'CAMPUS_MAP.FILTER_RESET' | translate }}
+        </button>
+      </div>
+
+      <div class="hint" *ngIf="!loading">
+        <ion-icon name="school-outline"></ion-icon>
+        <div>
+          <p class="hint-title" *ngIf="selectedCampus; else allHint">{{ selectedCampus.name }}</p>
+          <ng-template #allHint>
+            <p class="hint-title">{{ 'CAMPUS_MAP.HINT_TITLE' | translate }}</p>
+          </ng-template>
+          <p class="hint-sub">
+            <span *ngIf="selectedCampus">
+              {{ 'CAMPUS_MAP.STUDENTS' | translate: { count: selectedCampus.studentsCount } }}
+              ·
+            </span>
+            {{ 'CAMPUS_MAP.COUNT' | translate: { count: nearbyCount } }}
+            <span *ngIf="selectedCampus"> · ≤ {{ filterMaxKm }} km</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend" [class.raised]="cards.length">
+      <span class="lg uni">{{ 'CAMPUS_MAP.LEGEND_UNI' | translate }}</span>
+      <span class="lg immo">{{ 'CAMPUS_MAP.LEGEND_IMMO' | translate }}</span>
+    </div>
+
+    <!-- Carrousel annonces style Airbnb -->
+    <div class="listings-rail" *ngIf="cards.length">
+      <button
+        type="button"
+        class="listing-card"
+        *ngFor="let card of cards; trackBy: trackCard"
+        [id]="'map-listing-' + card.property.id"
+        [class.is-selected]="selectedPropertyId === card.property.id"
+        (click)="selectCard(card)"
+        (dblclick)="openProperty(card.property.id)">
+        <div class="listing-card__photo" [style.background-image]="'url(' + card.photo + ')'">
+          <span class="listing-card__price">{{ card.price }} DT</span>
+        </div>
+        <div class="listing-card__body">
+          <p class="listing-card__title">{{ card.property.title }}</p>
+          <p class="listing-card__meta">
+            {{ card.property.city }}
+            <span *ngIf="selectedCampus"> · {{ card.distKm.toFixed(1) }} km</span>
+          </p>
+          <button
+            type="button"
+            class="listing-card__cta"
+            (click)="openProperty(card.property.id); $event.stopPropagation()">
+            Voir
+          </button>
+        </div>
+      </button>
+    </div>
+  </div>
+</ion-content>

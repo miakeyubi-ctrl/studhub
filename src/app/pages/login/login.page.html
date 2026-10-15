@@ -19,6 +19,26 @@
 
     </div>
 
+    <!-- Switch rôle (discret, sans bandeau rouge) -->
+    <div class="role-switch mt-5 mb-3">
+      <button type="button" class="active" (click)="goStudentLogin()">🎓 Étudiant</button>
+      <button type="button" (click)="goAgentLogin()">🏢 Agent</button>
+      <button type="button" (click)="goPartnerLogin()">🏪 Partenaire</button>
+    </div>
+
+    <div *ngIf="isLoggedIn" class="session-pill mb-4">
+      <div>
+        <div class="name">{{ connectedName }}</div>
+        <div class="sub" *ngIf="connectedRole === 'student'">Session étudiante</div>
+        <div class="sub" *ngIf="connectedRole === 'agent'">Session agent</div>
+        <div class="sub" *ngIf="connectedRole === 'partner'">Session partenaire</div>
+      </div>
+      <ion-button fill="clear" size="small" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="login-enter">
     <!-- Logo -->
     <div class="flex flex-col items-center mt-2 mb-8">
       <img src="../../../assets/images/logo.png" class="w-14 h-14 object-contain" alt="StudHub" />
@@ -33,7 +53,7 @@
       {{ 'AUTH.LOGIN_SUBTITLE' | translate }}
     </p>
 
-    <form>
+    <form (ngSubmit)="onSubmit()">
 
       <!-- Email -->
       <div class="mb-4">
@@ -92,20 +112,21 @@
       </div>
 
       <!-- Bouton Connexion -->
-      <a
-        routerLink="/tabs/tab1"
-        class="block text-center w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all duration-200 text-decoration-none">
+      <button
+        type="submit"
+        class="block text-center w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all duration-200 border-0 cursor-pointer">
         {{ 'AUTH.SIGN_IN_BUTTON' | translate }}
-      </a>
+      </button>
 
     </form>
 
     <!-- Inscription -->
-    <div class="text-center mt-8 pb-10">
+    <div class="text-center mt-6 pb-10">
       <span class="text-sm text-slate-400 dark:text-slate-300">{{ 'AUTH.NO_ACCOUNT' | translate }}</span>
       <a routerLink="/register" class="text-sm font-semibold text-primary-600 dark:text-primary-300 ml-1 text-decoration-none">
         {{ 'AUTH.CREATE_ACCOUNT_LINK' | translate }}
       </a>
+    </div>
     </div>
 
   </div>

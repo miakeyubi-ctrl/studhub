@@ -1,0 +1,142 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">
+      {{ 'PRIVACY_PAGE.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-4 pb-10">
+
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-5 m-0">
+      {{ 'PRIVACY_PAGE.SUBTITLE' | translate }}
+    </p>
+
+    <!-- Compte -->
+    <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-3">
+      {{ 'PRIVACY_PAGE.ACCOUNT_TITLE' | translate }}
+    </h3>
+
+    <div class="rounded-2xl shadow-sm mb-6 overflow-hidden" style="background: var(--stud-surface)">
+      <div class="flex items-center gap-3 px-4 py-3.5 border-b border-slate-100 dark:border-primary-700/50">
+        <ion-icon name="mail-outline" class="text-lg text-primary-500"></ion-icon>
+        <div class="flex-1 min-w-0">
+          <p class="text-[10px] font-semibold uppercase text-slate-400 m-0">{{ 'AUTH.EMAIL_LABEL' | translate }}</p>
+          <p class="text-sm text-slate-800 dark:text-white m-0 truncate">{{ email || '—' }}</p>
+        </div>
+      </div>
+
+      <button type="button" (click)="goEditProfile()"
+        class="w-full flex items-center gap-3 px-4 py-3.5 border-b border-slate-100 dark:border-primary-700/50 active:opacity-70 text-left">
+        <ion-icon name="person-outline" class="text-lg text-primary-500"></ion-icon>
+        <span class="flex-1 text-sm font-semibold text-slate-800 dark:text-white">{{ 'PRIVACY_PAGE.EDIT_PROFILE' | translate }}</span>
+        <ion-icon name="chevron-forward" class="text-slate-300"></ion-icon>
+      </button>
+
+      <button type="button" (click)="goChangePassword()"
+        class="w-full flex items-center gap-3 px-4 py-3.5 active:opacity-70 text-left">
+        <ion-icon name="key-outline" class="text-lg text-primary-500"></ion-icon>
+        <span class="flex-1 text-sm font-semibold text-slate-800 dark:text-white">{{ 'PRIVACY_PAGE.CHANGE_PASSWORD' | translate }}</span>
+        <ion-icon name="chevron-forward" class="text-slate-300"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Préférences -->
+    <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-3">
+      {{ 'PRIVACY_PAGE.PREFS_TITLE' | translate }}
+    </h3>
+
+    <div class="rounded-2xl shadow-sm mb-6 overflow-hidden" style="background: var(--stud-surface)">
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-primary-700/50">
+        <ion-icon name="notifications-outline" class="text-lg text-primary-500"></ion-icon>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-slate-800 dark:text-white m-0">{{ 'PRIVACY_PAGE.PUSH_LABEL' | translate }}</p>
+          <p class="text-[11px] text-slate-400 m-0">{{ 'PRIVACY_PAGE.PUSH_HINT' | translate }}</p>
+        </div>
+        <ion-toggle
+          [checked]="prefs.pushEnabled"
+          (ionChange)="onPushToggle($any($event).detail.checked)"
+          color="primary">
+        </ion-toggle>
+      </div>
+
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-primary-700/50">
+        <ion-icon name="sparkles-outline" class="text-lg text-primary-500"></ion-icon>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-slate-800 dark:text-white m-0">{{ 'PRIVACY_PAGE.TIPS_LABEL' | translate }}</p>
+          <p class="text-[11px] text-slate-400 m-0">{{ 'PRIVACY_PAGE.TIPS_HINT' | translate }}</p>
+        </div>
+        <ion-toggle
+          [checked]="prefs.personalizedTips"
+          (ionChange)="onTipsToggle($any($event).detail.checked)"
+          color="primary">
+        </ion-toggle>
+      </div>
+
+      <div class="flex items-center gap-3 px-4 py-3">
+        <ion-icon name="moon-outline" class="text-lg text-primary-500"></ion-icon>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-slate-800 dark:text-white m-0">{{ 'PRIVACY_PAGE.DARK_LABEL' | translate }}</p>
+          <p class="text-[11px] text-slate-400 m-0">{{ 'PRIVACY_PAGE.DARK_HINT' | translate }}</p>
+        </div>
+        <ion-toggle
+          [checked]="theme.isDark"
+          (ionChange)="onDarkToggle($any($event).detail.checked)"
+          color="primary">
+        </ion-toggle>
+      </div>
+    </div>
+
+    <!-- Politique -->
+    <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-3">
+      {{ 'PRIVACY_PAGE.POLICY_TITLE' | translate }}
+    </h3>
+
+    <div class="space-y-2 mb-6">
+      <div
+        *ngFor="let s of sections"
+        class="rounded-2xl overflow-hidden shadow-sm"
+        style="background: var(--stud-surface)">
+        <button
+          type="button"
+          (click)="toggleSection(s)"
+          class="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left active:opacity-80">
+          <span class="text-sm font-semibold text-slate-800 dark:text-white">{{ s.title | translate }}</span>
+          <ion-icon [name]="s.open ? 'chevron-up' : 'chevron-down'" class="text-slate-400 text-base flex-shrink-0"></ion-icon>
+        </button>
+        <div *ngIf="s.open" class="px-4 pb-4">
+          <p class="text-xs text-slate-500 dark:text-slate-400 m-0 leading-5">{{ s.body | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="confirmLogout()"
+      class="w-full py-3.5 rounded-2xl text-sm font-bold text-red-500 bg-red-50 dark:bg-red-500/10 active:scale-[0.98] transition">
+      {{ 'PROFILE_PAGE.MENU_LOGOUT' | translate }}
+    </button>
+
+    <button
+      *ngIf="email"
+      type="button"
+      (click)="confirmDeleteAccount()"
+      [disabled]="deleting"
+      class="w-full mt-3 py-3.5 rounded-2xl text-sm font-bold text-white bg-red-600 active:scale-[0.98] transition disabled:opacity-50">
+      {{ (deleting ? 'PRIVACY_PAGE.DELETE_LOADING' : 'PRIVACY_PAGE.DELETE_ACCOUNT') | translate }}
+    </button>
+    <p *ngIf="email" class="text-[10px] text-slate-400 text-center mt-2 m-0 px-4">
+      {{ 'PRIVACY_PAGE.DELETE_HINT' | translate }}
+    </p>
+
+  </div>
+</ion-content>

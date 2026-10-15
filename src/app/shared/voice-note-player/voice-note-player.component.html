@@ -1,0 +1,40 @@
+<div class="vn" [class.from-me]="fromMe" [class.playing]="playing">
+  <button type="button" class="vn__play" (click)="toggle()" [attr.aria-label]="playing ? 'Pause' : 'Play'">
+    <ion-icon [name]="playing ? 'pause' : 'play'"></ion-icon>
+  </button>
+
+  <div class="vn__body">
+    <div
+      class="vn__wave"
+      (click)="seek($event)"
+      role="slider"
+      [attr.aria-valuenow]="progress"
+      aria-valuemin="0"
+      aria-valuemax="1">
+      <div class="vn__bars">
+        <span
+          *ngFor="let h of bars; let i = index"
+          class="vn__bar"
+          [class.passed]="(i + 1) / bars.length <= progress"
+          [style.height.%]="h * 100">
+        </span>
+      </div>
+      <div class="vn__thumb" [style.left.%]="progress * 100"></div>
+    </div>
+
+    <div class="vn__meta">
+      <span class="vn__time">{{ timeLabel }}</span>
+      <ion-icon name="mic" class="vn__mic"></ion-icon>
+    </div>
+  </div>
+
+  <audio
+    #audioEl
+    preload="metadata"
+    [src]="src"
+    (loadedmetadata)="onLoaded()"
+    (durationchange)="onLoaded()"
+    (timeupdate)="onTimeUpdate()"
+    (ended)="onEnded()">
+  </audio>
+</div>

@@ -1,0 +1,740 @@
+// ==========================================================
+//  STUDHUB - Prisma Schema PostgreSQL
+//  Modèles alignés avec interfaces TS du frontend (mock-data.service.ts)
+// ==========================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================================
+//  ENUMS (alignés sur valeurs frontend à l'identique)
+// ==========================================================
+
+enum Role {
+  STUDENT
+  AGENT
+  ADMIN
+  PARTNER
+}
+
+enum PropertyCategory {
+  STUDIO
+  COLOCATION
+  RESIDENCE
+  CHAMBRE
+}
+
+enum ProductCategory {
+  ELECTRONIQUE
+  LIVRES
+  MEUBLES
+  VETEMENTS
+  AUTRES
+}
+
+enum ProductCondition {
+  NEW
+  LIKE_NEW
+  USED
+  FOR_PARTS
+}
+
+enum ProviderCategory {
+  DEVELOPPEMENT_WEB
+  GRAPHISME
+  COURS_LANGUES
+  REPARATION_PC
+  DESIGN_INTERIEUR
+  PHOTOGRAPHIE
+  COURS_PARTICULIERS
+  AUTRES
+}
+
+enum ProviderTier {
+  GRATUIT
+  STANDARD
+  PREMIUM
+}
+
+/// Type d'activité agent / prestataire (inscription)
+enum AgentActivityType {
+  AGENT_IMMOBILIER
+  PROPRIETAIRE
+  TRANSPORT
+  MENAGE
+  AUTRE_SERVICE
+}
+
+enum AgentDocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReviewTargetType {
+  PROPERTY
+  PRODUCT
+  PROVIDER
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+  SYSTEM
+}
+
+// (ChatSenderType enum supprimé : on utilise 2 colonnes distinctes
+//  studentSenderId / agentSenderId sur ChatMessage)
+
+// ==========================================================
+//  1) USER = Étudiant
+// ==========================================================
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @db.VarChar(255)
+  fullName     String   @db.VarChar(200)
+  phone        String?  @db.VarChar(20)
+  nationality  String?  @db.VarChar(100)
+  city         String?  @db.VarChar(100)
+  bio          String?  @db.Text
+  avatarUrl    String?  @db.VarChar(500)
+  university   String?  @db.VarChar(200)
+  studyLevel   String?  @db.VarChar(100) // "Licence 3", "Master 1"
+  role         Role     @default(STUDENT)
+  emailVerifiedAt DateTime?
+  termsAcceptedAt DateTime?
+  /// null = compte actif ; date = bloqué par un admin
+  blockedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products         Product[]
+  posts            FeedPost[]
+  likesGiven       Like[]
+  commentsWritten  Comment[]
+  favorites        PropertyFavorite[]
+  productFavorites ProductFavorite[]
+  providerFavorites ProviderFavorite[]
+  propertyLikes    PropertyLike[]
+  propertyViews    PropertyView[]
+  productLikes     ProductLike[]
+  productViews     ProductView[]
+  authoredReviews  Review[]      @relation("ReviewAuthorUser")
+  refreshTokens    RefreshToken[]  @relation("UserRefreshTokens")
+  sentMessages     ChatMessage[]   @relation("StudentSenderMessages")
+  ownedProviders   ServiceProvider[]
+  conversations    Conversation[]  @relation("StudentConversations")
+  peerConversations Conversation[] @relation("PeerStudentConversations")
+  pushTokens       DevicePushToken[]
+  agentFollows     AgentFollow[]   @relation("UserAgentFollows")
+  reportsFiled     ListingReport[] @relation("ListingReportAuthor")
+}
+
+// ==========================================================
+//  2) AGENT IMMOBILIER
+// ==========================================================
+
+model Agent {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @db.VarChar(255)
+  firstName     String?  @db.VarChar(100)
+  lastName      String?  @db.VarChar(100)
+  /// Nom entreprise / activité (optionnel selon le type)
+  agencyName    String?  @db.VarChar(200)
+  phone         String   @db.VarChar(20)
+  activityType  AgentActivityType?
+  activityCity  String?  @db.VarChar(100)
+  address       String?  @db.VarChar(500)
+  avatarUrl     String?  @db.VarChar(500)
+  licenseNumber String?  @db.VarChar(100) // N° carte pro agent immobilier
+  websiteUrl    String?  @db.VarChar(500)
+  description   String?  @db.Text
+  tier          ProviderTier @default(GRATUIT)
+  verified      Boolean  @default(false)
+  role          Role     @default(AGENT)
+  emailVerifiedAt DateTime?
+  termsAcceptedAt DateTime?
+  documentsVerifiedAt DateTime?
+  /// null = compte actif ; date = bloqué par un admin
+  blockedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  properties    Property[]
+  documents     AgentDocument[]
+  refreshTokens RefreshToken[]  @relation("AgentRefreshTokens")
+  sentMessages  ChatMessage[]   @relation("AgentSenderMessages")
+  conversations Conversation[]  @relation("AgentConversations")
+  pushTokens    DevicePushToken[]
+  followers     AgentFollow[]   @relation("AgentFollowed")
+  following     AgentFollow[]   @relation("AgentFollower")
+  propertyViews PropertyView[]
+}
+
+model AgentDocument {
+  id         Int                 @id @default(autoincrement())
+  agentId    Int
+  agent      Agent               @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  docType    String              @db.VarChar(100)
+  fileUrl    String              @db.VarChar(500)
+  status     AgentDocumentStatus @default(PENDING)
+  reviewNote String?             @db.Text
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([agentId])
+  @@index([status])
+}
+
+// ==========================================================
+//  3) PROPERTY = Bien immobilier (logement étudiant)
+// ==========================================================
+
+model Property {
+  id          Int              @id @default(autoincrement())
+  title       String           @db.VarChar(255)
+  description String?          @db.Text
+  price       Decimal          @db.Decimal(10, 3) // en DT
+  city        String           @db.VarChar(100)
+  location    String?          @db.VarChar(255) // quartier
+  latitude    Float?
+  longitude   Float?
+  category    PropertyCategory
+  surface     Float            // en m²
+  rooms       Int              // nb de pièces
+  bedrooms    Int?
+  bathrooms   Int?
+  furnished   Boolean          @default(false)
+  amenities   String[]         // ["wifi","parking","climatiseur","ascenseur"]
+  photos      String[]         // URLs galerie (Cloudinary ou /uploads)
+  viewsCount  Int              @default(0)
+  likesCount  Int              @default(0)
+  available   Boolean          @default(true)
+  isReported  Boolean          @default(false)
+  monthlyRent Decimal?         @db.Decimal(10, 3)
+  depositFee  Decimal?         @db.Decimal(10, 3)
+  agentId     Int
+  agent       Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  favorites PropertyFavorite[]
+  likes     PropertyLike[]
+  views     PropertyView[]
+  reviews   Review[]           @relation("PropertyReviews")
+
+  @@index([city])
+  @@index([price])
+  @@index([category])
+  @@index([agentId])
+  @@index([available])
+  @@index([createdAt])
+  @@index([latitude, longitude])
+}
+
+// ==========================================================
+//  4) PRODUCT = Article Marketplace
+// ==========================================================
+
+model Product {
+  id          Int              @id @default(autoincrement())
+  title       String           @db.VarChar(255)
+  description String?          @db.Text
+  price       Decimal          @db.Decimal(10, 3) // DT
+  category    ProductCategory
+  condition   ProductCondition
+  photos      String[]
+  location    String?          @db.VarChar(200) // ville
+  sellerId    Int
+  seller      User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  isSold      Boolean          @default(false)
+  isReported  Boolean          @default(false)
+  viewsCount  Int              @default(0)
+  likesCount  Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  likes   ProductLike[]
+  views   ProductView[]
+  favorites ProductFavorite[]
+  reviews Review[] @relation("ProductReviews")
+
+  @@index([category])
+  @@index([sellerId])
+  @@index([price])
+  @@index([createdAt])
+}
+
+// ==========================================================
+//  5) SERVICE PROVIDER = Professionnel StudServices
+// ==========================================================
+
+model ServiceProvider {
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       ProviderCategory
+  title          String           @db.VarChar(200)
+  bio            String?          @db.Text
+  tier           ProviderTier     @default(GRATUIT)
+  priceStart     Decimal?         @db.Decimal(10, 3)
+  priceEnd       Decimal?         @db.Decimal(10, 3)
+  phoneContact   String           @db.VarChar(20)
+  emailContact   String?          @db.VarChar(255)
+  city           String           @db.VarChar(100)
+  portfolioUrls  String[]
+  ratingAvg      Decimal          @db.Decimal(2, 1) @default(0.0)
+  reviewsCount   Int              @default(0)
+  isVerified     Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  reviews Review[] @relation("ProviderReviews")
+  favorites ProviderFavorite[]
+
+  @@index([userId])
+  @@index([category])
+  @@index([city])
+  @@index([tier])
+}
+
+// ==========================================================
+//  6) FEED POST = Publication réseau social étudiant
+// ==========================================================
+
+model FeedPost {
+  id              Int       @id @default(autoincrement())
+  authorId        Int
+  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  text            String    @db.Text
+  imageUrl        String?   @db.VarChar(500)
+  associationTag  String?   @db.VarChar(100) // Club / Assoc / Faculté
+  eventDate       DateTime?
+  likesCount      Int       @default(0)
+  commentsCount   Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  likes     Like[]
+  comments  Comment[]
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([associationTag])
+}
+
+// ==========================================================
+//  7) LIKE sur un post
+// ==========================================================
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId]) // 1 like max par user sur un post
+  @@index([postId])
+  @@index([userId])
+}
+
+// ==========================================================
+//  8) COMMENT sur un post
+// ==========================================================
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([authorId])
+}
+
+// ==========================================================
+//  9) PROPERTY FAVORITE = Favoris étudiant sur un logement
+// ==========================================================
+
+model PropertyFavorite {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@index([propertyId])
+}
+
+model ProductFavorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+model ProviderFavorite {
+  id         Int             @id @default(autoincrement())
+  userId     Int
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerId Int
+  provider   ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+
+  @@unique([userId, providerId])
+  @@index([userId])
+  @@index([providerId])
+}
+
+// ==========================================================
+//  9b) PROPERTY LIKE = J'aime sur un logement
+// ==========================================================
+
+model PropertyLike {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@index([propertyId])
+}
+
+// ==========================================================
+//  9c) PRODUCT LIKE = J'aime sur un article marketplace
+// ==========================================================
+
+model ProductLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+// ==========================================================
+//  9d) PROPERTY VIEW = 1 vue unique par utilisateur / visiteur
+// ==========================================================
+
+model PropertyView {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId    Int?
+  agent      Agent?   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  viewerKey  String?  @db.VarChar(64)
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+  @@unique([agentId, propertyId])
+  @@unique([viewerKey, propertyId])
+  @@index([propertyId])
+}
+
+// ==========================================================
+//  9e) PRODUCT VIEW = 1 vue unique par utilisateur / visiteur
+// ==========================================================
+
+model ProductView {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  viewerKey  String?  @db.VarChar(64)
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@unique([viewerKey, productId])
+  @@index([productId])
+}
+
+// ==========================================================
+//  10) REVIEW = Avis / note 5 étoiles
+// ==========================================================
+
+model Review {
+  id         Int              @id @default(autoincrement())
+  authorId   Int
+  author     User             @relation("ReviewAuthorUser", fields: [authorId], references: [id], onDelete: Cascade)
+  targetType ReviewTargetType
+  rating     Int              // 1-5
+  comment    String?          @db.Text
+  createdAt  DateTime         @default(now())
+
+  // Relations polymorphes : une seule des 3 est remplie à la fois
+  propertyId  Int?
+  property    Property? @relation("PropertyReviews", fields: [propertyId], references: [id], onDelete: Cascade)
+  productId   Int?
+  product     Product?  @relation("ProductReviews", fields: [productId], references: [id], onDelete: Cascade)
+  providerId  Int?
+  provider    ServiceProvider? @relation("ProviderReviews", fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([targetType])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// ==========================================================
+//  11) CONVERSATION (liste de convs du chat)
+// ==========================================================
+
+model Conversation {
+  id            Int              @id @default(autoincrement())
+  type          ConversationType @default(DIRECT)
+  title         String?          @db.VarChar(255)
+  studentId     Int              // participant étudiant (A)
+  peerStudentId Int?             // participant étudiant (B) — marketplace / feed
+  agentId       Int?             // participant agent (pour conv étudiant↔agent)
+  allowReplies  Boolean          @default(true)
+  lastMessage   String?          @db.Text
+  lastMessageAt DateTime
+  unreadStudentCount Int         @default(0)
+  unreadAgentCount   Int         @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  messages ChatMessage[]
+  student  User   @relation("StudentConversations", fields: [studentId], references: [id], onDelete: Cascade)
+  peerStudent User? @relation("PeerStudentConversations", fields: [peerStudentId], references: [id], onDelete: Cascade)
+  agent    Agent? @relation("AgentConversations",   fields: [agentId],   references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([peerStudentId])
+  @@index([agentId])
+  @@index([lastMessageAt])
+  @@index([studentId, type])
+  @@unique([studentId, agentId]) // 1 conv max par paire étudiant-agent
+  @@unique([studentId, peerStudentId]) // 1 conv max par paire étudiant-étudiant
+}
+
+// ==========================================================
+//  12) CHAT MESSAGE = un message dans une conv
+//  Règles : UN SEUL des 2 champs studentSenderId / agentSenderId est renseigné
+//           (mutuellement exclusif, selon type envoyeur)
+// ==========================================================
+
+model ChatMessage {
+  id              Int              @id @default(autoincrement())
+  conversationId  Int
+  conversation    Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // Deux colonnes distinctes (meilleure approche Prisma pour polymorphisme simple user/agent)
+  studentSenderId Int?
+  studentSender   User?  @relation("StudentSenderMessages", fields: [studentSenderId], references: [id], onDelete: Cascade)
+
+  agentSenderId   Int?
+  agentSender     Agent? @relation("AgentSenderMessages",   fields: [agentSenderId],   references: [id], onDelete: Cascade)
+
+  content         String           @db.Text
+  mediaUrl        String?          @db.VarChar(500)
+  isSystem        Boolean          @default(false)
+  readAt          DateTime?
+  createdAt       DateTime         @default(now())
+
+  @@index([conversationId])
+  @@index([studentSenderId])
+  @@index([agentSenderId])
+  @@index([createdAt])
+}
+
+// ==========================================================
+//  13) REFRESH TOKEN (rotation pour JWT)
+// ==========================================================
+
+model RefreshToken {
+  id          Int       @id @default(autoincrement())
+  tokenHash   String    @unique @db.VarChar(255)
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  userId    Int?
+  user      User?   @relation("UserRefreshTokens",  fields: [userId],    references: [id], onDelete: Cascade)
+  agentId   Int?
+  agent     Agent?  @relation("AgentRefreshTokens", fields: [agentId],   references: [id], onDelete: Cascade)
+  partnerId Int?
+  partner   Partner? @relation("PartnerRefreshTokens", fields: [partnerId], references: [id], onDelete: Cascade)
+
+  userAgent  String? @db.VarChar(500)
+  ipAddress  String? @db.VarChar(50)
+
+  @@index([userId])
+  @@index([agentId])
+  @@index([partnerId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+// ==========================================================
+//  14) PASSWORD RESET CODE (stocké aussi TTL 10 min Redis)
+// ==========================================================
+
+model PasswordResetCode {
+  id        Int      @id @default(autoincrement())
+  email     String   @db.VarChar(255)
+  code      String   @db.VarChar(10)
+  expiresAt DateTime
+  usedAt    DateTime?
+  ipAddress String?  @db.VarChar(50)
+  userAgent String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+// ==========================================================
+//  15) DEVICE PUSH TOKEN (FCM / APNs via Capacitor)
+// ==========================================================
+
+model DevicePushToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique @db.VarChar(512)
+  platform  String   @db.VarChar(20) // android | ios | web
+  userId    Int?
+  agentId   Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent     Agent?   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([agentId])
+}
+
+// ==========================================================
+//  16) AGENT FOLLOW — suivre un agent pour recevoir ses alertes
+// ==========================================================
+
+model AgentFollow {
+  id              Int      @id @default(autoincrement())
+  agentId         Int      // agent suivi (celui qui publie)
+  followerAgentId Int?     // agent abonné
+  followerUserId  Int?     // étudiant abonné
+  createdAt       DateTime @default(now())
+
+  agent           Agent    @relation("AgentFollowed", fields: [agentId], references: [id], onDelete: Cascade)
+  followerAgent   Agent?   @relation("AgentFollower", fields: [followerAgentId], references: [id], onDelete: Cascade)
+  followerUser    User?    @relation("UserAgentFollows", fields: [followerUserId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, followerAgentId])
+  @@unique([agentId, followerUserId])
+  @@index([agentId])
+  @@index([followerAgentId])
+  @@index([followerUserId])
+}
+
+// ==========================================================
+//  17) PARTNER — STUD Partners (entreprises, assos, commerces)
+//  Gérés uniquement par un ADMIN ; offres réservées aux étudiants
+// ==========================================================
+
+model Partner {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(200)
+  category    String    @db.VarChar(100) // "Entreprise IT", "Association étudiante"…
+  offer       String    @db.VarChar(255) // accroche courte affichée sur la carte
+  description String?   @db.Text
+  discount    String?   @db.VarChar(30)  // badge : "-15%", "Gratuit"…
+  promoCode   String?   @db.VarChar(50)
+  logoUrl     String    @db.VarChar(500)
+  coverUrl    String?   @db.VarChar(500)
+  websiteUrl  String?   @db.VarChar(500)
+  phone       String?   @db.VarChar(20)
+  email       String?   @db.VarChar(255) // contact public
+  /// Compte connexion partenaire (email + mot de passe)
+  loginEmail  String?   @unique @db.VarChar(255)
+  passwordHash String?  @db.VarChar(255)
+  city        String?   @db.VarChar(100)
+  address     String?   @db.VarChar(500)
+  validUntil  DateTime?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  viewsCount  Int       @default(0)
+  likesCount  Int       @default(0)
+  clicksCount Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  refreshTokens RefreshToken[] @relation("PartnerRefreshTokens")
+  announcements PartnerAnnouncement[]
+
+  @@index([isActive, sortOrder])
+  @@index([category])
+}
+
+// Annonces publiées uniquement par le compte partenaire (pas étudiant / agent)
+model PartnerAnnouncement {
+  id          Int       @id @default(autoincrement())
+  partnerId   Int
+  partner     Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  title       String    @db.VarChar(200)
+  description String?   @db.Text
+  discount    String?   @db.VarChar(30)
+  promoCode   String?   @db.VarChar(50)
+  imageUrl    String?   @db.VarChar(500)
+  isActive    Boolean   @default(true)
+  validUntil  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([partnerId, isActive, createdAt])
+}
+
+// Signalement d'annonce (logement / produit / service)
+enum ReportTargetType {
+  PROPERTY
+  PRODUCT
+  PROVIDER
+}
+
+model ListingReport {
+  id         Int              @id @default(autoincrement())
+  authorId   Int
+  author     User             @relation("ListingReportAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetType ReportTargetType
+  targetId   Int
+  reason     String           @db.VarChar(100)
+  details    String?          @db.Text
+  createdAt  DateTime         @default(now())
+
+  @@unique([authorId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+

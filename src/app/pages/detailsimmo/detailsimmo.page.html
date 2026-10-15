@@ -18,49 +18,56 @@
       <app-skeleton width="70%" height="0.8rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
     </div>
 
-    <div class="rounded-2xl dark:bg-primary-800 shadow-lg p-4 mt-6 flex items-center gap-3">
-      <app-skeleton width="3.5rem" height="3.5rem" [circle]="true" logoSize="1.4rem"></app-skeleton>
-      <div class="flex-1 space-y-2">
-        <app-skeleton width="60%" height="0.8rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
-        <app-skeleton width="40%" height="0.7rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
-      </div>
-    </div>
-
   </div>
 
+</ion-content>
+
+<ion-content [fullscreen]="true" *ngIf="!loading && notFound">
+  <div class="container py-16 text-center">
+    <ion-icon name="home-outline" class="text-6xl text-primary-100 mb-4" style="display:block"></ion-icon>
+    <p class="text-slate-700 dark:text-slate-200 font-semibold">{{ 'DETAILS_IMMO.NOT_FOUND' | translate }}</p>
+    <button
+      type="button"
+      (click)="goBack()"
+      class="mt-5 bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl active:scale-95 transition">
+      {{ 'COMMON.BACK' | translate }}
+    </button>
+  </div>
 </ion-content>
 
 <ion-content [fullscreen]="true" *ngIf="property && !loading">
 
   <!-- Galerie photo -->
-  <div class="relative bg-primary-900">
+  <app-photo-gallery
+    [images]="property.images"
+    [title]="property.title"
+    galleryId="property-gallery">
 
-    <div id="property-gallery" class="splide">
-      <div class="splide__track">
-        <ul class="splide__list">
+    <div class="absolute top-0 left-0 right-0 flex items-center justify-between p-4 pointer-events-none" style="padding-top: env(safe-area-inset-top)">
 
-          <li class="splide__slide" *ngFor="let img of property.images">
-            <img [src]="img" [alt]="property.title" class="w-full h-full object-cover" />
-          </li>
-
-        </ul>
-      </div>
-    </div>
-
-    <!-- Barre haute flottante -->
-    <div class="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10" style="padding-top: env(safe-area-inset-top)">
-
-      <button routerLink="/tabs/tab2" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
+      <button type="button" (click)="goBack()" class="pointer-events-auto w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
         <ion-icon name="chevron-back" class="text-white text-lg"></ion-icon>
       </button>
 
-      <div class="flex gap-2">
+      <div class="flex gap-2 pointer-events-auto">
 
-        <button class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
-          <ion-icon name="share-social-outline" class="text-white text-lg"></ion-icon>
+        <button
+          *ngIf="!isOwner"
+          type="button"
+          (click)="toggleLike()"
+          class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
+          <ion-icon
+            [name]="isLiked ? 'thumbs-up' : 'thumbs-up-outline'"
+            class="text-lg"
+            [class]="isLiked ? 'text-primary-300' : 'text-white'">
+          </ion-icon>
         </button>
 
-        <button (click)="toggleFavorite()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
+        <button
+          *ngIf="!isOwner"
+          type="button"
+          (click)="toggleFavorite()"
+          class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
           <ion-icon
             [name]="isFavorite ? 'heart' : 'heart-outline'"
             class="text-lg"
@@ -68,33 +75,46 @@
           </ion-icon>
         </button>
 
+        <button
+          *ngIf="!isOwner"
+          type="button"
+          (click)="reportListing()"
+          [disabled]="reportBusy"
+          class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
+          <ion-icon name="flag-outline" class="text-white text-lg"></ion-icon>
+        </button>
+
+        <button
+          *ngIf="isOwner"
+          type="button"
+          (click)="editProperty()"
+          class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
+          <ion-icon name="create-outline" class="text-white text-lg"></ion-icon>
+        </button>
+
       </div>
 
     </div>
 
-    <!-- Compteur photos -->
-    <div class="absolute bottom-3 right-3 bg-black/55 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full z-10">
-      {{ activeSlide + 1 }}/{{ property.images.length }}
-    </div>
-
-    <!-- Badge catégorie -->
-    <div class="absolute bottom-3 left-3 bg-white/95 backdrop-blur text-primary-700 text-[11px] font-bold px-3 py-1 rounded-full z-10">
+    <div class="absolute bottom-3 left-3 bg-white/95 backdrop-blur text-primary-700 text-[11px] font-bold px-3 py-1 rounded-full pointer-events-none">
       {{ 'CATEGORIES.' + property.category | translate }}
     </div>
 
-  </div>
+  </app-photo-gallery>
 
-  <div class="container py-5">
+  <div class="container py-5 pb-28">
 
     <!-- Titre + prix -->
     <div class="flex items-start justify-between gap-3">
 
-      <div>
+      <div class="min-w-0">
         <h1 class="text-lg font-bold text-slate-800 dark:text-white leading-5">{{ property.title }}</h1>
 
         <p class="text-xs text-slate-500 dark:text-slate-300 mt-1.5 flex items-center gap-1">
-          <ion-icon name="location-outline" class="text-primary-600"></ion-icon>
-          {{ property.address }}, {{ property.city }}
+          <ion-icon name="location-outline" class="text-primary-600 flex-shrink-0"></ion-icon>
+          <span class="truncate">
+            <ng-container *ngIf="property.address">{{ property.address }}, </ng-container>{{ property.city }}
+          </span>
         </p>
       </div>
 
@@ -105,8 +125,24 @@
 
     </div>
 
-    <!-- Note -->
-    <div class="flex items-center gap-1.5 mt-3">
+    <!-- Vues + Likes -->
+    <div class="flex items-center gap-4 mt-3">
+      <span class="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-300">
+        <ion-icon name="eye-outline" class="text-primary-600 text-sm"></ion-icon>
+        {{ property.viewsCount || 0 }} {{ 'COMMON.VIEWS' | translate }}
+      </span>
+      <button
+        type="button"
+        (click)="toggleLike()"
+        class="inline-flex items-center gap-1 text-xs border-0 bg-transparent p-0 active:opacity-70"
+        [class]="isLiked ? 'text-primary-600 dark:text-primary-300 font-semibold' : 'text-slate-500 dark:text-slate-300'">
+        <ion-icon [name]="isLiked ? 'thumbs-up' : 'thumbs-up-outline'" class="text-sm"></ion-icon>
+        {{ property.likesCount || 0 }} {{ 'COMMON.LIKES' | translate }}
+      </button>
+    </div>
+
+    <!-- Note (seulement si avis réels) -->
+    <div class="flex items-center gap-1.5 mt-3" *ngIf="property.reviews > 0">
       <ion-icon name="star" class="text-amber-400"></ion-icon>
       <span class="text-sm font-bold text-slate-700 dark:text-white">{{ property.rating }}</span>
       <span class="text-xs text-slate-400">({{ property.reviews }} {{ 'COMMON.REVIEWS' | translate }})</span>
@@ -127,13 +163,26 @@
         <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.PIECES' | translate }}</p>
       </div>
 
-      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center">
-        <ion-icon name="layers-outline" class="text-primary-600 text-lg"></ion-icon>
-        <p class="text-xs font-bold text-slate-800 dark:text-white mt-1 leading-4">{{ property.floor }}</p>
-        <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.ETAGE' | translate }}</p>
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" *ngIf="property.bedrooms != null; else furnishedCard">
+        <ion-icon name="moon-outline" class="text-primary-600 text-lg"></ion-icon>
+        <p class="text-xs font-bold text-slate-800 dark:text-white mt-1">{{ property.bedrooms }}</p>
+        <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.BEDROOMS' | translate }}</p>
+      </div>
+      <ng-template #furnishedCard>
+        <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center">
+          <ion-icon name="checkmark-circle-outline" class="text-primary-600 text-lg"></ion-icon>
+          <p class="text-xs font-bold text-slate-800 dark:text-white mt-1">{{ (property.furnished ? 'DETAILS_IMMO.MEUBLE' : 'DETAILS_IMMO.NON_MEUBLE') | translate }}</p>
+          <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.AMEUBLEMENT' | translate }}</p>
+        </div>
+      </ng-template>
+
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" *ngIf="property.bathrooms != null">
+        <ion-icon name="water-outline" class="text-primary-600 text-lg"></ion-icon>
+        <p class="text-xs font-bold text-slate-800 dark:text-white mt-1">{{ property.bathrooms }}</p>
+        <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.BATHROOMS' | translate }}</p>
       </div>
 
-      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center">
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" *ngIf="property.bedrooms != null">
         <ion-icon name="checkmark-circle-outline" class="text-primary-600 text-lg"></ion-icon>
         <p class="text-xs font-bold text-slate-800 dark:text-white mt-1">{{ (property.furnished ? 'DETAILS_IMMO.MEUBLE' : 'DETAILS_IMMO.NON_MEUBLE') | translate }}</p>
         <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.AMEUBLEMENT' | translate }}</p>
@@ -151,16 +200,22 @@
         <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.TYPE' | translate }}</p>
       </div>
 
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" *ngIf="property.depositFee">
+        <ion-icon name="wallet-outline" class="text-primary-600 text-lg"></ion-icon>
+        <p class="text-xs font-bold text-slate-800 dark:text-white mt-1">{{ property.depositFee }} {{ 'COMMON.CURRENCY' | translate }}</p>
+        <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.DEPOSIT' | translate }}</p>
+      </div>
+
     </div>
 
     <!-- Description -->
-    <div class="mt-6">
+    <div class="mt-6" *ngIf="property.description">
       <h2 class="font-bold text-slate-800 dark:text-white text-sm">{{ 'DETAILS.DESCRIPTION' | translate }}</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-300 mt-2 leading-relaxed">{{ property.description }}</p>
+      <p class="text-sm text-slate-500 dark:text-slate-300 mt-2 leading-relaxed whitespace-pre-line">{{ property.description }}</p>
     </div>
 
     <!-- Équipements -->
-    <div class="mt-6">
+    <div class="mt-6" *ngIf="property.amenities.length">
 
       <h2 class="font-bold text-slate-800 dark:text-white text-sm">{{ 'DETAILS_IMMO.EQUIPEMENTS' | translate }}</h2>
 
@@ -180,51 +235,222 @@
 
       <h2 class="font-bold text-slate-800 dark:text-white text-sm">{{ 'DETAILS_IMMO.PUBLIE_PAR' | translate }}</h2>
 
-      <div class="rounded-2xl dark:bg-primary-800 shadow-lg p-4 mt-3">
+      <div class="rounded-2xl dark:bg-primary-800 shadow-lg p-4 mt-3" style="background: var(--stud-surface)">
 
         <div class="flex items-center gap-3">
 
-          <img [src]="property.publisher.image" [alt]="property.publisher.name" class="w-14 h-14 rounded-full object-cover" />
+          <img
+            [src]="property.publisher.image"
+            [alt]="property.publisher.name"
+            referrerpolicy="no-referrer"
+            class="w-14 h-14 rounded-full object-cover bg-slate-100" />
 
-          <div class="flex-1">
+          <div class="flex-1 min-w-0">
             <div class="flex items-center gap-1.5">
-              <h3 class="font-bold text-slate-800 dark:text-white text-sm">{{ property.publisher.name }}</h3>
-              <ion-icon *ngIf="property.publisher.verified" name="shield-checkmark" class="text-primary-600 text-sm"></ion-icon>
+              <h3 class="font-bold text-slate-800 dark:text-white text-sm truncate m-0">{{ property.publisher.name }}</h3>
+              <ion-icon *ngIf="property.publisher.verified" name="shield-checkmark" class="text-primary-600 text-sm flex-shrink-0"></ion-icon>
             </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">{{ 'DETAILS.MEMBRE_DEPUIS' | translate: { date: property.publisher.memberSince } }}</p>
-          </div>
-
-          <div class="text-right">
-            <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1 justify-end">
-              <ion-icon name="star" class="text-amber-400"></ion-icon>
-              {{ property.publisher.rating }}
-            </p>
-            <p class="text-[10px] text-slate-400 mt-1">{{ 'DETAILS.REPOND_EN' | translate: { time: property.publisher.responseTime } }}</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5 m-0">{{ 'DETAILS.MEMBRE_DEPUIS' | translate: { date: property.publisher.memberSince } }}</p>
           </div>
 
         </div>
 
-        <div class="flex items-center gap-2 mt-3.5 bg-primary-50 dark:bg-primary-700/40 rounded-xl px-3 py-2.5">
+        <div class="flex items-center gap-2 mt-3.5 bg-primary-50 dark:bg-primary-700/40 rounded-xl px-3 py-2.5" *ngIf="property.publisher.phone && !isOwner">
           <ion-icon name="call-outline" class="text-primary-600 text-base"></ion-icon>
-          <span class="text-sm font-semibold text-slate-700 dark:text-white">+216 {{ property.publisher.phone }}</span>
+          <span class="text-sm font-semibold text-slate-700 dark:text-white">{{ formatPhone(property.publisher.phone) }}</span>
         </div>
 
-        <div class="flex gap-2.5 mt-3.5">
+        <div class="mt-3.5 rounded-xl bg-primary-50 dark:bg-primary-700/40 px-3 py-2.5" *ngIf="isOwner">
+          <p class="text-xs font-semibold text-primary-700 dark:text-primary-200 m-0">
+            {{ 'DETAILS_IMMO.YOUR_LISTING' | translate }}
+          </p>
+        </div>
 
-          <button (click)="call()" class="flex-1 bg-primary-500 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
-            <ion-icon name="call" class="text-sm"></ion-icon>
-            {{ 'DETAILS.APPELER' | translate }}
+        <!-- Suivre + Voir le profil -->
+        <div class="flex gap-2.5 mt-3.5" *ngIf="publisherAgentId">
+          <button
+            *ngIf="!isOwner"
+            type="button"
+            (click)="toggleFollowAlerts()"
+            [disabled]="followBusy"
+            class="flex-1 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition disabled:opacity-60"
+            [ngClass]="followingAgent
+              ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+              : 'bg-primary-500 text-white'">
+            <ion-icon [name]="followingAgent ? 'checkmark-circle' : 'person-add-outline'" class="text-sm"></ion-icon>
+            {{ (followingAgent ? 'DETAILS_IMMO.FOLLOWING' : 'DETAILS_IMMO.FOLLOW') | translate }}
           </button>
 
-          <button (click)="converser()" class="flex-1 bg-primary-700 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <button
+            type="button"
+            (click)="openAgentProfile()"
+            class="flex-1 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition bg-primary-50 dark:bg-primary-700/40 text-primary-700 dark:text-primary-200"
+            [class.w-full]="isOwner">
+            <ion-icon name="person-outline" class="text-sm"></ion-icon>
+            {{ 'DETAILS_IMMO.VIEW_PROFILE' | translate }}
+          </button>
+        </div>
+
+        <div class="flex gap-2.5 mt-3.5" *ngIf="!isOwner">
+
+          <button type="button" (click)="call()" [disabled]="calling" class="flex-1 bg-primary-500 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition disabled:opacity-60">
+            <ion-icon name="call" class="text-sm"></ion-icon>
+            {{ 'DETAILS.CLICK_TO_CALL' | translate }}
+          </button>
+
+          <button type="button" (click)="converser()" class="flex-1 bg-primary-700 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
             <ion-icon name="chatbubbles-outline" class="text-sm"></ion-icon>
             {{ 'DETAILS.CONVERSER' | translate }}
           </button>
 
         </div>
 
+        <div class="flex gap-2.5 mt-3.5" *ngIf="isOwner">
+          <button type="button" (click)="editProperty()" class="flex-1 bg-primary-500 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
+            <ion-icon name="create-outline" class="text-sm"></ion-icon>
+            {{ 'COMMON.EDIT' | translate }}
+          </button>
+          <button type="button" routerLink="/agent-dashboard/gestion" class="flex-1 bg-primary-700 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition text-decoration-none">
+            <ion-icon name="business-outline" class="text-sm"></ion-icon>
+            {{ 'DETAILS_IMMO.MY_LISTINGS' | translate }}
+          </button>
+        </div>
+
       </div>
 
+    </div>
+
+    <!-- Carte maps -->
+    <div class="mt-7">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <h2 class="font-bold text-slate-800 dark:text-white text-sm m-0">{{ 'DETAILS_IMMO.LOCATION_MAP' | translate }}</h2>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="openNearbyListings()"
+            class="text-[11px] font-semibold text-primary-600 dark:text-primary-300">
+            {{ 'DETAILS_IMMO.NEARBY_LISTINGS' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="openExternalMap()"
+            class="text-[11px] font-semibold text-primary-600 dark:text-primary-300">
+            {{ 'DETAILS_IMMO.OPEN_MAPS' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <div class="immo-map-card rounded-2xl overflow-hidden shadow-lg dark:bg-primary-800">
+        <iframe
+          *ngIf="mapUrl"
+          class="immo-map-iframe"
+          [src]="mapUrl"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          [attr.title]="'DETAILS_IMMO.LOCATION_MAP' | translate">
+        </iframe>
+        <div *ngIf="!mapUrl" class="immo-map-iframe immo-map-iframe--placeholder flex items-center justify-center">
+          <ion-icon name="map-outline" class="text-4xl text-primary-300"></ion-icon>
+        </div>
+        <div class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-primary-800">
+          <button
+            type="button"
+            (click)="openExternalMap()"
+            class="flex-1 flex items-center gap-2 text-left min-w-0">
+            <ion-icon name="location" class="text-primary-600 text-base flex-shrink-0"></ion-icon>
+            <span class="text-xs font-semibold text-slate-700 dark:text-white truncate">{{ mapCityLabel || property.city || 'Tunisie' }}</span>
+            <ion-icon name="open-outline" class="text-slate-400 text-sm flex-shrink-0"></ion-icon>
+          </button>
+          <button
+            type="button"
+            (click)="openNearbyListings()"
+            class="flex-shrink-0 text-[10px] font-bold text-primary-600 dark:text-primary-300 px-2 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-700/40 whitespace-nowrap">
+            {{ 'DETAILS_IMMO.NEARBY_SHORT' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Autres annonces du vendeur / agent -->
+    <div class="mt-7" *ngIf="publisherListings.length">
+      <h2 class="font-bold text-slate-800 dark:text-white text-sm mb-3">
+        {{ 'DETAILS_IMMO.PUBLISHER_LISTINGS' | translate: { name: property.publisher.name } }}
+      </h2>
+
+      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+        <button
+          type="button"
+          *ngFor="let item of publisherListings"
+          (click)="openProperty(item.id)"
+          class="related-card flex-shrink-0 w-36 text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition"
+          style="background: var(--stud-surface)">
+          <div class="h-24 bg-primary-50 dark:bg-primary-900 overflow-hidden">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+          </div>
+          <div class="p-2">
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2 leading-4 min-h-[2rem]">{{ item.title }}</p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Annonces similaires (max 4) -->
+    <div class="mt-7" *ngIf="similarProperties.length">
+      <h2 class="font-bold text-slate-800 dark:text-white text-sm mb-3">
+        {{ 'DETAILS_IMMO.SIMILAR' | translate }}
+      </h2>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          *ngFor="let item of similarProperties"
+          (click)="openProperty(item.id)"
+          class="related-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+          </div>
+          <div class="p-2">
+            <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold mb-0.5 truncate">
+              {{ 'CATEGORIES.' + item.category | translate }}
+            </p>
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2 leading-4">{{ item.title }}</p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Avis -->
+    <div class="mt-7" *ngIf="property">
+      <h2 class="font-bold text-slate-800 dark:text-white text-sm mb-3">{{ 'REVIEWS_UI.TITLE' | translate }}</h2>
+      <div class="rounded-2xl p-4 mb-3 dark:bg-primary-800 shadow-lg" style="background: var(--stud-surface)">
+        <div class="flex items-center gap-1 mb-3">
+          <button type="button" *ngFor="let s of [1,2,3,4,5]" (click)="reviewRating = s" class="active:scale-90">
+            <ion-icon [name]="s <= reviewRating ? 'star' : 'star-outline'" class="text-xl"
+              [class.text-amber-400]="s <= reviewRating" [class.text-slate-300]="s > reviewRating"></ion-icon>
+          </button>
+        </div>
+        <textarea [(ngModel)]="reviewComment" rows="2" [placeholder]="'REVIEWS_UI.PLACEHOLDER' | translate"
+          class="w-full bg-slate-50 dark:bg-primary-900/50 border border-slate-200 dark:border-primary-700 rounded-xl px-3 py-2 text-sm outline-none text-slate-800 dark:text-white resize-none mb-3"></textarea>
+        <button type="button" (click)="submitReview()" [disabled]="reviewSending || !reviewComment.trim()"
+          class="w-full py-2.5 rounded-xl text-white text-xs font-bold bg-primary-600 disabled:opacity-50">
+          {{ 'REVIEWS_UI.SUBMIT' | translate }}
+        </button>
+      </div>
+      <div *ngIf="!reviewsList.length" class="text-xs text-slate-400 py-2">{{ 'REVIEWS_UI.EMPTY' | translate }}</div>
+      <div *ngFor="let r of reviewsList" class="rounded-2xl p-3 mb-2 dark:bg-primary-800" style="background: var(--stud-surface)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-bold text-slate-800 dark:text-white">{{ r.authorName }}</span>
+          <span class="text-[10px] text-amber-500 font-bold">{{ r.rating }}/5</span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-300 m-0">{{ r.comment }}</p>
+      </div>
     </div>
 
   </div>
@@ -235,13 +461,27 @@
   <div class="bg-white dark:bg-primary-900 shadow-[0_-6px_16px_-4px_rgba(14,51,54,0.15)] px-4 py-3 flex items-center gap-3" style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom))">
 
     <div class="flex-1">
-      <p class="text-[10px] text-slate-400">{{ 'DETAILS_IMMO.LOYER_MENSUEL' | translate }}</p>
-      <p class="text-primary-700 dark:text-primary-300 font-extrabold text-base">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}<span class="text-[10px] font-medium text-slate-400">{{ 'COMMON.PER_MONTH' | translate }}</span></p>
+      <p class="text-[10px] text-slate-400 m-0">{{ 'DETAILS_IMMO.LOYER_MENSUEL' | translate }}</p>
+      <p class="text-primary-700 dark:text-primary-300 font-extrabold text-base m-0">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}<span class="text-[10px] font-medium text-slate-400">{{ 'COMMON.PER_MONTH' | translate }}</span></p>
     </div>
 
-    <button (click)="call()" class="bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition">
+    <button
+      *ngIf="!isOwner"
+      type="button"
+      (click)="call()"
+      class="bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition disabled:opacity-60"
+      [disabled]="calling">
       <ion-icon name="call" class="text-base"></ion-icon>
-      {{ 'DETAILS.CONTACTER' | translate }}
+      {{ 'DETAILS.CLICK_TO_CALL' | translate }}
+    </button>
+
+    <button
+      *ngIf="isOwner"
+      type="button"
+      (click)="editProperty()"
+      class="bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition">
+      <ion-icon name="create-outline" class="text-base"></ion-icon>
+      {{ 'COMMON.EDIT' | translate }}
     </button>
 
   </div>

@@ -1,60 +1,227 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  background: #f7f8fb;
+}
 
-ion-tab-bar {
-  --background: var(--stud-surface);
-  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 -4px 6px -4px rgba(0, 0, 0, 0.1);
-  padding: 6px 10px;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom));
-  height: auto;
-  min-height: 62px;
+.tabs-wrap {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tabs-wrap ion-tabs {
+  height: 100%;
+  width: 100%;
+}
+
+/* Offcanvas menu étudiant */
+.student-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--stud-surface, #fff);
+}
+
+.student-menu__hero {
+  position: relative;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1.25rem 1.35rem;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);
+  color: #fff;
+}
+
+.student-menu__close {
+  position: absolute;
+  top: calc(0.65rem + env(safe-area-inset-top, 0px));
+  right: 0.75rem;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
+  font-size: 1.35rem;
 }
 
-/* Onglet actif */
-ion-tab-button.tab-selected {
-  background: #56C8D1;
-  border-radius: 10px;
-  padding: 0 10px;
-  max-width: 120px;
-  flex-direction: row;
-  gap: 6px;
-  transition: all 0.3s ease;
+.student-menu__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.75rem;
 }
 
-/* Icône active */
-ion-tab-button.tab-selected ion-icon {
-  color: white !important;
-  font-size: 18px;
+.student-menu__name {
   margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
-/* Texte actif */
-ion-tab-button.tab-selected ion-label {
-  display: block;
-  color: white !important;
+.student-menu__email {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  opacity: 0.88;
+}
+
+.student-menu__badge {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
   font-weight: 600;
-  font-size: 12px;
-  margin: 0;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
-/* Onglets inactifs : icône seule, sans libellé (comme la maquette) */
-ion-tab-button {
-  --background: transparent;
-  --color: #9CA9AB;
-  --color-selected: white;
-  flex: 0 0 auto;
+.student-menu__body {
+  flex: 1;
+  overflow: auto;
+  padding: 0.75rem 0.85rem 1.5rem;
+}
+
+.student-menu__section {
+  margin: 0.85rem 0.35rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.student-menu__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0.7rem;
+  margin-bottom: 0.35rem;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.student-menu__item:active {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.student-menu__item--static {
+  cursor: default;
+}
+
+.student-menu__item--static:active {
+  background: transparent;
+}
+
+.student-menu__item--danger {
+  color: #ef4444;
+  margin-top: 0.5rem;
+}
+
+.student-menu__icon {
+  position: relative;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
-.dark ion-tab-button {
-  --color: #6FA6AA;
+.student-menu__notif {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  border: 1.5px solid #fff;
+  pointer-events: none;
 }
 
-ion-tab-button ion-icon {
-  font-size: 22px;
+.student-menu__icon--danger {
+  background: #fef2f2;
+  color: #ef4444;
 }
 
-ion-tab-button ion-label {
-  display: none;
+.student-menu__chevron {
+  margin-left: auto;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+.student-menu__select {
+  margin-left: auto;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  outline: none;
+}
+
+:host-context(.dark) .student-menu__item,
+:host-context(html.dark) .student-menu__item {
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .student-menu__icon,
+:host-context(html.dark) .student-menu__icon {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+/* Tab bar : marges + icônes espacées */
+:host ::ng-deep ion-tab-bar {
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-bottom: env(safe-area-inset-bottom, 4px);
+}
+
+:host ::ng-deep ion-tab-button {
+  margin: 0 3px;
+  padding-inline: 4px;
+}
+
+:host ::ng-deep ion-tab-button ion-icon {
+  font-size: 20px;
+}
+
+:host ::ng-deep ion-tab-button ion-label {
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 2px;
 }

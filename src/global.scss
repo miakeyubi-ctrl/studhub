@@ -53,17 +53,520 @@
 
 ion-content {
   --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
 }
 
 html,
 body {
   background: var(--ion-background-color);
+  color: var(--ion-text-color);
 }
 
-/* Les headers ne doivent jamais empiéter sur la zone système
-   (heure, batterie, encoche) : on réserve la zone sécurisée en haut. */
+/* Mode clair : force le contraste même si Android est en dark system */
+html:not(.dark),
+html:not(.dark) body {
+  color-scheme: light !important;
+  --ion-background-color: #F9FAFB;
+  --ion-background-color-rgb: 249, 250, 251;
+  --ion-text-color: #0E3336;
+  --ion-text-color-rgb: 14, 51, 54;
+  --ion-toolbar-background: #F9FAFB;
+  --ion-toolbar-color: #0E3336;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-tab-bar-background: #ffffff;
+  --ion-tab-bar-color: #64748b;
+  --ion-tab-bar-color-selected: #2E9DA6;
+  --stud-surface: #ffffff;
+  --stud-field-text: #0E3336;
+  --stud-field-placeholder: #94a3b8;
+  background: #F9FAFB;
+  color: #0E3336;
+}
+
+html:not(.dark) {
+  ion-toolbar {
+    --color: #0E3336;
+    --background: #F9FAFB;
+    --border-color: #EFFBFC;
+    color: #0E3336;
+  }
+
+  ion-title,
+  ion-title.title-default,
+  .toolbar-title {
+    color: #0E3336 !important;
+  }
+
+  ion-back-button,
+  ion-buttons ion-button:not(.button-solid):not(.button-outline),
+  ion-menu-button {
+    --color: #0E3336;
+    color: #0E3336;
+  }
+
+  ion-content {
+    --background: #F9FAFB;
+    --color: #0E3336;
+  }
+
+  ion-item {
+    --color: #0E3336;
+    --background: #ffffff;
+  }
+
+  ion-card {
+    --color: #0E3336;
+  }
+
+  ion-tab-bar {
+    --background: #ffffff;
+    --color: #64748b;
+    --color-selected: #2E9DA6;
+  }
+
+  ion-tab-button {
+    --color: #64748b;
+    --color-selected: #2E9DA6;
+    color: #64748b;
+  }
+
+  ion-tab-button.tab-selected,
+  ion-tab-button[aria-selected='true'] {
+    --color-selected: #2E9DA6;
+    color: #2E9DA6;
+  }
+
+  ion-tab-button ion-icon,
+  ion-tab-button ion-label {
+    color: inherit;
+  }
+}
+
+/* Contre les styles Ionic @media (prefers-color-scheme: dark) quand l'app est en mode clair */
+@media (prefers-color-scheme: dark) {
+  html:not(.dark) {
+    color-scheme: light !important;
+    --ion-background-color: #F9FAFB;
+    --ion-text-color: #0E3336;
+    --ion-toolbar-background: #F9FAFB;
+    --ion-toolbar-color: #0E3336;
+    --ion-item-background: #ffffff;
+    --ion-card-background: #ffffff;
+    --ion-tab-bar-background: #ffffff;
+    --ion-tab-bar-color: #64748b;
+    --ion-tab-bar-color-selected: #2E9DA6;
+  }
+}
+
+/*
+ * Texte des champs natifs : toujours lié au thème (évite texte sombre
+ * illisible sur --stud-surface sombre, et blanc sur fond clair).
+ */
+input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']),
+textarea,
+select {
+  color: var(--stud-field-text) !important;
+  -webkit-text-fill-color: var(--stud-field-text) !important;
+  caret-color: var(--ion-color-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--stud-field-placeholder) !important;
+  -webkit-text-fill-color: var(--stud-field-placeholder) !important;
+  opacity: 1;
+}
+
+select option {
+  background-color: var(--stud-surface);
+  color: var(--stud-field-text);
+}
+
+html.dark {
+  color-scheme: dark;
+  --stud-field-text: #EAF6F7;
+  --stud-field-placeholder: rgba(234, 246, 247, 0.55);
+
+  ion-toolbar {
+    --color: #EAF6F7;
+    color: #EAF6F7;
+  }
+
+  ion-title {
+    color: #EAF6F7 !important;
+  }
+
+  ion-content {
+    --color: #EAF6F7;
+  }
+
+  /*
+   * color-scheme: dark force le navigateur à peindre le texte des <input>
+   * en blanc. Sur fond clair (bg-white) ça devient illisible.
+   * On force un contraste correct partout.
+   */
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']),
+  textarea,
+  select {
+    color: #EAF6F7 !important;
+    caret-color: #56C8D1;
+    -webkit-text-fill-color: #EAF6F7 !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(234, 246, 247, 0.55) !important;
+    -webkit-text-fill-color: rgba(234, 246, 247, 0.55) !important;
+    opacity: 1;
+  }
+
+  select option {
+    background-color: #123F42;
+    color: #EAF6F7;
+  }
+
+  /* Autofill Chrome/Android : évite texte transparent / fond jaune */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: #EAF6F7 !important;
+    caret-color: #56C8D1;
+    transition: background-color 99999s ease-out;
+    box-shadow: 0 0 0 1000px #123F42 inset !important;
+  }
+
+  /* Champs restés sur fond blanc / clair */
+  .bg-white input,
+  .bg-white textarea,
+  .bg-white select,
+  input.bg-white,
+  textarea.bg-white,
+  select.bg-white,
+  .bg-gray-50 input,
+  .bg-gray-50 textarea,
+  input.bg-gray-50,
+  textarea.bg-gray-50,
+  .bg-slate-50 input,
+  .bg-slate-50 textarea,
+  .bg-slate-50 select {
+    color: #0E3336 !important;
+    -webkit-text-fill-color: #0E3336 !important;
+    caret-color: #2E9DA6;
+  }
+
+  .bg-white input::placeholder,
+  .bg-white textarea::placeholder,
+  input.bg-white::placeholder,
+  textarea.bg-white::placeholder,
+  .bg-gray-50 input::placeholder,
+  input.bg-gray-50::placeholder,
+  .bg-slate-50 input::placeholder,
+  .bg-slate-50 textarea::placeholder {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-searchbar {
+    --color: #EAF6F7;
+    --placeholder-color: rgba(234, 246, 247, 0.55);
+    color: #EAF6F7;
+  }
+
+  ion-input input,
+  ion-textarea textarea,
+  ion-searchbar input {
+    color: #EAF6F7 !important;
+    -webkit-text-fill-color: #EAF6F7 !important;
+  }
+}
+
+/* Mode clair : texte des champs toujours sombre (même si le système est dark) */
+html:not(.dark) {
+  --stud-field-text: #0E3336;
+  --stud-field-placeholder: #94a3b8;
+
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']),
+  textarea,
+  select {
+    color: #0E3336 !important;
+    -webkit-text-fill-color: #0E3336 !important;
+    caret-color: #2E9DA6;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+
+  select option {
+    background-color: #ffffff;
+    color: #0E3336;
+  }
+}
+
+/* Barre d'onglets : 6 icônes aérées + marges latérales */
+ion-tab-bar {
+  padding-inline: 10px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(58px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--stud-border, #eef2f7);
+  box-shadow: 0 -4px 16px rgba(14, 51, 54, 0.06);
+}
+
+ion-tab-button {
+  --padding-start: 2px;
+  --padding-end: 2px;
+  margin-inline: 2px;
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+ion-tab-button ion-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+ion-tab-button ion-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 ion-header {
-  padding-top: env(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ion-tabs remplit .tabs-wrap */
+app-tabs {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+app-tabs > .tabs-wrap {
+  position: relative !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Pages d’onglets : hauteur contrainte pour que ion-content scrolle */
+app-tabs > .tabs-wrap ion-tabs {
+  position: relative !important;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+app-tabs > .tabs-wrap ion-router-outlet,
+app-tabs > .tabs-wrap .ion-page {
+  position: absolute !important;
+  inset: 0 !important;
+  contain: layout size style;
+}
+
+/* Offcanvas menu agent (depuis la gauche) */
+ion-modal.agent-menu-modal,
+ion-modal.student-menu-modal {
+  --width: min(88vw, 340px);
+  --height: 100%;
+  --border-radius: 0 20px 20px 0;
+  --box-shadow: 8px 0 28px rgba(15, 23, 42, 0.18);
+  --backdrop-opacity: 0.35;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+ion-modal.agent-menu-modal::part(content),
+ion-modal.student-menu-modal::part(content) {
+  margin: 0;
+  border-radius: 0 20px 20px 0;
+}
+
+/* Offcanvas publication — ion-modal (porté sur body) + scroll sur le panneau */
+ion-modal.student-compose-modal {
+  --width: min(94vw, 420px);
+  --height: 100%;
+  --max-height: 100%;
+  --border-radius: 20px 0 0 20px;
+  --box-shadow: -8px 0 28px rgba(15, 23, 42, 0.18);
+  --backdrop-opacity: 0.35;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+/* Le scroll doit être ICI (pas dans un enfant flex).
+   Sinon le contenu est clipé sans overflow utilisable. */
+ion-modal.student-compose-modal::part(content) {
+  margin: 0;
+  border-radius: 20px 0 0 20px;
+  height: 100% !important;
+  max-height: 100dvh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: block;
+  background: var(--stud-surface, #fff);
+}
+
+/* Empêche les wrappers Angular/Ionic de recasser le scroll */
+ion-modal.student-compose-modal .ion-delegate-host,
+ion-modal.student-compose-modal .ion-page {
+  display: block !important;
+  position: relative !important;
+  height: auto !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.compose-sheet {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+  background: var(--stud-surface, #fff);
+  overflow: visible;
+}
+
+.compose-sheet__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: calc(0.85rem + env(safe-area-inset-top, 0px)) 1rem 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  background: var(--stud-surface, #fff);
+}
+
+.compose-sheet__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+html.dark .compose-sheet__title {
+  color: #fff;
+}
+
+.compose-sheet__close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+html.dark .compose-sheet__close {
+  background: rgba(30, 58, 138, 0.55);
+  color: #fff;
+}
+
+.compose-sheet__body {
+  padding: 1rem 1rem calc(2.5rem + env(safe-area-inset-bottom, 0px));
+  overflow: visible;
+  height: auto;
+  min-height: 0;
+}
+
+/* Overlay custom (fallback hors ion-modal) */
+.compose-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+/* Prévisualisation image plein écran */
+ion-modal.image-preview-modal {
+  --width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+  --backdrop-opacity: 0.6;
+}
+
+ion-modal.image-preview-modal::part(content) {
+  border-radius: 0;
+}
+.agent-menu-trigger,
+.student-menu-trigger {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #fff;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.28);
+  flex-shrink: 0;
+}
+
+.agent-menu-trigger:active,
+.student-menu-trigger:active {
+  transform: scale(0.94);
+}
+
+.student-menu-trigger {
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.28);
+}
+
+.agent-back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.agent-back-btn:active {
+  transform: scale(0.94);
+  background: rgba(15, 23, 42, 0.1);
+}
+
+html.dark .agent-back-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
 }
 
 /* Masque la barre de scroll dans toute l'application */

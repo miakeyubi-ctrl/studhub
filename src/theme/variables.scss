@@ -10,6 +10,7 @@
   --ion-color-primary-tint: #67ced6;
 
   /* Mode clair */
+  color-scheme: light;
   --ion-background-color: #F9FAFB;
   --ion-background-color-rgb: 249, 250, 251;
 
@@ -17,11 +18,17 @@
   --ion-text-color-rgb: 14, 51, 54;
 
   --ion-toolbar-background: #F9FAFB;
+  --ion-toolbar-color: #0E3336;
   --ion-item-background: #ffffff;
   --ion-card-background: #ffffff;
+  --ion-tab-bar-background: #ffffff;
+  --ion-tab-bar-color: #64748b;
+  --ion-tab-bar-color-selected: #2E9DA6;
 
   --stud-surface: #ffffff;
   --stud-border: #EFFBFC;
+  --stud-field-text: #0E3336;
+  --stud-field-placeholder: #94a3b8;
 }
 
 /* Mode sombre : dérivé de la même teinte teal (#56C8D1) pour rester
@@ -29,6 +36,7 @@
    Piloté par la classe .dark (voir ThemeService) plutôt que par les
    préférences système, pour permettre l'interrupteur manuel. */
 :root.dark {
+  color-scheme: dark;
   --ion-background-color: #0E3336;
   --ion-background-color-rgb: 14, 51, 54;
 
@@ -36,12 +44,18 @@
   --ion-text-color-rgb: 234, 246, 247;
 
   --ion-toolbar-background: #123F42;
+  --ion-toolbar-color: #EAF6F7;
   --ion-item-background: #123F42;
   --ion-card-background: #123F42;
+  --ion-tab-bar-background: #123F42;
+  --ion-tab-bar-color: #94a3b8;
+  --ion-tab-bar-color-selected: #56C8D1;
 
   --ion-color-primary-contrast: #0E3336;
   --ion-color-primary-contrast-rgb: 14, 51, 54;
 
   --stud-surface: #123F42;
   --stud-border: #1F5B60;
+  --stud-field-text: #EAF6F7;
+  --stud-field-placeholder: rgba(234, 246, 247, 0.55);
 }

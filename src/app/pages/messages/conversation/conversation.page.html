@@ -2,13 +2,17 @@
   <ion-toolbar>
 
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/messages" text=""></ion-back-button>
+      <button type="button" (click)="goBack()" class="agent-back-btn" [attr.aria-label]="'COMMON.BACK' | translate">
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
     </ion-buttons>
 
     <div class="flex items-center gap-2.5 py-1" *ngIf="conversation">
 
       <div class="relative flex-shrink-0">
-        <img [src]="conversation.avatar" [alt]="conversation.name" class="w-9 h-9 rounded-full object-cover" />
+        <img *ngIf="hasPhoto" [src]="conversation.avatar" [alt]="conversation.name" class="w-9 h-9 rounded-full object-cover" />
+        <div *ngIf="!hasPhoto" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-extrabold"
+             [style.background]="avatarColor">{{ initials }}</div>
         <span
           *ngIf="conversation.online"
           class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-primary-900 rounded-full">
@@ -17,66 +21,239 @@
 
       <div class="min-w-0">
         <h2 class="text-sm font-bold text-slate-800 dark:text-white leading-tight truncate">{{ conversation.name }}</h2>
-        <p class="text-[10px] text-slate-400 leading-tight truncate">
-          {{ conversation.online ? ('MESSAGES_PAGE.ONLINE' | translate) : conversation.role }}
+        <p
+          class="text-[10px] leading-tight truncate"
+          [ngClass]="peerTyping || conversation.online ? 'text-primary-600 dark:text-primary-300 font-semibold' : 'text-slate-400'">
+          <ng-container *ngIf="statusLabel; else roleOnly">{{ statusLabel | translate }}</ng-container>
+          <ng-template #roleOnly>{{ conversation.role }}</ng-template>
         </p>
       </div>
 
     </div>
+
+    <ion-buttons slot="end" *ngIf="conversation && !conversation.isSystem">
+      <button
+        type="button"
+        class="call-header-btn"
+        [class.offline]="!conversation.online"
+        (click)="startCall()"
+        [attr.aria-label]="'COMMON.CALL' | translate"
+        [attr.title]="(conversation.online ? 'COMMON.CALL' : 'CALL.PEER_OFFLINE') | translate">
+        <ion-icon name="call"></ion-icon>
+      </button>
+    </ion-buttons>
 
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
 
-  <div class="container py-4 space-y-3" *ngIf="conversation">
+  <div class="chat-thread" *ngIf="conversation">
 
-    <div
-      *ngFor="let message of conversation.messages"
-      class="flex"
-      [ngClass]="message.fromMe ? 'justify-end' : 'justify-start'">
+    <ng-container *ngFor="let message of conversation.messages; trackBy: trackByMessageId">
 
-      <div
-        class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm shadow-sm"
-        [ngClass]="message.fromMe
-          ? 'bg-primary-600 text-white rounded-br-md'
-          : 'bg-slate-100 dark:bg-primary-800 text-slate-800 dark:text-white rounded-bl-md'">
-
-        <p class="leading-relaxed">{{ message.text }}</p>
-
-        <p
-          class="text-[9px] mt-1 text-right"
-          [ngClass]="message.fromMe ? 'text-white/70' : 'text-slate-400 dark:text-slate-400'">
-          {{ message.time }}
-        </p>
-
+      <div class="chat-row chat-row--center" *ngIf="message.kind === 'call'">
+        <div
+          class="call-history-chip"
+          [class.outgoing]="message.callDirection === 'out'"
+          [class.incoming]="message.callDirection === 'in'"
+          [class.missed]="message.callStatus === 'missed' || message.callStatus === 'rejected'">
+          <ion-icon
+            [name]="message.callDirection === 'out' ? 'arrow-up-outline' : 'arrow-down-outline'"
+            class="call-history-arrow">
+          </ion-icon>
+          <span>{{ message.text }}</span>
+          <span class="call-history-time">{{ message.time }}</span>
+        </div>
       </div>
 
+      <div
+        class="chat-row"
+        *ngIf="message.kind !== 'call'"
+        [class.chat-row--out]="message.fromMe"
+        [class.chat-row--in]="!message.fromMe">
+
+        <div
+          class="chat-bubble"
+          [class.chat-bubble--out]="message.fromMe"
+          [class.chat-bubble--in]="!message.fromMe">
+
+          <img
+            *ngIf="message.kind === 'image' && message.mediaUrl"
+            [src]="message.mediaUrl"
+            alt=""
+            class="chat-media-image mb-1.5" />
+
+          <app-voice-note-player
+            *ngIf="message.kind === 'audio' && message.mediaUrl"
+            [src]="message.mediaUrl"
+            [fromMe]="message.fromMe">
+          </app-voice-note-player>
+
+          <a
+            *ngIf="message.kind === 'file' && message.mediaUrl"
+            [href]="message.mediaUrl"
+            target="_blank"
+            rel="noopener"
+            class="chat-file-link"
+            [class.from-me]="message.fromMe">
+            <ion-icon name="document-attach-outline"></ion-icon>
+            <span>{{ message.fileName || message.text || ('CONVERSATION_PAGE.FILE' | translate) }}</span>
+          </a>
+
+          <p *ngIf="message.kind === 'text' || (message.text && message.kind === 'image')" class="chat-bubble__text">
+            {{ message.text }}
+          </p>
+
+          <p class="chat-bubble__meta" [class.chat-bubble__meta--out]="message.fromMe">
+            <span>{{ message.time }}</span>
+            <span
+              *ngIf="message.fromMe"
+              class="msg-ticks"
+              [class.msg-ticks--read]="message.status === 'read' || message.readAt"
+              [attr.title]="(message.status === 'read' || message.readAt ? 'CONVERSATION_PAGE.READ' : 'CONVERSATION_PAGE.SENT') | translate">
+              <ion-icon
+                [name]="message.status === 'read' || message.readAt ? 'checkmark-done' : 'checkmark'"
+                class="text-[12px]">
+              </ion-icon>
+            </span>
+          </p>
+
+        </div>
+      </div>
+
+    </ng-container>
+
+    <div class="chat-row chat-row--in" *ngIf="peerTyping">
+      <div class="chat-bubble chat-bubble--in chat-bubble--typing">
+        {{ 'MESSAGES_PAGE.TYPING' | translate }}
+      </div>
     </div>
 
   </div>
 
 </ion-content>
 
-<ion-footer class="ion-no-border">
+<ion-footer class="ion-no-border" *ngIf="conversation?.allowReplies !== false && !conversation?.isSystem">
   <div
-    class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-primary-900 border-t border-slate-100 dark:border-primary-800"
+    *ngIf="recording"
+    class="recording-bar px-3 pt-2 bg-white dark:bg-primary-900 border-t border-slate-100 dark:border-primary-800">
+    <div class="flex items-center gap-3">
+      <span class="rec-dot"></span>
+      <span class="text-sm font-semibold text-red-500">{{ 'CONVERSATION_PAGE.RECORDING' | translate }} · {{ recordLabel }}</span>
+      <button type="button" class="ml-auto text-xs font-semibold text-slate-500" (click)="cancelRecording()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+      <button
+        type="button"
+        (click)="toggleRecording()"
+        class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white">
+        <ion-icon name="send" class="text-base"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="!recording"
+    class="flex items-center gap-1.5 px-2.5 py-2.5 bg-white dark:bg-primary-900 border-t border-slate-100 dark:border-primary-800"
     style="padding-bottom: calc(10px + env(safe-area-inset-bottom))">
+
+    <input
+      #fileInput
+      type="file"
+      class="hidden"
+      accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+      (change)="onFileSelected($event)" />
+
+    <button
+      type="button"
+      class="composer-icon-btn"
+      [disabled]="uploading"
+      (click)="fileInput.click()"
+      [attr.aria-label]="'CONVERSATION_PAGE.ATTACH' | translate">
+      <ion-icon name="attach-outline"></ion-icon>
+    </button>
 
     <input
       type="text"
       name="draft"
       [(ngModel)]="draft"
+      (ngModelChange)="onDraftInput()"
       (keyup.enter)="send()"
+      [disabled]="uploading"
       [placeholder]="'CONVERSATION_PAGE.INPUT_PLACEHOLDER' | translate"
       class="flex-1 bg-slate-100 dark:bg-primary-800 rounded-full px-4 py-2.5 text-sm outline-none text-slate-800 dark:text-white placeholder-slate-400" />
 
     <button
+      *ngIf="!draft.trim()"
+      type="button"
+      class="composer-icon-btn mic"
+      [disabled]="uploading"
+      (click)="toggleRecording()"
+      [attr.aria-label]="'CONVERSATION_PAGE.VOICE' | translate">
+      <ion-icon name="mic-outline"></ion-icon>
+    </button>
+
+    <button
+      *ngIf="draft.trim()"
+      type="button"
       (click)="send()"
-      [disabled]="!draft.trim()"
+      [disabled]="uploading"
       class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white disabled:opacity-40 active:scale-95 transition flex-shrink-0">
       <ion-icon name="send" class="text-base"></ion-icon>
     </button>
 
+    <div *ngIf="uploading" class="composer-icon-btn uploading">
+      <ion-icon name="reload-outline" class="animate-spin"></ion-icon>
+    </div>
+
   </div>
 </ion-footer>
+
+<ion-footer class="ion-no-border" *ngIf="conversation?.isSystem || conversation?.allowReplies === false">
+  <div
+    class="px-4 py-3 text-center text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-primary-900 border-t border-slate-100 dark:border-primary-800"
+    style="padding-bottom: calc(12px + env(safe-area-inset-bottom))">
+    {{ 'CONVERSATION_PAGE.SYSTEM_NO_REPLY' | translate }}
+  </div>
+</ion-footer>
+
+<!-- Prévisualisation image avant envoi -->
+<ion-modal
+  class="image-preview-modal"
+  [isOpen]="showImagePreview"
+  [backdropDismiss]="true"
+  (didDismiss)="closeImagePreview()">
+  <ng-template>
+    <div class="img-preview">
+      <div class="img-preview__top">
+        <button type="button" class="img-preview__close" (click)="closeImagePreview()" [attr.aria-label]="'COMMON.CLOSE' | translate">
+          <ion-icon name="close"></ion-icon>
+        </button>
+        <span class="img-preview__title">{{ 'CONVERSATION_PAGE.PREVIEW_TITLE' | translate }}</span>
+      </div>
+
+      <div class="img-preview__stage">
+        <img *ngIf="previewDataUrl" [src]="previewDataUrl" alt="" />
+      </div>
+
+      <div class="img-preview__bottom">
+        <input
+          type="text"
+          name="previewCaption"
+          [(ngModel)]="previewCaption"
+          [placeholder]="'CONVERSATION_PAGE.PREVIEW_CAPTION' | translate"
+          (keyup.enter)="confirmSendImage()"
+          class="img-preview__caption" />
+        <button
+          type="button"
+          class="img-preview__send"
+          [disabled]="uploading"
+          (click)="confirmSendImage()"
+          [attr.aria-label]="'CONVERSATION_PAGE.PREVIEW_SEND' | translate">
+          <ion-icon name="send"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

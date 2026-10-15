@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { DetailsproduitPage } from './detailsproduit.page';
 import { SkeletonModule } from '../../shared/skeleton/skeleton.module';
 
+import { PhotoGalleryModule } from '../../shared/photo-gallery/photo-gallery.module';
 import { DetailsproduitPageRoutingModule } from './detailsproduit-routing.module';
 
 @NgModule({
@@ -15,6 +16,7 @@ import { DetailsproduitPageRoutingModule } from './detailsproduit-routing.module
     CommonModule,
     FormsModule,
     SkeletonModule,
+    PhotoGalleryModule,
     DetailsproduitPageRoutingModule
   ],
   declarations: [DetailsproduitPage]

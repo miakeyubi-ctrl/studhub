@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>StudHub — Brief développeur Backend</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  color: #1f2328; background: #ffffff; margin: 0 auto; padding: 48px 56px; max-width: 960px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 { color: #1f2328; margin: 1.8em 0 0.7em; line-height: 1.3; border: 0; }
+h1 { font-size: 2.1em; margin-top: 0.2em; padding-bottom: 0.4em; border-bottom: 1px solid #d0d7de; }
+h2 { font-size: 1.55em; padding-bottom: 0.3em; border-bottom: 1px solid #eaeef2; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.05em; }
+p { margin: 0.9em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: #1f2328; }
+em { color: #444; }
+blockquote {
+  margin: 1.1em 0; padding: 0.6em 1em; border-left: 4px solid #0969da;
+  background: #f6f8fa; color: #424a53;
+}
+code.inline {
+  padding: 0.15em 0.4em; margin: 0 2px; border-radius: 6px;
+  background: #f6f8fa; color: #cf222e; font-size: 85%;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, "Liberation Mono", monospace;
+}
+pre.code-block {
+  background: #0d1117; color: #e6edf3; padding: 16px 18px; border-radius: 10px;
+  overflow-x: auto; font-size: 88%; line-height: 1.55;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, "Liberation Mono", monospace;
+}
+pre.code-block code { background: transparent; color: inherit; padding: 0; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2em 0; }
+ul, ol { margin: 0.8em 0; padding-left: 1.6em; }
+ul ul, ol ul, ul ol, ol ol { margin: 0.3em 0; }
+li { margin: 0.3em 0; }
+table {
+  border-collapse: collapse; width: 100%; margin: 1.2em 0;
+  font-size: 95%;
+}
+th, td { border: 1px solid #d0d7de; padding: 10px 14px; text-align: left; }
+thead th { background: #f6f8fa; font-weight: 600; }
+tbody tr:nth-child(even) { background: #fcfcfd; }
+@media print {
+  body { padding: 0 18px; max-width: 100%; font-size: 11pt; color: #000; }
+  a { color: #000; text-decoration: none; }
+  pre.code-block { background: #f6f8fa !important; color: #1f2328 !important; }
+  h1, h2 { break-after: avoid; }
+  pre, table, blockquote { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<h1 id="studhub-brief-dveloppeur-backend">StudHub — Brief développeur Backend</h1>
+
+<blockquote><strong>Durée de mission : 2 SEMAINES (10 jours ouvrés)</strong>  <br><strong>Stack backend imposé : NestJS + Prisma + PostgreSQL + Redis</strong>  <br><strong>Déploiement cible : VPS Linux (Debian 12) via Docker</strong></blockquote>
+<hr>
+<h2 id="1-prsentation-du-projet">🎯 1. Présentation du projet</h2>
+
+<p><strong>StudHub</strong> est une <strong>application mobile tout-en-un pour la communauté étudiante tunisienne</strong>. C'est un hub qui réunit :</p>
+
+<table><thead><tr><th>Domaine</th><th>Description</th></tr></thead><tbody><tr><td>🏘️ <strong>Immobilier étudiant</strong></td><td>Recherche de studios / colocations / résidences / chambres meublées près des facultés + <strong>espace agent immobilier dédié</strong></td></tr><tr><td>🛒 <strong>Marketplace</strong></td><td>Petites annonces entre étudiants (électronique, meubles, livres, vêtements, vélos…)</td></tr><tr><td>💼 <strong>StudServices</strong></td><td>Annuaire de prestataires ciblés étudiants (développeurs, graphistes, réparateurs, profs particuliers…) avec <strong>3 tiers d'abonnement : Gratuit / Standard / Premium</strong></td></tr><tr><td>📰 <strong>Feed social</strong></td><td>Réseau étudiant : publications, événements, clubs, groupes de révision, hackathons, like + commentaires</td></tr><tr><td>💬 <strong>Messagerie instantanée</strong></td><td>Chat en temps réel entre étudiants &amp; agents / vendeurs / prestataires</td></tr><tr><td>🔐 <strong>2 systèmes d'authentification séparés</strong> : Étudiant (<code class="inline">studhub-session</code>) + Agent Immobilier (<code class="inline">studhub-agent-session</code>)</td></tr></tbody></table>
+<h3 id="deux-portails">Deux portails</h3>
+<ul><li><strong>Portail Étudiant</strong> : 6 onglets (Accueil → Feed → Immo → Marketplace → Services → Profil). Accès racine <code class="inline">/tabs/...</code></li><li><strong>Portail Agent Immobilier</strong> : 4 onglets (Dashboard → Gestion biens → Messages → Profil). Accès <code class="inline">/agent-dashboard/...</code></li></ul><hr>
+<h2 id="2-tat-actuel-du-code-frontend">📦 2. État actuel du code (frontend)</h2>
+
+<h3 id="ce-qui-existe-dj-100-fonctionnel-en-mock">Ce qui existe déjà — 100% fonctionnel en mock</h3>
+<ul><li>✅ App <strong>Ionic 8 / Angular 20 / Capacitor 8</strong> (compile en APK Android natif)</li><li>✅ <strong>Toutes les pages et écrans</strong> sont codés et stylés (Tailwind + SCSS)</li><li>✅ <strong>4 langues</strong> : Français / Anglais / Arabe / Arabe tunisien (Derja) — <code class="inline">src/assets/i18n/</code></li><li>✅ Thème clair / sombre + switch de langue</li><li>✅ Onboarding Splide + Guard (vue 1 seule fois)</li><li>✅ Flow auth complet étudiant &amp; agent (register → login → forgot-password → verify-code → reset-password)</li><li>✅ Tout le typage TypeScript est <strong>déjà écrit</strong> : interfaces <code class="inline">Property</code>, <code class="inline">Product</code>, <code class="inline">ServiceProvider</code>, <code class="inline">StudUser</code>, <code class="inline">RealEstateAgent</code>, <code class="inline">ChatMessage</code>, <code class="inline">Conversation</code>, <code class="inline">Publisher</code>, <code class="inline">FeedPost</code></li></ul>
+<h3 id="fichiers-typescript-utiliser-partager-avec-le-backend">Fichiers TypeScript à UTILISER / PARTAGER avec le backend</h3>
+Ces fichiers contiennent <strong>exactement les schémas de données</strong> — ils font office de <strong>spec contractuelle</strong> :
+<ul><li>[mock-data.service.ts](src/app/services/mock-data.service.ts) → modèles <code class="inline">Property</code>, <code class="inline">Product</code>, <code class="inline">ServiceProvider</code>, <code class="inline">Publisher</code> + exemples de données</li><li>[auth.service.ts](src/app/services/auth.service.ts) → modèle <code class="inline">StudUser</code>, logique auth étudiant</li><li><code class="inline">src/app/services/agent-auth.service.ts</code> → modèle <code class="inline">RealEstateAgent</code>, logique auth agent</li><li>[agent-properties.service.ts](src/app/services/agent-properties.service.ts) → modèle <code class="inline">AgentProperty</code>, CRUD biens</li><li>[messages.service.ts](src/app/services/messages.service.ts) → <code class="inline">Conversation</code>, <code class="inline">ChatMessage</code></li><li>[marketplace.page.ts](src/app/marketplace/marketplace.page.ts) → modèle <code class="inline">Product</code> (version liste)</li><li>[feed.page.ts](src/app/pages/feed/feed.page.ts) → modèle <code class="inline">FeedPost</code></li></ul>
+<h3 id="ce-qui-nexiste-pas-construire">Ce qui n'existe PAS — à construire</h3>
+<ul><li>❌ <strong>Aucun backend</strong> (pas d'URL API, pas de <code class="inline">HttpClient</code> utilisé sauf pour i18n)</li><li>❌ <strong>Aucune persistance</strong> — tout est en <code class="inline">localStorage</code> (auth) ou mémoire vive seule (messages, feed, produits nouvellement créés)</li><li>❌ <strong>Aucun upload de fichier</strong> — les photos sont traitées en <code class="inline">FileReader</code> → <code class="inline">dataURL</code> locale, jamais stockées</li><li>❌ <strong>Aucun vrai temps réel</strong> — le chat est uniquement local</li></ul><hr>
+<h2 id="3-stack-backend-impos">🏗️ 3. Stack backend IMPOSÉ</h2>
+
+<blockquote>⚠️ Pas de déviation sur la stack — toute la suite repose dessus.</blockquote>
+
+<table><thead><tr><th>Couche</th><th>Techno</th><th>Justification</th></tr></thead><tbody><tr><td><strong>Framework API</strong></td><td><strong>NestJS 11 (Node.js / TypeScript)</strong></td><td>Même langage TS que le front Angular → partage des DTO / interfaces / enums. Architecture modulaire parfaite pour 4 domaines. Guards / interceptors / WebSocket natifs.</td></tr><tr><td><strong>ORM</strong></td><td><strong>Prisma 5+</strong></td><td>Génère le client TS type-safe depuis <code class="inline">schema.prisma</code>. Migrations BDD zero-douleur. Requêtes CRUD 10x plus rapides à écrire.</td></tr><tr><td><strong>Base de données</strong></td><td><strong>PostgreSQL 16</strong></td><td>Relations complexes (user ↔ property ↔ review ↔ conversation ↔ message). JSONB pour metadata. ACID.</td></tr><tr><td><strong>Cache + WebSocket Pub/Sub</strong></td><td><strong>Redis 7</strong></td><td>Sessions revoke, rate limit auth, cache listes publiques, et distribution des messages WebSocket si multi-instance.</td></tr><tr><td><strong>Upload photos</strong></td><td><strong>Cloudinary</strong> (ou MinIO auto-hébergé sur le VPS)</td><td>CDN + transformations d'images. Simple, gratuit en tier MVP. Les URLs Cloudinary sont stockées en BDD.</td></tr><tr><td><strong>Auth</strong></td><td><strong>JWT (access token 15min + refresh token 7j)</strong></td><td>Access token en header <code class="inline">Authorization: Bearer</code>. Refresh token en cookie <code class="inline">httpOnly</code> + <code class="inline">secure</code> en prod.</td></tr><tr><td><strong>Validation</strong></td><td><code class="inline">class-validator</code> + <code class="inline">class-transformer</code> (DTOs Nest)</td><td>Validation d'entrée identique à ce qui existe côté front Angular.</td></tr><tr><td><strong>Conteneurisation</strong></td><td><strong>Docker + docker-compose</strong></td><td>3 services : <code class="inline">api</code> (Nest), <code class="inline">db</code> (PostgreSQL), <code class="inline">redis</code> (Redis). Déploiement identique en local / dev / VPS.</td></tr><tr><td><strong>Reverse proxy + SSL</strong></td><td><strong>Caddy 2</strong> sur le VPS</td><td>HTTPS automatique Let's Encrypt, gzip, headers sécurité.</td></tr></tbody></table>
+<h3 id="arborescence-crer">Arborescence à créer</h3>
+<pre class="code-block"><code class="lang-">
+studhub/
+├── backend/                          ← DOSSIER À CRÉER À CÔTÉ DE src/
+│   ├── prisma/
+│   │   ├── schema.prisma             ← modèles de BDD (inspirés de mock-data.service.ts)
+│   │   └── migrations/
+│   ├── src/
+│   │   ├── main.ts                   ← bootstrap Nest : app.setGlobalPrefix('api') + CORS + ValidationPipe
+│   │   ├── app.module.ts             ← imports : PrismaModule, ConfigModule, JwtModule, ThrottlerModule
+│   │   ├── common/
+│   │   │   ├── guards/               ← JwtAuthGuard, RolesGuard('student' | 'agent')
+│   │   │   ├── decorators/           ← @CurrentUser(), @Roles()
+│   │   │   ├── filters/              ← PrismaClientExceptionFilter (traduit erreurs Prisma en HTTP)
+│   │   │   └── interceptors/         ← ResponseInterceptor, LoggingInterceptor
+│   │   ├── prisma/
+│   │   │   ├── prisma.module.ts
+│   │   │   └── prisma.service.ts     ← extends PrismaClient + onModuleInit
+│   │   ├── config/
+│   │   │   └── configuration.ts      ← process.env : DATABASE_URL, REDIS_URL, JWT_SECRET, CLOUDINARY_<em>, FRONTEND_URL
+│   │   └── modules/
+│   │       ├── auth/                 ← 🔐 étudiant + agent (2 stratégies JWT distinctes ou 1 avec champ role)
+│   │       │   ├── auth.module.ts
+│   │       │   ├── auth.service.ts       ← register, login, refresh, forgotPassword, sendCode, verifyCode, resetPassword
+│   │       │   ├── auth.controller.ts    ← POST /api/auth/</em> + POST /api/agent-auth/<em>
+│   │       │   ├── dto/                   ← RegisterDto, LoginDto, ForgotDto, VerifyCodeDto, ResetDto…
+│   │       │   └── strategies/            ← JwtStrategy + éventuellement LocalStrategy
+│   │       ├── properties/           ← 🏘️ logements immobiliers
+│   │       │   ├── properties.module.ts
+│   │       │   ├── properties.service.ts  ← CRUD + pagination + filtres (ville, prix, surface, catégorie, meublé…)
+│   │       │   ├── properties.controller.ts  ← GET public + CRUD protégé role=agent
+│   │       │   └── dto/                   ← CreatePropertyDto, UpdatePropertyDto, PropertyFilterDto
+│   │       ├── marketplace/          ← 🛒 produits du marketplace
+│   │       │   ├── marketplace.module.ts
+│   │       │   ├── products.service.ts
+│   │       │   ├── products.controller.ts  ← GET public / POST/PUT/DELETE protégé role=student (propriétaire)
+│   │       │   └── dto/
+│   │       ├── services/             ← 💼 prestataires StudServices
+│   │       │   ├── services.module.ts
+│   │       │   ├── providers.service.ts     ← tiers Gratuit/Standard/Premium, recherche par catégorie/ville
+│   │       │   ├── providers.controller.ts
+│   │       │   └── dto/
+│   │       ├── feed/                 ← 📰 posts sociaux
+│   │       │   ├── feed.module.ts
+│   │       │   ├── posts.service.ts         ← create, list paginée, like/unlike, addComment
+│   │       │   ├── posts.controller.ts
+│   │       │   └── dto/
+│   │       ├── chat/                 ← 💬 messagerie
+│   │       │   ├── chat.module.ts
+│   │       │   ├── chat.gateway.ts          ← @WebSocketGateway : joinRoom, sendMessage, typing…
+│   │       │   ├── conversations.service.ts ← CRUD conversations + count unread
+│   │       │   ├── messages.service.ts      ← persistence messages en BDD
+│   │       │   └── dto/
+│   │       ├── reviews/              ← ⭐ avis (optionnel mais prévoir)
+│   │       └── upload/               ← 🖼️ upload photos (Cloudinary ou MinIO)
+│   │           ├── upload.module.ts
+│   │           ├── upload.service.ts       ← upload via buffer stream, retourne secure_url
+│   │           └── upload.controller.ts    ← POST /api/upload → multipart/form-data (files[])
+│   ├── test/
+│   ├── .env.example                ← VARIABLES D'ENVIRONNEMENT À REMPLIR (copier en .env)
+│   ├── Dockerfile                  ← build image Node API (multi-stage : builder + production alpine)
+│   ├── docker-compose.yml          ← services: api + db + redis
+│   └── package.json                ← @nestjs/cli, prisma, @prisma/client, @nestjs/jwt, @nestjs/passport, @nestjs/websockets, @nestjs/throttler, cloudinary, class-validator…
+│
+└── src/                             ← FRONTEND EXISTANT (Ionic/Angular) — ne PAS toucher sauf section 6</code></pre>
+
+<h3 id="variables-denvironnement-envexample">Variables d'environnement (.env.example)</h3>
+<pre class="code-block"><code class="lang-dotenv">
+<h1 id="app">=== APP ===</h1>
+NODE_ENV=development
+PORT=3000
+FRONTEND_URL=<a href="http://localhost:4200" target="_blank" rel="noopener">http://localhost:4200</a>
+
+<h1 id="secrets">=== SECRETS ===</h1>
+JWT_ACCESS_SECRET=studhub_access_change_me_in_prod_xxxxxxxxxxxxxxxx
+JWT_REFRESH_SECRET=studhub_refresh_change_me_in_prod_yyyyyyyyyyyyyyyy
+JWT_ACCESS_TTL=900
+JWT_REFRESH_TTL=604800
+
+<h1 id="bdd">=== BDD ===</h1>
+DATABASE_URL=postgresql://studhub:studhub_password@localhost:5432/studhub?schema=public
+
+<h1 id="redis">=== REDIS ===</h1>
+REDIS_URL=redis://localhost:6379
+
+<h1 id="cloudinary">=== CLOUDINARY ===</h1>
+CLOUDINARY_CLOUD_NAME=xxxx
+CLOUDINARY_API_KEY=xxxx
+CLOUDINARY_API_SECRET=xxxx
+
+<h1 id="mail-optionnel-mvp-stub-console-en-dev">=== MAIL (optionnel MVP : stub console en dev) ===</h1>
+<h1 id="smtp_hostsmtpexamplecom">SMTP_HOST=smtp.example.com</h1>
+<h1 id="smtp_port587">SMTP_PORT=587</h1>
+<h1 id="smtp_usernoreplystudhubtn">SMTP_USER=noreply@studhub.tn</h1>
+# SMTP_PASS=xxx</code></pre>
+<hr>
+<h2 id="4-liste-des-endpoints-implmenter-spec">🔗 4. Liste des endpoints à implémenter (spec)</h2>
+
+<blockquote>Préfixe global : <code class="inline">/api</code>  <br>Format de réponse uniforme : <code class="inline">{ "success": true, "data": ..., "meta": { ...pagination... } }</code> (via <code class="inline">ResponseInterceptor</code>)  <br>Erreurs : <code class="inline">{ "success": false, "error": "CODE_ERR", "message": "...", "details": [...] }</code>  <br>Pagination par défaut : <code class="inline">?page=1&amp;limit=20</code></blockquote>
+
+<h3 id="auth-tudiant-code-classinlineapiauthcode">🔐 Auth Étudiant (<code class="inline">/api/auth/</em></code>)</h3>
+<table><thead><tr><th>Méthode</th><th>Route</th><th>Body</th><th>Rôle</th><th>Description</th></tr></thead><tbody><tr><td>POST</td><td><code class="inline">/auth/register</code></td><td><code class="inline">{fullName, email, password, confirmPassword, phone?, university?}</code></td><td>public</td><td>Inscription + renvoie access+refresh</td></tr><tr><td>POST</td><td><code class="inline">/auth/login</code></td><td><code class="inline">{email, password}</code></td><td>public</td><td>Connexion → access+refresh</td></tr><tr><td>POST</td><td><code class="inline">/auth/refresh</code></td><td>(cookie refreshToken)</td><td>public</td><td>Nouvel access token</td></tr><tr><td>POST</td><td><code class="inline">/auth/logout</code></td><td>—</td><td>student</td><td>Invalide refresh côté Redis</td></tr><tr><td>POST</td><td><code class="inline">/auth/forgot-password</code></td><td><code class="inline">{email}</code></td><td>public</td><td>Génère code 6 chiffres → stocke Redis (10 min). <strong>En dev : renvoyer le code dans la réponse.</strong> En prod → envoyer par email.</td></tr><tr><td>POST</td><td><code class="inline">/auth/verify-code</code></td><td><code class="inline">{email, code}</code></td><td>public</td><td>Vérifie code</td></tr><tr><td>POST</td><td><code class="inline">/auth/reset-password</code></td><td><code class="inline">{email, code, newPassword}</code></td><td>public</td><td>Réinitialise MDP</td></tr><tr><td>GET</td><td><code class="inline">/auth/me</code></td><td>—</td><td>student</td><td>Renvoie profil étudiant connecté</td></tr><tr><td>PATCH</td><td><code class="inline">/auth/me</code></td><td><code class="inline">{fullName?, phone?, university?}</code></td><td>student</td><td>Modifier profil</td></tr></tbody></table>
+<h3 id="auth-agent-code-classinlineapiagent-authcode">🔐 Auth Agent (<code class="inline">/api/agent-auth/<em></code>)</h3>
+Même flow exact mais modèle <code class="inline">RealEstateAgent</code> avec <code class="inline">agencyName</code> + <code class="inline">role='agent'</code>
+
+<h3 id="logements-code-classinlineapipropertiescode-inspirations-modles-mock-dataservicetssrcappservicesmock-dataservicetsl13-l31">🏘️ Logements (<code class="inline">/api/properties</code>) — Inspirations modèles [mock-data.service.ts](src/app/services/mock-data.service.ts#L13-L31)</h3>
+<table><thead><tr><th>Méthode</th><th>Route</th><th>Query params</th><th>Rôle</th><th>Description</th></tr></thead><tbody><tr><td>GET</td><td><code class="inline">/properties</code></td><td><code class="inline">?city=&amp;minPrice=&amp;maxPrice=&amp;category=Studios</td><td>Colocations</td><td>Résidences</td><td>Chambres&amp;minSurface=&amp;rooms=&amp;furnished=&amp;search=&amp;page=&amp;limit=</code></td><td>public</td><td>Liste paginée + filtres</td></tr><tr><td>GET</td><td><code class="inline">/properties/:id</code></td><td>—</td><td>public</td><td>Détail complet + publisher + amenities + galerie</td></tr><tr><td>POST</td><td><code class="inline">/properties</code></td><td>multipart : <code class="inline">{title,category,city,address,price,surface,rooms,floor,furnished,availableFrom,description,amenities[],photos[]}</code></td><td><strong>agent</strong></td><td>Publier un bien (lié à agentId)</td></tr><tr><td>PATCH</td><td><code class="inline">/properties/:id</code></td><td>(champs partielles)</td><td><strong>agent</strong> (propriétaire)</td><td>Modifier mon bien</td></tr><tr><td>DELETE</td><td><code class="inline">/properties/:id</code></td><td>—</td><td><strong>agent</strong> (propriétaire)</td><td>Supprimer mon bien</td></tr><tr><td>GET</td><td><code class="inline">/agent/me/properties</code></td><td><code class="inline">?page=</code></td><td><strong>agent</strong></td><td>Mes biens publiés (pour dashboard agent)</td></tr></tbody></table>
+<h3 id="marketplace-produits-code-classinlineapiproductscode">🛒 Marketplace Produits (<code class="inline">/api/products</code>)</h3>
+Inspiration : [mock-data.service.ts](src/app/services/mock-data.service.ts#L33-L50) + [marketplace.page.ts](src/app/marketplace/marketplace.page.ts#L5-L16)
+<ul><li>GET <code class="inline">/products</code> (filtres <code class="inline">category</code>, <code class="inline">condition</code>, <code class="inline">minPrice</code>, <code class="inline">city</code>, <code class="inline">search</code>)</li><li>GET <code class="inline">/products/:id</code></li><li>POST <code class="inline">/products</code> (student connecté)</li><li>PATCH <code class="inline">/products/:id</code> (propriétaire)</li><li>DELETE <code class="inline">/products/:id</code> (propriétaire)</li></ul>
+<h3 id="prestataires-studservices-code-classinlineapiproviderscode">💼 Prestataires StudServices (<code class="inline">/api/providers</code>)</h3>
+Inspiration : [mock-data.service.ts](src/app/services/mock-data.service.ts#L52-L73)
+<ul><li>GET <code class="inline">/providers</code> (filtres <code class="inline">category</code>, <code class="inline">tier</code>, <code class="inline">city</code>, <code class="inline">search</code>)</li><li>GET <code class="inline">/providers/:id</code></li><li>POST <code class="inline">/providers</code> (student/agent avec <code class="inline">role=provider</code> + <code class="inline">tier</code>)</li><li>PATCH <code class="inline">/providers/:id</code> (propriétaire)</li></ul>
+<h3 id="feed-posts-code-classinlineapipostscode">📰 Feed Posts (<code class="inline">/api/posts</code>)</h3>
+Inspiration : [feed.page.ts](src/app/pages/feed/feed.page.ts#L3-L15)
+<ul><li>GET <code class="inline">/posts</code> (?search= &amp; page= &amp; limit=)</li><li>POST <code class="inline">/posts</code> (student) → <code class="inline">{description, imageUrl?}</code></li><li>POST <code class="inline">/posts/:id/like</code> (toggle like)</li><li>GET <code class="inline">/posts/:id/comments</code></li><li>POST <code class="inline">/posts/:id/comments</code> → <code class="inline">{text}</code></li></ul>
+<h3 id="messagerie">💬 Messagerie</h3>
+<strong>API REST :</strong>
+<ul><li>GET <code class="inline">/conversations</code> → liste de mes convs + unreadCount</li><li>GET <code class="inline">/conversations/:id/messages?before=</code> → messages paginés par conversation</li><li>POST <code class="inline">/conversations</code> → <code class="inline">{withUserId, withRole, context?}</code> initier une conv avec user/agent/prestataire/vendeur</li></ul>
+<strong>WebSocket (<code class="inline">ws://host/ws/chat</code> — auth via JWT dans query ou header) :</strong>
+<ul><li>Événements client : <code class="inline">join(conversationId)</code>, <code class="inline">message({conversationId, text})</code>, <code class="inline">typing({conversationId, isTyping})</code></li><li>Événements serveur broadcast : <code class="inline">new_message</code>, <code class="inline">typing</code>, <code class="inline">conversation_updated</code></li><li><strong>Distribution via Redis Pub/Sub</strong> pour supporter scalabilité multi-instance (obligatoire pour VPS)</li></ul>
+<h3 id="upload">🖼️ Upload</h3>
+<ul><li>POST <code class="inline">/upload</code> (multipart form-data <code class="inline">file</code>) → <code class="inline">{url, publicId, width, height}</code> — rôle authentifié student OU agent. Accepte jpg/png/webp. Taille max 5Mo. Compression auto côté Cloudinary.</li></ul><hr>
+<h2 id="5-dploiement-vps-spcifications-procdure">🚀 5. Déploiement VPS — Spécifications &amp; procédure</h2>
+
+<h3 id="matriel-vps-minimum-mvp-tunisie">Matériel VPS (minimum MVP Tunisie)</h3>
+<ul><li><strong>OS : Debian 12 Bookworm</strong> (x86_64)</li><li><strong>vCPU :</strong> 2 vCPUs</li><li><strong>RAM :</strong> 4 Go minimum (Nest + Postgres + Redis + Caddy dans Docker tient très bien dedans)</li><li><strong>Stockage :</strong> 80 Go SSD</li><li><strong>Hébergeur recommandé :</strong> <strong>Scaleway DEV1-S</strong> (€5/mois) ou <strong>DigitalOcean Basic 4GB</strong> ($12/mois) ou <strong>OVH Starter</strong> — choisir DC en EU (Paris/Frankfurt/Amsterdam) pour latence décente Tunisie.</li><li><strong>IP statique</strong> + <strong>PTR inversé</strong> correct.</li><li><strong>Nom de domaine :</strong> ex <code class="inline">studhub.tn</code> avec 2 sous-domaines A :</li><li><code class="inline">app.studhub.tn</code> → frontend Ionic (build www/ servi par Caddy ou séparément Netlify/Vercel)</li><li><code class="inline">api.studhub.tn</code> → backend Nest + Docker</li><li>Optionnel : <code class="inline">minio.studhub.tn</code> si pas Cloudinary</li></ul>
+<h3 id="outils-dexploitation-installer-sur-le-vps">Outils d'exploitation (à installer sur le VPS)</h3>
+<ul><li><strong>Docker 27+</strong> + <strong>Docker Compose v2</strong> (déploiement par conteneurs)</li><li><strong>Caddy 2</strong> en hôte (ou en conteneur) → HTTPS auto + reverse proxy vers <code class="inline">localhost:3000</code></li><li><strong>UFW firewall</strong> ouvert sur : <code class="inline">22 (ssh limité)</code>, <code class="inline">80</code>, <code class="inline">443</code> → tout le reste fermé</li><li><strong>fail2ban</strong> pour bannir brute force SSH</li><li>Monitoring léger : <code class="inline">netdata</code> en conteneur (port 19999 limité IP)</li></ul>
+<h3 id="pipeline-de-dploiement">Pipeline de déploiement</h3>
+<ol><li><strong>Build local</strong> de l'API : image Docker multi-stage (<code class="inline">node:22-alpine builder → node:22-alpine slim</code>)</li><li><strong>Tag</strong> image en <code class="inline">registry.studhub.tn/api:latest</code> (ou utiliser Docker Hub) OR utiliser <strong>CapRover / Coolify</strong> sur le VPS pour pull + build direct depuis un repo Git privé</li><li><strong>Sur VPS :</strong></li></ol>   <pre class="code-block"><code class="lang-bash">
+   cd /opt/studhub
+   docker compose pull
+   docker compose up -d --remove-orphans
+   docker compose exec api npx prisma migrate deploy   # applique migrations en BDD
+   </code></pre>
+<ol><li><strong>Caddyfile VPS (/etc/caddy/Caddyfile) :</strong></li></ol>   <pre class="code-block"><code class="lang-">
+   api.studhub.tn {
+     reverse_proxy localhost:3000
+     encode gzip zstd
+     header {
+       X-Frame-Options DENY
+       X-Content-Type-Options nosniff
+       Referrer-Policy strict-origin-when-cross-origin
+       Permissions-Policy "geolocation=(), microphone=(), camera=()"
+     }
+   }
+   </code></pre>
+
+<h3 id="sauvegardes">Sauvegardes</h3>
+<ul><li>Dump PostgreSQL <strong>quotidien</strong> à 3h du matin via cron : <code class="inline">pg_dump</code> + upload sur bucket S3 compatible (Scaleway Object Storage 750GB/mois gratuit)</li><li>Volume Docker <code class="inline">postgres_data</code> dans <code class="inline">/var/lib/docker/volumes/...</code> — sauvegardé</li><li>Redis : backup RDB AOF + inclus dans backup complet VPS</li></ul>
+<h3 id="health-check">Health check</h3>
+<ul><li>GET <code class="inline">/api/health</code> → retourne <code class="inline">{status:'ok', db:true, redis:true}</code> → <strong>obligatoire</strong> pour uptime monitoring (UptimeRobot gratuit sur cette URL)</li></ul><hr>
+<h2 id="6-planning-2-semaines-10-jours-ouvrs">📅 6. Planning 2 SEMAINES = 10 jours ouvrés</h2>
+
+<blockquote>⚠️ <strong>Périmètre de la mission = Backend + déploiement VPS + connexion front</strong>. Pas de refonte frontend UX, pas d'app mobile native supplémentaire.</blockquote>
+
+<h3 id="semaine-1-fondations-modules-critiques-jour-1-jour-5">🟢 Semaine 1 — Fondations + modules critiques (JOUR 1 → JOUR 5)</h3>
+<table><thead><tr><th>Jour</th><th>Livrable attendu</th></tr></thead><tbody><tr><td><strong>J1</strong></td><td>Initialisation projet <code class="inline">backend/</code> : NestJS CLI, Prisma, Docker Compose (api + db + redis), Caddyfile dev local, <code class="inline">.env.example</code>, fichier README backend. <strong>Schéma Prisma entier</strong> écrit et validé (toutes les tables du projet). <code class="inline">prisma migrate dev --name init</code> → 1ère migration créée. Lancer l'app hello world sur <code class="inline"><a href="http://localhost:3000/api/health" target="_blank" rel="noopener"><a href="http://localhost:3000/api/health" target="_blank" rel="noopener">http://localhost:3000/api/health</a></a></code>. <strong>Partager repo Git</strong> + push premier commit.</td></tr><tr><td><strong>J2</strong></td><td>Module <strong>Auth</strong> 100% fonctionnel : JWT access+refresh, DTOs validés, <code class="inline">RolesGuard</code>, endpoints <code class="inline">/api/auth/<em></code> et <code class="inline">/api/agent-auth/</em></code>. <strong>Endpoints testés via Postman / Bruno</strong> : register, login, refresh, forgot, verify, reset. 2 rôles créés : <code class="inline">student</code> et <code class="inline">agent</code>. Revocation refresh token sur Redis fonctionnel.</td></tr><tr><td><strong>J3</strong></td><td>Module <strong>Properties</strong> (Immobilier) : CRUD BDD + filtres + pagination. Endpoints testés via collection Bruno. Test agent créé bien → étudiant voit bien dans liste. <code class="inline">403 Forbidden</code> si étudiant tente POST/PATCH/DELETE. Upload photos connecté Cloudinary dans module <code class="inline">upload</code> + POST <code class="inline">/properties</code> accepte multipart photos.</td></tr><tr><td><strong>J4</strong></td><td>Module <strong>Marketplace (Products)</strong> + <strong>StudServices (Providers)</strong> : CRUD + filtres + recherche. Modules <strong>Upload</strong> (Cloudinary) finalisé. Module <strong>Feed Posts</strong> : CRUD posts + toggle like + comments.</td></tr><tr><td><strong>J5</strong></td><td>Module <strong>Chat</strong> : <code class="inline">ConversationsService</code> + <code class="inline">MessagesService</code> (BDD) + <strong>WebSocket Gateway Nest</strong> fonctionnelle en local (test via websocat ou page test). Redis Pub/Sub opérationnel. REST conversations + messages OK.</td></tr></tbody></table>
+<h3 id="semaine-2-intgration-dploiement-livraison-jour-6-jour-10">🔵 Semaine 2 — Intégration + déploiement + livraison (JOUR 6 → JOUR 10)</h3>
+<table><thead><tr><th>Jour</th><th>Livrable attendu</th></tr></thead><tbody><tr><td><strong>J6</strong></td><td><strong>Intégration FRONT ↔ BACK</strong> : Modifier le frontend Ionic existant (uniquement les services, <strong>NE PAS TOUCHER aux templates HTML ni au style</strong>). Créer un nouveau dossier <code class="inline">src/app/core/api/</code> avec : <code class="inline">api.interceptor.ts</code> (ajoute Authorization Bearer JWT + refresh automatique 401), + nouveaux services Angular <code class="inline">properties-api.service.ts</code>, <code class="inline">products-api.service.ts</code>, <code class="inline">providers-api.service.ts</code>, <code class="inline">posts-api.service.ts</code>, <code class="inline">chat-api.service.ts</code>, <code class="inline">auth-api.service.ts</code>. Supprimer les mocks dans les pages et remplacer par appels API. Fichier <code class="inline">environment.ts</code> mis à jour avec <code class="inline">{ apiUrl: '<a href="http://localhost:3000/api'," target="_blank" rel="noopener"><a href="http://localhost:3000/api'," target="_blank" rel="noopener">http://localhost:3000/api',</a></a> wsUrl: 'ws://localhost:3000/ws/chat' }</code>.</td></tr><tr><td><strong>J7</strong></td><td><strong>Provisionnement VPS Debian 12</strong> : SSH user + sudo, Docker+Compose, Caddy, UFW, fail2ban configurés. DNS <code class="inline">api.studhub.tn</code> pointe sur IP VPS. HTTPS Let's Encrypt fonctionnel. <strong>Premier déploiement Docker Compose sur le VPS</strong> réussi : <code class="inline">/api/health</code> accessible en HTTPS public. Base de données persistée dans volume Docker.</td></tr><tr><td><strong>J8</strong></td><td><strong>End-to-end tests manuels</strong> sur 2 appareils : scénarios complets. Liste de contrôle : (1) Inscription étudiant → (2) Login → (3) Recherche logements avec filtres → (4) Détail bien → (5) Inscription agent → (6) Agent publie bien avec photos → (7) Étudiant voit apparaître le bien dans la liste → (8) Étudiant et agent ouvrent conversation → (9) Chat temps réel bidirectionnel fonctionne. Bug fixes.</td></tr><tr><td><strong>J9</strong></td><td><strong>Optimisation + hardening</strong> : Rate limiting (ThrottlerModule Nest : 100 req/minute par IP sur login/forgot pour bloquer brute force). Headers sécurité CSP. <code class="inline">bcrypt</code> cost 12 minimum pour les mots de passe. CORS restreint à <code class="inline">FRONTEND_URL</code> + <code class="inline">app.studhub.tn</code> en prod. Documentation OpenAPI Swagger Nest (endpoint <code class="inline">/api/docs</code>) avec tous les groupes endpoints. <strong>Backup script PostgreSQL + cron activé sur VPS.</strong></td></tr><tr><td><strong>J10 — JOUR DE LIVRAISON</strong></td><td><strong>Livrable final + transfert</strong>. (1) Repos Git up-to-date : frontend+backend 100% synchronisés. (2) README unique à la racine qui explique "comment lancer front en local, comment lancer back en local docker, comment déployer sur VPS". (3) Collection Bruno / Postman complète (tous les endpoints + auth). (4) Dashboard de monitoring UptimeRobot sur <code class="inline">/api/health</code>. (5) Démo live 30 min en appel où on déroule tous les scénarios du J8 en PROD sur <code class="inline">app.studhub.tn</code> / <code class="inline">api.studhub.tn</code>.</td></tr></tbody></table>
+<h3 id="engagements-qualit-obligatoires">🚨 Engagements qualité OBLIGATOIRES</h3>
+<ul><li>❌ Pas de <code class="inline">// TODO</code> / <code class="inline">console.log</code> / <code class="inline">any</code> laissés dans le code livré</li><li>✅ <strong>Toutes les requêtes en écriture</strong> passent par un DTO avec <code class="inline">class-validator</code></li><li>✅ HTTP status corrects : 200 / 201 / 204 / 400 / 401 / 403 / 404 / 409 / 422 / 500</li><li>✅ Mots de passe <strong>jamais retournés</strong> par un endpoint (même pas à l'admin)</li><li>✅ <code class="inline">bcrypt</code> pour tous les hash (JAMAIS md5/sha1)</li><li>✅ Les secrets (JWT_<em>, CLOUDINARY_</em>) <strong>sont dans .env uniquement</strong>, jamais commités sur Git</li><li>✅ <code class="inline">.gitignore</code> backend : <code class="inline">.env</code>, <code class="inline">node_modules/</code>, <code class="inline">dist/</code>, <code class="inline"></em>.log</code></li><li>✅ Logs JSON structurés côté API (Nest PinoLogger recommandé)</li><li>✅ <strong>Migrations Prisma versionnées</strong>, jamais <code class="inline">prisma db push</code> en prod</li><li>✅ Frontend continue à compiler sans erreur <code class="inline">ng build</code> après modifications J6</li></ul><hr>
+<h2 id="7-comment-tester-le-front-actuel-lecture-seule-pour-le-dev-backend">🧪 7. Comment tester le front actuel (lecture seule — pour le dev backend)</h2>
+
+<pre class="code-block"><code class="lang-powershell">
+<h1 id="prrequis-node-20-npm-10">Prérequis : Node 20+, npm 10+</h1>
+git clone &lt;LE_REPO&gt;
+cd studhub
+
+<h1 id="install-front">Install front</h1>
+npm install
+
+<h1 id="lancer-front-angularionic">Lancer front Angular/Ionic</h1>
+npm start
+# → Ouvre <a href="http://localhost:4200" target="_blank" rel="noopener">http://localhost:4200</a></code></pre>
+
+<p>Depuis Chrome : <strong>F12 → Ctrl+Shift+M → iPhone 14</strong> pour avoir la vue mobile. Tout est en mock. Le développeur backend peut naviguer librement et inspecter les données mockées pour comprendre chaque page.<br>
+<hr><br>
+<h2 id="8-notes-utiles">📝 8. Notes utiles</h2></p>
+
+<h3 id="devise">Devise</h3>
+Tous les prix sont en <strong>Dinar tunisien (DT)</strong> — champs <code class="inline">price: number</code> entier. Côté affichage le front ajoute <code class="inline">/mois</code> pour l'immobilier.
+
+<h3 id="numros-de-tlphone">Numéros de téléphone</h3>
+Format tunisien <code class="inline">22 456 789</code> (8 chiffres). Indicatif international <strong>+216</strong> — voir helpers <code class="inline">telLink()</code> / <code class="inline">whatsappLink()</code> dans [mock-data.service.ts](src/app/services/mock-data.service.ts#L682-L688).
+
+<h3 id="tiers-prestataires">Tiers prestataires</h3>
+Classes CSS à retourner en string pour les badges (couleurs d'origine dans le front, mais backend stocke seulement l'enum) : <code class="inline">tier ∈ ('Gratuit' | 'Standard' | 'Premium')</code>
+
+<h3 id="filtres-logement">Filtres logement</h3>
+Catégories d'immobilier existantes dans le front mock : <code class="inline">'Studios' | 'Colocations' | 'Résidences' | 'Chambres'</code> → <strong>utiliser ces valeurs EXACTES en enum Prisma</strong> sinon le casse.
+
+<h3 id="tapes-suivantes-pour-toi-commanditaire">Étapes suivantes pour toi, commanditaire</h3>
+<ul><li>Commander le VPS + nom de domaine avant le J7 max</li><li>Créer compte Cloudinary gratuit avant J3</li><li>Donner accès SSH au développeur avant J7</li></ul><hr>
+<strong>Fin du brief. Toute déviation de stack, de planning ou de scope doit être validée PAR ÉCRIT avant de commencer.</strong>
+
+</body>
+</html>

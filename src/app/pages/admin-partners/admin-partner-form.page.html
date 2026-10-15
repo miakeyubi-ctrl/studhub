@@ -1,0 +1,157 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">
+      {{ (isEdit ? 'ADMIN_PARTNERS.EDIT_TITLE' : 'ADMIN_PARTNERS.NEW_TITLE') | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div *ngIf="loading" class="container py-4 space-y-3">
+    <app-skeleton *ngFor="let i of [0,1,2,3]" width="100%" height="3rem" radius="0.75rem" [showLogo]="false"></app-skeleton>
+  </div>
+
+  <form *ngIf="!loading" class="container py-4 pb-28 space-y-6" (ngSubmit)="save()">
+
+    <!-- Images -->
+    <section>
+      <div class="flex gap-4 items-end">
+        <!-- Logo -->
+        <label class="flex flex-col items-center gap-1.5 cursor-pointer">
+          <div class="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center bg-primary-50 dark:bg-primary-800 border-2 border-dashed border-primary-200 dark:border-primary-600">
+            <img *ngIf="form.logoUrl && !uploading.logoUrl" [src]="form.logoUrl" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+            <ion-spinner *ngIf="uploading.logoUrl" name="crescent" class="text-primary-600"></ion-spinner>
+            <ion-icon *ngIf="!form.logoUrl && !uploading.logoUrl" name="image-outline" class="text-primary-400 text-2xl"></ion-icon>
+          </div>
+          <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">{{ 'ADMIN_PARTNERS.FIELD_LOGO' | translate }} *</span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" (change)="onImageSelected($event, 'logoUrl')" />
+        </label>
+
+        <!-- Couverture -->
+        <label class="flex-1 flex flex-col items-center gap-1.5 cursor-pointer">
+          <div class="w-full h-20 rounded-2xl overflow-hidden flex items-center justify-center bg-primary-50 dark:bg-primary-800 border-2 border-dashed border-primary-200 dark:border-primary-600">
+            <img *ngIf="form.coverUrl && !uploading.coverUrl" [src]="form.coverUrl" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+            <ion-spinner *ngIf="uploading.coverUrl" name="crescent" class="text-primary-600"></ion-spinner>
+            <ion-icon *ngIf="!form.coverUrl && !uploading.coverUrl" name="images-outline" class="text-primary-400 text-2xl"></ion-icon>
+          </div>
+          <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">{{ 'ADMIN_PARTNERS.FIELD_COVER' | translate }}</span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" (change)="onImageSelected($event, 'coverUrl')" />
+        </label>
+      </div>
+    </section>
+
+    <!-- Informations -->
+    <section class="space-y-3">
+      <h4 class="font-bold text-slate-800 dark:text-white text-sm m-0">{{ 'ADMIN_PARTNERS.SECTION_INFO' | translate }}</h4>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_NAME' | translate }} *</span>
+        <input type="text" name="name" [(ngModel)]="form.name" maxlength="200" required />
+      </label>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_CATEGORY' | translate }} *</span>
+        <input type="text" name="category" [(ngModel)]="form.category" maxlength="100" required />
+      </label>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_DESCRIPTION' | translate }}</span>
+        <textarea name="description" [(ngModel)]="form.description" rows="4"></textarea>
+      </label>
+    </section>
+
+    <!-- Offre -->
+    <section class="space-y-3">
+      <h4 class="font-bold text-slate-800 dark:text-white text-sm m-0">{{ 'ADMIN_PARTNERS.SECTION_OFFER' | translate }}</h4>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_OFFER' | translate }} *</span>
+        <input type="text" name="offer" [(ngModel)]="form.offer" maxlength="255" required />
+      </label>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="field">
+          <span>{{ 'ADMIN_PARTNERS.FIELD_DISCOUNT' | translate }}</span>
+          <input type="text" name="discount" [(ngModel)]="form.discount" maxlength="30" />
+        </label>
+        <label class="field">
+          <span>{{ 'ADMIN_PARTNERS.FIELD_PROMO' | translate }}</span>
+          <input type="text" name="promoCode" [(ngModel)]="form.promoCode" maxlength="50" class="uppercase" />
+        </label>
+      </div>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_VALID_UNTIL' | translate }}</span>
+        <input type="date" name="validUntil" [(ngModel)]="form.validUntil" />
+      </label>
+    </section>
+
+    <!-- Contact -->
+    <section class="space-y-3">
+      <h4 class="font-bold text-slate-800 dark:text-white text-sm m-0">{{ 'ADMIN_PARTNERS.SECTION_CONTACT' | translate }}</h4>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_WEBSITE' | translate }}</span>
+        <input type="url" name="websiteUrl" [(ngModel)]="form.websiteUrl" maxlength="500" placeholder="https://" />
+      </label>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="field">
+          <span>{{ 'ADMIN_PARTNERS.FIELD_PHONE' | translate }}</span>
+          <input type="tel" name="phone" [(ngModel)]="form.phone" maxlength="20" placeholder="22 456 789" />
+        </label>
+        <label class="field">
+          <span>{{ 'ADMIN_PARTNERS.FIELD_CITY' | translate }}</span>
+          <input type="text" name="city" [(ngModel)]="form.city" maxlength="100" />
+        </label>
+      </div>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_EMAIL' | translate }}</span>
+        <input type="email" name="email" [(ngModel)]="form.email" maxlength="255" />
+      </label>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_ADDRESS' | translate }}</span>
+        <input type="text" name="address" [(ngModel)]="form.address" maxlength="500" />
+      </label>
+    </section>
+
+    <!-- Compte connexion partenaire -->
+    <section class="space-y-3">
+      <h4 class="font-bold text-slate-800 dark:text-white text-sm m-0">{{ 'ADMIN_PARTNERS.SECTION_LOGIN' | translate }}</h4>
+      <p class="text-xs text-slate-500 dark:text-slate-400 m-0">{{ 'ADMIN_PARTNERS.SECTION_LOGIN_HINT' | translate }}</p>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_LOGIN_EMAIL' | translate }}</span>
+        <input type="email" name="loginEmail" [(ngModel)]="form.loginEmail" maxlength="255" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_PASSWORD' | translate }}</span>
+        <input type="password" name="password" [(ngModel)]="form.password" maxlength="100" autocomplete="new-password"
+          [placeholder]="isEdit ? ('ADMIN_PARTNERS.FIELD_PASSWORD_KEEP' | translate) : ''" />
+      </label>
+    </section>
+
+    <!-- Affichage -->
+    <section class="space-y-3">
+      <h4 class="font-bold text-slate-800 dark:text-white text-sm m-0">{{ 'ADMIN_PARTNERS.SECTION_DISPLAY' | translate }}</h4>
+      <div class="flex items-center justify-between rounded-xl px-3 py-2.5 dark:bg-primary-800" style="background: var(--stud-surface)">
+        <span class="text-sm text-slate-700 dark:text-slate-200">{{ 'ADMIN_PARTNERS.FIELD_ACTIVE' | translate }}</span>
+        <ion-toggle name="isActive" [(ngModel)]="form.isActive"></ion-toggle>
+      </div>
+      <label class="field">
+        <span>{{ 'ADMIN_PARTNERS.FIELD_SORT' | translate }}</span>
+        <input type="number" name="sortOrder" [(ngModel)]="form.sortOrder" min="0" step="1" />
+      </label>
+    </section>
+
+  </form>
+</ion-content>
+
+<ion-footer *ngIf="!loading" class="ion-no-border">
+  <div class="container py-3" style="padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem)">
+    <button type="button" (click)="save()" [disabled]="!canSave"
+      class="w-full h-12 rounded-xl bg-primary-600 text-white text-sm font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition disabled:opacity-50">
+      <ion-spinner *ngIf="saving" name="crescent" class="w-4 h-4"></ion-spinner>
+      {{ 'COMMON.SAVE' | translate }}
+    </button>
+  </div>
+</ion-footer>

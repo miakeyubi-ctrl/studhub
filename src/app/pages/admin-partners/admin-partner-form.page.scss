@@ -1,0 +1,43 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background: var(--stud-surface);
+    padding: 0.65rem 0.75rem;
+    font-size: 0.875rem;
+    color: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &:focus {
+      border-color: var(--ion-color-primary);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+:host-context(.dark) .field {
+  span {
+    color: #cbd5e1;
+  }
+
+  input,
+  textarea {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}

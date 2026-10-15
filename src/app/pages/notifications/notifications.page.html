@@ -1,0 +1,87 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">
+      {{ 'NOTIFICATIONS_PAGE.TITLE' | translate }}
+      <span *ngIf="unreadCount > 0" class="text-primary-600 dark:text-primary-300 text-sm font-semibold">
+        ({{ unreadCount }})
+      </span>
+    </ion-title>
+    <ion-buttons slot="end" *ngIf="items.length">
+      <button
+        type="button"
+        (click)="markAllRead()"
+        class="mr-1 text-xs font-bold text-primary-600 dark:text-primary-300 px-2 py-1 active:opacity-70">
+        {{ 'NOTIFICATIONS_PAGE.MARK_ALL' | translate }}
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-4 pb-10">
+
+    <div *ngIf="!items.length" class="text-center py-16 px-4">
+      <div class="w-14 h-14 mx-auto rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center mb-3">
+        <ion-icon name="notifications-off-outline" class="text-primary-600 text-2xl"></ion-icon>
+      </div>
+      <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'NOTIFICATIONS_PAGE.EMPTY_TITLE' | translate }}</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 m-0">{{ 'NOTIFICATIONS_PAGE.EMPTY_DESC' | translate }}</p>
+    </div>
+
+    <div class="space-y-2" *ngIf="items.length">
+      <button
+        type="button"
+        *ngFor="let item of items"
+        (click)="openItem(item)"
+        class="notif-row w-full text-left flex items-start gap-3 p-3.5 rounded-2xl shadow-sm active:scale-[0.99] transition relative"
+        style="background: var(--stud-surface)"
+        [class.opacity-70]="item.read">
+
+        <div
+          class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+          [ngClass]="iconBg(item.type)">
+          <ion-icon [name]="iconFor(item.type)" class="text-xl"></ion-icon>
+        </div>
+
+        <div class="flex-1 min-w-0 pr-6">
+          <div class="flex items-center gap-2">
+            <p class="text-sm font-bold text-slate-800 dark:text-white m-0 truncate"
+               [class.font-extrabold]="!item.read">
+              <ng-container *ngIf="item.title; else titleI18n">{{ item.title }}</ng-container>
+              <ng-template #titleI18n>{{ (item.titleKey || '') | translate: item.titleParams }}</ng-template>
+            </p>
+            <span *ngIf="!item.read" class="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0"></span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 m-0 line-clamp-2 leading-4"
+             *ngIf="item.body || item.bodyKey">
+            <ng-container *ngIf="item.body; else bodyI18n">{{ item.body }}</ng-container>
+            <ng-template #bodyI18n>{{ (item.bodyKey || '') | translate: item.bodyParams }}</ng-template>
+          </p>
+          <p class="text-[10px] text-slate-400 mt-1.5 m-0">{{ relativeTime(item.createdAt) }}</p>
+        </div>
+
+        <span
+          (click)="remove(item, $event)"
+          class="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 active:bg-slate-100 dark:active:bg-primary-700">
+          <ion-icon name="close" class="text-sm"></ion-icon>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        (click)="confirmClear()"
+        class="w-full mt-4 py-3 rounded-2xl text-xs font-bold text-red-500 bg-red-50 dark:bg-red-500/10 active:scale-[0.98] transition">
+        {{ 'NOTIFICATIONS_PAGE.CLEAR_ALL' | translate }}
+      </button>
+    </div>
+
+  </div>
+</ion-content>

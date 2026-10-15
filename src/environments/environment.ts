@@ -3,7 +3,19 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  apiUrl: 'http://localhost:3000/api/v1',
+  // Origine HTTP du serveur : socket.io gère l'upgrade WS + path `/ws/chat`
+  wsUrl: 'http://localhost:3000',
+  uploadsUrl: 'http://localhost:3000/uploads',
+  /**
+   * Passe à true après avoir :
+   * 1) Copié google-services.json dans android/app/
+   * 2) Retiré le tools:node="remove" de FirebaseInitProvider dans AndroidManifest.xml
+   * 3) Mis firebase_messaging_auto_init_enabled à true
+   * 4) Configuré FIREBASE_SERVICE_ACCOUNT_* côté backend
+   */
+  firebasePushEnabled: false,
 };
 
 /*

@@ -29,7 +29,9 @@ export class VerifyCodePage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.email = this.route.snapshot.queryParamMap.get('email') || '';
+    this.email = this.route.snapshot.queryParamMap.get('email')
+      || this.route.snapshot.queryParamMap.get('phone')
+      || '';
   }
 
   goBack() {
@@ -67,7 +69,7 @@ export class VerifyCodePage implements OnInit {
     }
 
     this.loading = true;
-    const result = this.authService.verifyResetCode(this.email, this.code);
+    const result = await this.authService.verifyResetCode(this.email, this.code);
     this.loading = false;
 
     if (!result.success) {
@@ -82,14 +84,14 @@ export class VerifyCodePage implements OnInit {
 
   async resendCode() {
     this.resending = true;
-    const result = this.authService.sendResetCode(this.email);
+    const result = await this.authService.sendResetCode(this.email);
     this.resending = false;
 
     const message = result.success
       ? (result.devCode
         ? this.translate.instant('AUTH.RESEND_CODE_SENT_DEV', { code: result.devCode })
         : this.translate.instant('AUTH.RESEND_CODE_SENT'))
-      : this.translate.instant(result.message || 'AUTH.ERROR_NO_ACCOUNT_EMAIL');
+      : this.translate.instant(result.message || 'AUTH.ERROR_NO_ACCOUNT');
 
     const toast = await this.toastController.create({
       message,

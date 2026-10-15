@@ -16,6 +16,10 @@ const routes: Routes = [
         loadChildren: () => import('../tab2/tab2.module').then(m => m.Tab2PageModule)
       },
       {
+        path: 'campus-map',
+        loadChildren: () => import('../pages/campus-map/campus-map.module').then(m => m.CampusMapPageModule)
+      },
+      {
         path: 'tab3',
         loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
       },
@@ -33,14 +37,14 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/onbroading',
+        redirectTo: '/tabs/tab1',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/onbroading',
+    redirectTo: '/tabs/tab1',
     pathMatch: 'full'
   }
 ];

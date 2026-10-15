@@ -1,0 +1,132 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'FAVORITES_PAGE.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-4 pb-10">
+
+    <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+      <button type="button" (click)="setTab('immo')"
+        class="flex-shrink-0 text-xs font-bold px-3 py-2 rounded-xl transition"
+        [ngClass]="tab === 'immo' ? 'bg-primary-600 text-white' : 'bg-slate-100 dark:bg-primary-800 text-slate-600 dark:text-slate-300'">
+        {{ 'FAVORITES_PAGE.TAB_IMMO' | translate }} ({{ favorites.length }})
+      </button>
+      <button type="button" (click)="setTab('product')"
+        class="flex-shrink-0 text-xs font-bold px-3 py-2 rounded-xl transition"
+        [ngClass]="tab === 'product' ? 'bg-primary-600 text-white' : 'bg-slate-100 dark:bg-primary-800 text-slate-600 dark:text-slate-300'">
+        {{ 'FAVORITES_PAGE.TAB_PRODUCT' | translate }} ({{ productFavorites.length }})
+      </button>
+      <button type="button" (click)="setTab('service')"
+        class="flex-shrink-0 text-xs font-bold px-3 py-2 rounded-xl transition"
+        [ngClass]="tab === 'service' ? 'bg-primary-600 text-white' : 'bg-slate-100 dark:bg-primary-800 text-slate-600 dark:text-slate-300'">
+        {{ 'FAVORITES_PAGE.TAB_SERVICE' | translate }} ({{ providerFavorites.length }})
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="grid grid-cols-2 gap-3">
+      <div *ngFor="let i of [0,1,2,3]" class="rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg">
+        <app-skeleton height="7rem" radius="0"></app-skeleton>
+        <div class="p-2 space-y-2">
+          <app-skeleton width="70%" height="0.7rem" radius="0.4rem" [showLogo]="false"></app-skeleton>
+          <app-skeleton width="40%" height="0.8rem" radius="0.4rem" [showLogo]="false"></app-skeleton>
+        </div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3" *ngIf="totalCount">
+        {{ 'FAVORITES_PAGE.COUNT' | translate: { count: totalCount } }}
+      </p>
+
+      <div *ngIf="!totalCount" class="text-center py-16 px-4">
+        <div class="w-14 h-14 mx-auto rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center mb-3">
+          <ion-icon name="heart-outline" class="text-primary-600 text-2xl"></ion-icon>
+        </div>
+        <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'FAVORITES_PAGE.EMPTY_TITLE' | translate }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 m-0">{{ 'FAVORITES_PAGE.EMPTY_DESC' | translate }}</p>
+      </div>
+
+      <!-- Immo -->
+      <div class="grid grid-cols-2 gap-3" *ngIf="tab === 'immo' && favorites.length">
+        <button type="button" *ngFor="let item of favorites" (click)="openItem(item.id)"
+          class="fav-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition relative"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden relative">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+            <span (click)="removeFavorite(item.id, $event)"
+              class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/95 flex items-center justify-center active:scale-90 transition shadow">
+              <ion-icon name="heart" class="text-red-500 text-sm"></ion-icon>
+            </span>
+          </div>
+          <div class="p-2">
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2 leading-4">{{ item.title }}</p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Products -->
+      <div class="grid grid-cols-2 gap-3" *ngIf="tab === 'product' && productFavorites.length">
+        <button type="button" *ngFor="let item of productFavorites" (click)="openProduct(item.id)"
+          class="fav-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition relative"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden relative">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" />
+            <span (click)="removeProductFavorite(item.id, $event)"
+              class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/95 flex items-center justify-center shadow">
+              <ion-icon name="heart" class="text-red-500 text-sm"></ion-icon>
+            </span>
+          </div>
+          <div class="p-2">
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2">{{ item.title }}</p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Services -->
+      <div class="grid grid-cols-2 gap-3" *ngIf="tab === 'service' && providerFavorites.length">
+        <button type="button" *ngFor="let item of providerFavorites" (click)="openProvider(item.id)"
+          class="fav-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition relative"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden relative">
+            <img [src]="item.images[0]" [alt]="item.name" class="w-full h-full object-cover" />
+            <span (click)="removeProviderFavorite(item.id, $event)"
+              class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/95 flex items-center justify-center shadow">
+              <ion-icon name="heart" class="text-red-500 text-sm"></ion-icon>
+            </span>
+          </div>
+          <div class="p-2">
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2">{{ item.name }}</p>
+            <p class="text-[10px] text-slate-400 truncate">{{ item.profession }}</p>
+          </div>
+        </button>
+      </div>
+
+      <div *ngIf="tab === 'immo' && !favorites.length && totalCount" class="text-center py-10 text-xs text-slate-400">
+        {{ 'FAVORITES_PAGE.EMPTY_TAB' | translate }}
+      </div>
+      <div *ngIf="tab === 'product' && !productFavorites.length && totalCount" class="text-center py-10 text-xs text-slate-400">
+        {{ 'FAVORITES_PAGE.EMPTY_TAB' | translate }}
+      </div>
+      <div *ngIf="tab === 'service' && !providerFavorites.length && totalCount" class="text-center py-10 text-xs text-slate-400">
+        {{ 'FAVORITES_PAGE.EMPTY_TAB' | translate }}
+      </div>
+    </ng-container>
+
+  </div>
+</ion-content>

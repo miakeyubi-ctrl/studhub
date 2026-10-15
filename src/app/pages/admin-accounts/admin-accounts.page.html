@@ -1,0 +1,131 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'ADMIN_ACCOUNTS.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="load(); $any($event).target.complete()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="container py-4 pb-10">
+
+    <div *ngIf="!loading && !error" class="grid grid-cols-4 gap-2 mb-4">
+      <div class="rounded-xl bg-primary-50 dark:bg-primary-800 px-2 py-2.5 text-center">
+        <p class="text-base font-extrabold text-primary-700 dark:text-primary-200 m-0">{{ stats.total }}</p>
+        <p class="text-[9px] font-semibold text-slate-500 m-0 mt-0.5">{{ 'ADMIN_ACCOUNTS.STAT_TOTAL' | translate }}</p>
+      </div>
+      <div class="rounded-xl bg-sky-50 dark:bg-primary-800 px-2 py-2.5 text-center">
+        <p class="text-base font-extrabold text-sky-700 dark:text-sky-300 m-0">{{ stats.students }}</p>
+        <p class="text-[9px] font-semibold text-slate-500 m-0 mt-0.5">{{ 'ADMIN_ACCOUNTS.STAT_STUDENTS' | translate }}</p>
+      </div>
+      <div class="rounded-xl bg-violet-50 dark:bg-primary-800 px-2 py-2.5 text-center">
+        <p class="text-base font-extrabold text-violet-700 dark:text-violet-300 m-0">{{ stats.agents }}</p>
+        <p class="text-[9px] font-semibold text-slate-500 m-0 mt-0.5">{{ 'ADMIN_ACCOUNTS.STAT_AGENTS' | translate }}</p>
+      </div>
+      <div class="rounded-xl bg-red-50 dark:bg-primary-800 px-2 py-2.5 text-center">
+        <p class="text-base font-extrabold text-red-600 dark:text-red-300 m-0">{{ stats.blocked }}</p>
+        <p class="text-[9px] font-semibold text-slate-500 m-0 mt-0.5">{{ 'ADMIN_ACCOUNTS.STAT_BLOCKED' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto scrollbar-hide mb-3">
+      <button type="button" (click)="setFilter('all')"
+        class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap"
+        [ngClass]="filterKind === 'all' ? 'bg-primary-600 text-white' : 'bg-primary-50 dark:bg-primary-800 text-slate-600 dark:text-slate-300'">
+        {{ 'ADMIN_ACCOUNTS.FILTER_ALL' | translate }}
+      </button>
+      <button type="button" (click)="setFilter('user')"
+        class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap"
+        [ngClass]="filterKind === 'user' ? 'bg-primary-600 text-white' : 'bg-primary-50 dark:bg-primary-800 text-slate-600 dark:text-slate-300'">
+        {{ 'ADMIN_ACCOUNTS.FILTER_STUDENTS' | translate }}
+      </button>
+      <button type="button" (click)="setFilter('agent')"
+        class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap"
+        [ngClass]="filterKind === 'agent' ? 'bg-primary-600 text-white' : 'bg-primary-50 dark:bg-primary-800 text-slate-600 dark:text-slate-300'">
+        {{ 'ADMIN_ACCOUNTS.FILTER_AGENTS' | translate }}
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2 rounded-2xl px-3 h-11 shadow-sm mb-4 dark:bg-primary-800" style="background: var(--stud-surface)">
+      <ion-icon name="search-outline" class="text-slate-400 text-lg"></ion-icon>
+      <input type="search" [(ngModel)]="search" [placeholder]="'COMMON.SEARCH' | translate"
+        class="flex-1 bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder:text-slate-400" />
+    </div>
+
+    <div *ngIf="loading" class="space-y-3">
+      <app-skeleton *ngFor="let i of [0,1,2,3]" width="100%" height="5.5rem" radius="1rem"></app-skeleton>
+    </div>
+
+    <div *ngIf="!loading && error" class="text-center py-16">
+      <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'ADMIN_ACCOUNTS.ERROR' | translate }}</p>
+      <button type="button" (click)="load()" class="mt-3 text-xs font-bold px-4 py-2 rounded-full bg-primary-600 text-white">
+        {{ 'COMMON.RETRY' | translate }}
+      </button>
+    </div>
+
+    <div *ngIf="!loading && !error && !filtered.length" class="text-center py-16 px-4">
+      <div class="w-14 h-14 mx-auto rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center mb-3">
+        <ion-icon name="people-outline" class="text-primary-600 text-2xl"></ion-icon>
+      </div>
+      <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'ADMIN_ACCOUNTS.EMPTY' | translate }}</p>
+    </div>
+
+    <div *ngIf="!loading && !error" class="space-y-3">
+      <div
+        *ngFor="let a of filtered"
+        class="rounded-2xl shadow-lg p-3 dark:bg-primary-800"
+        [class.opacity-70]="a.isBlocked"
+        style="background: var(--stud-surface)">
+
+        <div class="flex gap-3 items-start">
+          <div class="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <img *ngIf="a.avatarUrl" [src]="a.avatarUrl" [alt]="a.displayName" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+            <span *ngIf="!a.avatarUrl" class="text-sm font-extrabold text-primary-700">{{ a.displayName.charAt(0) || '?' }}</span>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h5 class="text-sm font-bold text-slate-800 dark:text-white m-0 truncate">{{ a.displayName }}</h5>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-700/50 text-primary-700 dark:text-primary-200">
+                {{ kindLabel(a) | translate }}
+              </span>
+              <span *ngIf="a.isBlocked" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600">
+                {{ 'ADMIN_ACCOUNTS.STATUS_BLOCKED' | translate }}
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 m-0 mt-0.5 truncate">{{ a.email }}</p>
+            <p *ngIf="a.university" class="text-[10px] text-slate-400 m-0 mt-0.5 truncate">{{ a.university }}</p>
+            <p class="text-[10px] text-slate-400 m-0 mt-1.5 leading-relaxed">
+              {{ 'ADMIN_ACCOUNTS.CREATED' | translate }} : {{ formatDate(a.createdAt) }}<br />
+              {{ 'ADMIN_ACCOUNTS.UPDATED' | translate }} : {{ formatDate(a.updatedAt) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-3 flex justify-end" *ngIf="a.role !== 'ADMIN'">
+          <button
+            type="button"
+            (click)="confirmToggle(a, $event)"
+            class="text-[11px] font-bold px-3 py-2 rounded-full active:scale-95 transition"
+            [ngClass]="a.isBlocked
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+              : 'bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-300'">
+            <ion-icon [name]="a.isBlocked ? 'lock-open-outline' : 'ban-outline'" class="align-middle mr-1"></ion-icon>
+            {{ (a.isBlocked ? 'ADMIN_ACCOUNTS.UNBLOCK' : 'ADMIN_ACCOUNTS.BLOCK') | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

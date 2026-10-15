@@ -1,0 +1,147 @@
+.call-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  padding: 1.5rem;
+}
+
+.call-card {
+  width: min(100%, 360px);
+  border-radius: 28px;
+  padding: 2rem 1.25rem 1.75rem;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(160deg, #0f766e 0%, #115e59 55%, #134e4a 100%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.call-avatar {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.call-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.call-timer {
+  margin: 0.45rem 0 1.35rem;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.call-status {
+  margin: 0.35rem 0 1.5rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.call-mute-hint {
+  margin: -0.9rem 0 1.15rem;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.call-peer-hold {
+  margin: -0.85rem 0 1.1rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 9999px;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.35);
+  color: #fde68a;
+}
+
+.call-card.peer-muted,
+.call-card.on-hold {
+  background: linear-gradient(160deg, #0f766e 0%, #1e3a5f 55%, #0f172a 100%);
+}
+
+.call-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.call-actions--in {
+  gap: 0.65rem 0.9rem;
+}
+
+.call-actions button {
+  border: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.btn-accept,
+.btn-reject,
+.btn-hangup {
+  width: 58px;
+  height: 58px;
+  font-size: 1.4rem;
+}
+
+.btn-accept {
+  background: #22c55e;
+}
+
+.btn-reject,
+.btn-hangup {
+  background: #ef4444;
+}
+
+.reject-icon {
+  transform: rotate(135deg);
+}
+
+.btn-ctrl {
+  width: 64px;
+  min-height: 64px;
+  border-radius: 18px !important;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.45rem 0.2rem;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 1.15rem;
+}
+
+.btn-ctrl span {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  opacity: 0.92;
+  max-width: 58px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-ctrl.active {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.btn-ctrl:disabled {
+  opacity: 0.4;
+}

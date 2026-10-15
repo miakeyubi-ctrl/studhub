@@ -17,12 +17,24 @@
       <div class="flex items-center gap-4">
 
         <img
-          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"
+          *ngIf="hasAvatar"
+          [src]="userAvatar"
+          [alt]="userName"
           class="w-16 h-16 rounded-full object-cover shadow-lg" />
+        <div
+          *ngIf="!hasAvatar"
+          class="w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-white text-xl font-extrabold"
+          [style.background]="avatarBg">{{ userInitials }}</div>
 
         <div>
-          <h2 class="text-white font-bold text-lg">{{ userName }}</h2>
-          <p class="text-white/80 text-xs mt-1">{{ userEmail }}</p>
+          <h2 class="text-white font-bold text-lg m-0">{{ userName }}</h2>
+          <p class="text-white/80 text-xs mt-1 m-0">{{ userEmail || ('PROFILE_PAGE.GUEST_HINT' | translate) }}</p>
+          <p *ngIf="userUniversity" class="text-white/65 text-[11px] mt-0.5 m-0">{{ userUniversity }}</p>
+          <span
+            *ngIf="isAgent"
+            class="inline-block mt-2 text-[10px] font-bold bg-white/20 text-white px-2.5 py-1 rounded-full">
+            {{ 'PROFILE_PAGE.AGENT_BADGE' | translate }}
+          </span>
         </div>
 
       </div>
@@ -79,54 +91,70 @@
 
     </div>
 
-    <!-- Espace agent immobilier -->
-    <div class="rounded-2xl bg-gradient-to-br from-primary-800 to-primary-600 shadow-lg flex items-center gap-3 px-4 py-4">
+    <!-- Espace agent : visible pour les visiteurs (CTA) et les agents (accès dashboard).
+         Masqué si déjà connecté en étudiant — évite le faux « Se connecter ». -->
+    <div
+      *ngIf="!isLoggedIn || isAgent"
+      class="rounded-2xl bg-gradient-to-br from-primary-800 to-primary-600 shadow-lg flex items-center gap-3 px-4 py-4">
 
       <div class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
         <ion-icon name="business-outline" class="text-white text-lg"></ion-icon>
       </div>
 
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-bold text-white">{{ 'PROFILE_PAGE.AGENT_SECTION_TITLE' | translate }}</p>
-        <p class="text-[11px] text-white/75 mt-0.5">{{ 'PROFILE_PAGE.AGENT_SECTION_DESC' | translate }}</p>
+        <p class="text-sm font-bold text-white m-0">
+          {{ (isAgent ? 'PROFILE_PAGE.AGENT_CONNECTED_TITLE' : 'PROFILE_PAGE.AGENT_SECTION_TITLE') | translate }}
+        </p>
+        <p class="text-[11px] text-white/75 mt-0.5 m-0">
+          {{ (isAgent ? 'PROFILE_PAGE.AGENT_CONNECTED_DESC' : 'PROFILE_PAGE.AGENT_SECTION_DESC') | translate }}
+        </p>
       </div>
 
       <a
-        [routerLink]="agentAuth.isLoggedIn ? '/agent-dashboard' : '/agent-login'"
+        [routerLink]="isAgent ? '/agent-dashboard' : '/agent-login'"
         class="flex-shrink-0 bg-white text-primary-700 text-xs font-bold px-4 py-2.5 rounded-full active:scale-95 transition text-decoration-none whitespace-nowrap">
-        {{ (agentAuth.isLoggedIn ? 'PROFILE_PAGE.AGENT_ACCESS_BUTTON' : 'PROFILE_PAGE.AGENT_LOGIN_BUTTON') | translate }}
+        {{ (isAgent ? 'PROFILE_PAGE.AGENT_ACCESS_BUTTON' : 'PROFILE_PAGE.AGENT_LOGIN_BUTTON') | translate }}
       </a>
 
     </div>
 
     <!-- STUD Partners -->
-    <div>
+    <div *ngIf="loading || partners.length">
 
       <div class="flex items-center justify-between mb-3">
         <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'PROFILE_PAGE.PARTNERS_TITLE' | translate }}</h4>
-        <a class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+        <a routerLink="/partners" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
       </div>
 
       <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1" *ngIf="loading">
         <app-skeleton *ngFor="let i of [0,1,2]" width="11rem" height="7.5rem" radius="1rem"></app-skeleton>
       </div>
 
-      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1" *ngIf="!loading">
+      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2" *ngIf="!loading">
 
-        <div
+        <button
+          type="button"
           *ngFor="let partner of partners"
-          class="flex-shrink-0 w-44 rounded-2xl dark:bg-primary-800 shadow-lg p-3">
+          (click)="openPartner(partner.id)"
+          class="partner-card relative flex-shrink-0 w-44 text-left rounded-2xl dark:bg-primary-800 shadow-lg p-3 active:scale-[0.97] transition"
+          style="background: var(--stud-surface)">
+
+          <span *ngIf="partner.discount"
+            class="absolute top-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+            {{ partner.discount }}
+          </span>
 
           <img
-            [src]="partner.logo"
+            [src]="partner.logoUrl"
             [alt]="partner.name"
-            class="w-10 h-10 rounded-full object-cover" />
+            class="w-10 h-10 rounded-xl object-cover bg-primary-50"
+            referrerpolicy="no-referrer" />
 
-          <h5 class="text-xs font-bold text-slate-800 dark:text-white mt-2 leading-4">{{ partner.name }}</h5>
-          <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold mt-0.5">{{ partner.category }}</p>
-          <p class="text-[10px] text-slate-500 dark:text-slate-300 mt-1 line-clamp-2">{{ partner.offer }}</p>
+          <h5 class="text-xs font-bold text-slate-800 dark:text-white mt-2 mb-0 leading-4 truncate">{{ partner.name }}</h5>
+          <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold mt-0.5 mb-0">{{ partner.category }}</p>
+          <p class="text-[10px] text-slate-500 dark:text-slate-300 mt-1 mb-0 line-clamp-2">{{ partner.offer }}</p>
 
-        </div>
+        </button>
 
       </div>
 
@@ -137,32 +165,35 @@
 
       <div class="flex items-center justify-between mb-3">
         <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'PROFILE_PAGE.FAVORITES_TITLE' | translate }}</h4>
-        <a routerLink="/tabs/tab2" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
+        <a routerLink="/favorites" class="text-xs font-semibold text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'COMMON.SEE_ALL' | translate }}</a>
       </div>
 
       <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
 
-        <div
+        <button
+          type="button"
           *ngFor="let property of favoris"
-          class="relative flex-shrink-0 w-36 h-28 rounded-2xl overflow-hidden">
+          (click)="openFavori(property.id)"
+          class="relative flex-shrink-0 w-36 h-28 rounded-2xl overflow-hidden border-0 p-0 appearance-none">
 
           <img
-            [src]="property.image"
+            [src]="property.images[0]"
             [alt]="property.title"
-            class="w-full h-full object-cover" />
+            class="w-full h-full object-cover"
+            referrerpolicy="no-referrer" />
 
-          <button
+          <span
             (click)="removeFavori(property.id, $event)"
             class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-white/90 flex items-center justify-center active:scale-90 transition">
             <ion-icon name="heart" class="text-red-500 text-xs"></ion-icon>
-          </button>
+          </span>
 
-          <div class="absolute bottom-1.5 left-1.5 right-1.5 text-white">
-            <p class="text-[10px] font-semibold drop-shadow">{{ property.city }}</p>
+          <div class="absolute bottom-1.5 left-1.5 right-1.5 text-white text-left">
+            <p class="text-[10px] font-semibold drop-shadow truncate">{{ property.city }}</p>
             <p class="text-[9px] text-white/85">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</p>
           </div>
 
-        </div>
+        </button>
 
         <div
           *ngIf="favoris.length === 0"
@@ -181,7 +212,7 @@
         <h4 class="font-bold text-slate-800 dark:text-white text-base">{{ 'PROFILE_PAGE.RESERVATIONS_TITLE' | translate }}</h4>
       </div>
 
-      <div class="space-y-3">
+      <div class="space-y-3" *ngIf="reservations.length">
 
         <div
           *ngFor="let reservation of reservations"
@@ -216,14 +247,19 @@
 
       </div>
 
+      <p *ngIf="!reservations.length" class="text-xs text-slate-400 dark:text-slate-500 py-2 m-0">
+        {{ 'PROFILE_PAGE.NO_RESERVATIONS' | translate }}
+      </p>
+
     </div>
 
     <!-- Menu -->
     <div class="rounded-2xl dark:bg-primary-800 shadow-lg overflow-hidden">
 
       <a
-        *ngFor="let item of menuItems"
-        [routerLink]="item.route"
+        *ngFor="let item of visibleMenuItems"
+        [routerLink]="item.action === 'logout' ? null : item.route"
+        (click)="onMenuClick(item, $event)"
         class="flex items-center gap-3 px-4 py-3.5 text-decoration-none active:bg-primary-50/60 dark:active:bg-primary-700/40 transition"
       >
         <div

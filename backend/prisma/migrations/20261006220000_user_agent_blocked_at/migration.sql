@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "blockedAt" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "Agent" ADD COLUMN IF NOT EXISTS "blockedAt" TIMESTAMP(3);

@@ -1,0 +1,182 @@
+<!-- Chargement -->
+<ion-content [fullscreen]="true" *ngIf="loading">
+  <app-skeleton height="12rem" radius="0" logoSize="3rem"></app-skeleton>
+  <div class="container py-5 space-y-3">
+    <app-skeleton width="50%" height="1rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+    <app-skeleton width="30%" height="0.8rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+    <app-skeleton width="100%" height="5rem" radius="1rem" [showLogo]="false"></app-skeleton>
+    <app-skeleton width="100%" height="0.8rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+    <app-skeleton width="70%" height="0.8rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+  </div>
+</ion-content>
+
+<!-- Introuvable -->
+<ion-content [fullscreen]="true" *ngIf="!loading && notFound">
+  <div class="container pt-6">
+    <button type="button" (click)="goBack()"
+      class="w-9 h-9 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition"
+      style="margin-top: env(safe-area-inset-top)">
+      <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+    </button>
+    <div class="text-center py-20 px-4">
+      <div class="w-14 h-14 mx-auto rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center mb-3">
+        <ion-icon name="people-outline" class="text-primary-600 text-2xl"></ion-icon>
+      </div>
+      <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'PARTNERS_PAGE.NOT_FOUND' | translate }}</p>
+    </div>
+  </div>
+</ion-content>
+
+<ion-content [fullscreen]="true" *ngIf="!loading && partner">
+
+  <!-- Couverture -->
+  <div class="relative h-48 bg-gradient-to-br from-primary-600 to-primary-900">
+    <img *ngIf="partner.coverUrl" [src]="partner.coverUrl" [alt]="partner.name"
+      class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+    <div class="absolute inset-0 bg-black/20"></div>
+
+    <div class="absolute top-0 left-0 right-0 p-4 z-10" style="padding-top: calc(env(safe-area-inset-top) + 1rem)">
+      <button type="button" (click)="goBack()"
+        class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-white text-lg"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="container pb-10">
+
+    <!-- En-tête : logo qui chevauche la couverture -->
+    <div class="flex items-end gap-3 -mt-10 relative z-10">
+      <img [src]="partner.logoUrl" [alt]="partner.name"
+        class="w-20 h-20 rounded-2xl object-cover shadow-lg border-4 border-white dark:border-primary-900 bg-white"
+        referrerpolicy="no-referrer" />
+      <span *ngIf="partner.discount"
+        class="mb-1 text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-700 shadow-sm">
+        {{ partner.discount }}
+      </span>
+    </div>
+
+    <div class="flex items-start justify-between gap-3 mt-3">
+      <div class="min-w-0">
+        <h1 class="text-xl font-bold text-slate-800 dark:text-white m-0">{{ partner.name }}</h1>
+        <p class="text-xs font-semibold text-primary-600 dark:text-primary-300 mt-1 mb-0">
+          {{ partner.category }}<ng-container *ngIf="partner.city"> · {{ partner.city }}</ng-container>
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="toggleLike()"
+        [disabled]="likeBusy || liked"
+        class="flex-shrink-0 w-11 h-11 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition disabled:opacity-70">
+        <ion-icon
+          [name]="liked ? 'heart' : 'heart-outline'"
+          class="text-xl"
+          [class.text-red-500]="liked"
+          [class.text-primary-600]="!liked">
+        </ion-icon>
+      </button>
+    </div>
+
+    <div class="flex flex-wrap gap-3 mt-3 text-[11px] font-semibold text-slate-500 dark:text-slate-300">
+      <span class="inline-flex items-center gap-1"><ion-icon name="eye-outline"></ion-icon> {{ partner.viewsCount || 0 }} {{ 'PARTNERS_PAGE.STAT_VIEWS' | translate }}</span>
+      <span class="inline-flex items-center gap-1"><ion-icon name="heart-outline"></ion-icon> {{ partner.likesCount || 0 }} {{ 'PARTNERS_PAGE.STAT_LIKES' | translate }}</span>
+      <span class="inline-flex items-center gap-1"><ion-icon name="hand-left-outline"></ion-icon> {{ partner.clicksCount || 0 }} {{ 'PARTNERS_PAGE.STAT_CLICKS' | translate }}</span>
+    </div>
+
+    <!-- Carte offre -->
+    <div class="rounded-2xl p-4 mt-5 bg-primary-50 dark:bg-primary-800 border border-primary-100 dark:border-primary-700">
+      <p class="text-[11px] uppercase tracking-wide font-bold text-primary-700 dark:text-primary-300 m-0">
+        {{ 'PARTNERS_PAGE.OFFER' | translate }}
+      </p>
+      <p class="text-base font-bold text-slate-800 dark:text-white mt-1 mb-0">{{ partner.offer }}</p>
+      <p *ngIf="partner.validUntil" class="text-[11px] text-slate-500 dark:text-slate-300 mt-2 mb-0 flex items-center gap-1">
+        <ion-icon name="time-outline"></ion-icon>
+        {{ 'PARTNERS_PAGE.VALID_UNTIL' | translate: { date: (partner.validUntil | date: 'dd/MM/yyyy') } }}
+      </p>
+
+      <!-- Code promo -->
+      <button *ngIf="partner.promoCode" type="button" (click)="copyPromoCode()"
+        class="promo-code w-full mt-3 flex items-center justify-between rounded-xl px-3 py-2.5 border-2 border-dashed border-primary-300 dark:border-primary-500 active:scale-[0.98] transition"
+        style="background: var(--stud-surface)">
+        <span class="text-left">
+          <span class="block text-[10px] text-slate-500 dark:text-slate-300">{{ 'PARTNERS_PAGE.PROMO_CODE' | translate }}</span>
+          <span class="block text-sm font-bold tracking-widest text-slate-800 dark:text-white">{{ partner.promoCode }}</span>
+        </span>
+        <span class="flex items-center gap-1 text-xs font-bold text-primary-600 dark:text-primary-300">
+          <ion-icon name="copy-outline"></ion-icon>{{ 'PARTNERS_PAGE.COPY' | translate }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Annonces publiées par le partenaire -->
+    <div *ngIf="announcements.length" class="mt-6">
+      <h4 class="font-bold text-slate-800 dark:text-white text-base mb-3">{{ 'PARTNER_AUTH.PUBLIC_ANNOUNCEMENTS' | translate }}</h4>
+      <div class="space-y-3">
+        <div *ngFor="let a of announcements"
+          class="rounded-2xl overflow-hidden shadow-sm dark:bg-primary-800 border border-slate-100 dark:border-primary-700"
+          style="background: var(--stud-surface)">
+          <img *ngIf="a.imageUrl" [src]="a.imageUrl" [alt]="a.title"
+            class="w-full h-36 object-cover" referrerpolicy="no-referrer" />
+          <div class="p-3">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-bold text-slate-800 dark:text-white m-0">{{ a.title }}</p>
+              <span *ngIf="a.discount" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0">{{ a.discount }}</span>
+            </div>
+            <p *ngIf="a.description" class="text-xs text-slate-500 dark:text-slate-300 mt-1 mb-0 whitespace-pre-line">{{ a.description }}</p>
+            <p *ngIf="a.validUntil" class="text-[11px] text-slate-400 mt-2 mb-0 flex items-center gap-1">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ 'PARTNERS_PAGE.VALID_UNTIL' | translate: { date: (a.validUntil | date: 'dd/MM/yyyy') } }}
+            </p>
+            <div *ngIf="a.promoCode" class="mt-2 rounded-xl px-3 py-2 border border-dashed border-primary-300 dark:border-primary-500">
+              <span class="block text-[10px] text-slate-500">{{ 'PARTNERS_PAGE.PROMO_CODE' | translate }}</span>
+              <span class="block text-sm font-bold tracking-widest text-slate-800 dark:text-white">{{ a.promoCode }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- À propos -->
+    <div *ngIf="partner.description" class="mt-6">
+      <h4 class="font-bold text-slate-800 dark:text-white text-base mb-2">{{ 'PARTNERS_PAGE.ABOUT' | translate }}</h4>
+      <p class="text-sm leading-6 text-slate-600 dark:text-slate-300 m-0 whitespace-pre-line">{{ partner.description }}</p>
+    </div>
+
+    <!-- Contact -->
+    <div *ngIf="partner.phone || partner.email || partner.address || partner.websiteUrl" class="mt-6">
+      <h4 class="font-bold text-slate-800 dark:text-white text-base mb-2">{{ 'PARTNERS_PAGE.CONTACT_TITLE' | translate }}</h4>
+      <div class="rounded-2xl shadow-lg divide-y divide-slate-100 dark:divide-primary-700 dark:bg-primary-800" style="background: var(--stud-surface)">
+        <a *ngIf="partner.websiteUrl" (click)="openWebsite()" class="flex items-center gap-3 p-3 text-decoration-none cursor-pointer">
+          <ion-icon name="globe-outline" class="text-primary-600 text-lg"></ion-icon>
+          <span class="text-sm text-slate-700 dark:text-slate-200 truncate">{{ partner.websiteUrl }}</span>
+        </a>
+        <a *ngIf="partner.email" (click)="onContactClick()" [href]="'mailto:' + partner.email" class="flex items-center gap-3 p-3 text-decoration-none">
+          <ion-icon name="mail-outline" class="text-primary-600 text-lg"></ion-icon>
+          <span class="text-sm text-slate-700 dark:text-slate-200 truncate">{{ partner.email }}</span>
+        </a>
+        <div *ngIf="partner.address" class="flex items-center gap-3 p-3">
+          <ion-icon name="location-outline" class="text-primary-600 text-lg"></ion-icon>
+          <span class="text-sm text-slate-700 dark:text-slate-200">{{ partner.address }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="partner.phone" class="grid grid-cols-2 gap-3 mt-3">
+        <a [href]="telLink" (click)="onContactClick()"
+          class="flex items-center justify-center gap-2 h-11 rounded-xl bg-primary-600 text-white text-sm font-bold text-decoration-none active:scale-95 transition">
+          <ion-icon name="call-outline"></ion-icon>{{ 'COMMON.CALL' | translate }}
+        </a>
+        <a [href]="whatsappLink" target="_blank" (click)="onContactClick()"
+          class="flex items-center justify-center gap-2 h-11 rounded-xl bg-green-500 text-white text-sm font-bold text-decoration-none active:scale-95 transition">
+          <ion-icon name="logo-whatsapp"></ion-icon>{{ 'COMMON.WHATSAPP' | translate }}
+        </a>
+      </div>
+    </div>
+
+    <!-- Site web (CTA principal si pas de téléphone) -->
+    <button *ngIf="partner.websiteUrl && !partner.phone" type="button" (click)="openWebsite()"
+      class="w-full mt-6 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary-600 text-white text-sm font-bold active:scale-95 transition">
+      <ion-icon name="open-outline"></ion-icon>{{ 'PARTNERS_PAGE.WEBSITE' | translate }}
+    </button>
+
+  </div>
+</ion-content>

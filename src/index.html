@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="utf-8" />
@@ -15,15 +15,108 @@
 
   <link rel="icon" type="image/x-icon" href="assets/icon/favicon.ico" />
 
-  <!-- add to homescreen for ios -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Splash avant boot Angular — disparaît via #studhub-boot-splash.hidden */
+    #studhub-boot-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 35%, rgba(86, 200, 209, 0.22), transparent 70%),
+        linear-gradient(165deg, #f7fdfd 0%, #ffffff 45%, #eef9fa 100%);
+      font-family: 'Outfit', system-ui, sans-serif;
+      transition: opacity 0.45s ease, visibility 0.45s ease;
+    }
+    #studhub-boot-splash.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #studhub-boot-splash .splash-mark {
+      width: 108px;
+      height: 108px;
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: 0 12px 40px rgba(14, 51, 54, 0.12), 0 0 0 1px rgba(86, 200, 209, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: splash-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #studhub-boot-splash .splash-mark img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+    }
+    #studhub-boot-splash .splash-brand {
+      margin-top: 1.35rem;
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #0E3336;
+      animation: splash-fade-up 0.65s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #studhub-boot-splash .splash-tag {
+      margin-top: 0.4rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #1F7379;
+      opacity: 0.9;
+      animation: splash-fade-up 0.65s 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #studhub-boot-splash .splash-bar {
+      margin-top: 2.25rem;
+      width: 96px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(46, 157, 166, 0.15);
+      overflow: hidden;
+      animation: splash-fade-up 0.65s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #studhub-boot-splash .splash-bar > i {
+      display: block;
+      height: 100%;
+      width: 40%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #56C8D1, #2E9DA6);
+      animation: splash-slide 1.1s ease-in-out infinite;
+    }
+    @keyframes splash-pop {
+      from { opacity: 0; transform: scale(0.82); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes splash-fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes splash-slide {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(280%); }
+    }
+  </style>
 </head>
 
-<body>
+<body style="margin:0;background:#eef9fa;">
+  <div id="studhub-boot-splash" aria-hidden="true">
+    <div class="splash-mark">
+      <img src="assets/images/logo.png" alt="StudHub" />
+    </div>
+    <div class="splash-brand">StudHub</div>
+    <div class="splash-tag">Logement étudiant en Tunisie</div>
+    <div class="splash-bar"><i></i></div>
+  </div>
+
   <app-root></app-root>
 </body>
 

@@ -1,6 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../services/auth.service';
+import { StudentMenuService } from '../services/student-menu.service';
+import { MockDataService, Product as DataProduct } from '../services/mock-data.service';
+import { UploadService } from '../services/upload.service';
+import { Router } from '@angular/router';
 
 interface Product {
   id: number;
@@ -13,6 +19,8 @@ interface Product {
   condition: string;
   negotiable?: boolean;
   description?: string;
+  viewsCount?: number;
+  likesCount?: number;
 }
 
 const NO_PHOTO_PLACEHOLDER =
@@ -29,12 +37,10 @@ const NO_PHOTO_PLACEHOLDER =
   styleUrls: ['marketplace.page.scss'],
   standalone: false,
 })
-export class MarketplacePage implements OnInit {
+export class MarketplacePage implements OnInit, OnDestroy {
 
   loading = true;
-
   searchText = '';
-
   selectedCategory = 'Tous';
 
   categories = [
@@ -47,91 +53,9 @@ export class MarketplacePage implements OnInit {
   ];
 
   sellCategories = this.categories.filter(c => c !== 'Tous');
-
   conditions = ['Neuf', 'Très bon état', 'Bon état'];
 
-  products: Product[] = [
-    {
-      id: 1,
-      title: 'iPhone 12 - 128 Go',
-      category: 'Électronique',
-      price: 950,
-      image: 'https://images.unsplash.com/photo-1592286927505-1def25115558?q=80&w=600&auto=format&fit=crop',
-      seller: 'Amine K.',
-      city: 'Tunis',
-      condition: 'Très bon état'
-    },
-    {
-      id: 2,
-      title: 'Ordinateur portable Dell',
-      category: 'Électronique',
-      price: 1200,
-      image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=600&auto=format&fit=crop',
-      seller: 'Salma T.',
-      city: 'Sfax',
-      condition: 'Bon état'
-    },
-    {
-      id: 3,
-      title: 'Bureau + chaise étudiant',
-      category: 'Meubles',
-      price: 180,
-      image: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=600&auto=format&fit=crop',
-      seller: 'Mohamed A.',
-      city: 'Sousse',
-      condition: 'Bon état'
-    },
-    {
-      id: 4,
-      title: 'Veste d\'hiver taille M',
-      category: 'Vêtements',
-      price: 45,
-      image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600&auto=format&fit=crop',
-      seller: 'Nour H.',
-      city: 'Ariana',
-      condition: 'Neuf'
-    },
-    {
-      id: 5,
-      title: 'Lot de livres - Génie Informatique',
-      category: 'Livres',
-      price: 60,
-      image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop',
-      seller: 'Yassine B.',
-      city: 'Tunis, El Manar',
-      condition: 'Bon état'
-    },
-    {
-      id: 6,
-      title: 'Étagère de rangement',
-      category: 'Meubles',
-      price: 90,
-      image: 'https://images.unsplash.com/photo-1594620302200-9a762244a156?q=80&w=600&auto=format&fit=crop',
-      seller: 'Ines M.',
-      city: 'Monastir',
-      condition: 'Bon état'
-    },
-    {
-      id: 7,
-      title: 'Vélo de ville',
-      category: 'Autres',
-      price: 250,
-      image: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=600&auto=format&fit=crop',
-      seller: 'Karim S.',
-      city: 'La Marsa',
-      condition: 'Très bon état'
-    },
-    {
-      id: 8,
-      title: 'Casque audio Bluetooth',
-      category: 'Électronique',
-      price: 70,
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop',
-      seller: 'Rania Z.',
-      city: 'Sfax',
-      condition: 'Neuf'
-    }
-  ];
+  products: Product[] = [];
 
   showSellModal = false;
   sellLoading = false;
@@ -145,16 +69,89 @@ export class MarketplacePage implements OnInit {
     negotiable: false,
     city: '',
     description: '',
-    photoDataUrl: null as string | null
+    photoDataUrl: null as string | null,
+    photoFile: null as File | null,
   };
+
+  private productsSub?: Subscription;
 
   constructor(
     private toastController: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private auth: AuthService,
+    private studentMenu: StudentMenuService,
+    private data: MockDataService,
+    private upload: UploadService,
+    private router: Router,
   ) {}
 
+  get menuInitial(): string {
+    const name = this.auth.currentUser?.fullName?.trim();
+    return name ? name.charAt(0).toUpperCase() : '';
+  }
+
+  openMenu(): void {
+    this.studentMenu.open();
+  }
+
   ngOnInit() {
-    setTimeout(() => this.loading = false, 900);
+    this.syncProducts(this.data.products);
+    this.productsSub = this.data.products$.subscribe((list) => this.syncProducts(list));
+    void this.reload();
+  }
+
+  ionViewWillEnter(): void {
+    void this.data.loadProducts({ limit: 100 }).then(() => this.syncProducts(this.data.products));
+  }
+
+  ngOnDestroy(): void {
+    this.productsSub?.unsubscribe();
+  }
+
+  async reload(event?: CustomEvent): Promise<void> {
+    this.loading = true;
+    try {
+      await this.data.loadProducts({ limit: 100 });
+      this.syncProducts(this.data.products);
+    } finally {
+      this.loading = false;
+      (event?.target as HTMLIonRefresherElement | undefined)?.complete?.();
+    }
+  }
+
+  trackByProductId(_index: number, product: Product): number {
+    return product.id;
+  }
+
+  private syncProducts(list: DataProduct[]): void {
+    const mapped = list.map((p) => ({
+      id: p.id,
+      title: p.title,
+      category: p.category,
+      price: p.price,
+      image: p.images?.[0] || NO_PHOTO_PLACEHOLDER,
+      seller: p.seller?.name || 'Vendeur',
+      city: p.city,
+      condition: p.condition,
+      negotiable: p.negotiable,
+      description: p.description,
+      viewsCount: p.viewsCount ?? 0,
+      likesCount: p.likesCount ?? 0,
+    }));
+    if (
+      this.products.length === mapped.length &&
+      this.products.every((p, i) =>
+        p.id === mapped[i].id &&
+        p.image === mapped[i].image &&
+        p.price === mapped[i].price &&
+        p.likesCount === mapped[i].likesCount &&
+        p.viewsCount === mapped[i].viewsCount &&
+        p.title === mapped[i].title,
+      )
+    ) {
+      return;
+    }
+    this.products = mapped;
   }
 
   selectCategory(category: string) {
@@ -167,7 +164,6 @@ export class MarketplacePage implements OnInit {
 
   get filteredProducts(): Product[] {
     return this.products.filter(item => {
-
       const matchesSearch =
         item.title.toLowerCase().includes(this.searchText.toLowerCase()) ||
         item.city.toLowerCase().includes(this.searchText.toLowerCase());
@@ -181,6 +177,10 @@ export class MarketplacePage implements OnInit {
   }
 
   openSellModal() {
+    if (!this.auth.isLoggedIn) {
+      void this.router.navigateByUrl('/login');
+      return;
+    }
     this.sellError = '';
     this.sellForm = {
       title: '',
@@ -190,7 +190,8 @@ export class MarketplacePage implements OnInit {
       negotiable: false,
       city: '',
       description: '',
-      photoDataUrl: null
+      photoDataUrl: null,
+      photoFile: null,
     };
     this.showSellModal = true;
   }
@@ -203,6 +204,7 @@ export class MarketplacePage implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+    this.sellForm.photoFile = file;
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -221,31 +223,54 @@ export class MarketplacePage implements OnInit {
       return;
     }
 
+    if (!this.auth.isLoggedIn) {
+      void this.router.navigateByUrl('/login');
+      return;
+    }
+
     this.sellLoading = true;
 
-    const newProduct: Product = {
-      id: Math.max(...this.products.map(p => p.id), 0) + 1,
-      title: title.trim(),
-      category,
-      condition,
-      price,
-      negotiable: this.sellForm.negotiable,
-      city: city.trim(),
-      description: this.sellForm.description.trim() || undefined,
-      image: this.sellForm.photoDataUrl || NO_PHOTO_PLACEHOLDER,
-      seller: 'Vous'
-    };
+    const me = this.auth.currentUser;
+    const sellerId = me?.id ? Number(me.id) : 0;
+    let imageUrls: string[] = [];
 
-    this.products = [newProduct, ...this.products];
-    this.sellLoading = false;
-    this.showSellModal = false;
+    try {
+      if (this.sellForm.photoFile) {
+        const uploaded = await this.upload.uploadFile(this.sellForm.photoFile, 'products');
+        if (uploaded?.url) imageUrls = [uploaded.url];
+      }
 
-    const toast = await this.toastController.create({
-      message: this.translate.instant('MARKETPLACE_PAGE.SELL_SUCCESS'),
-      duration: 2500,
-      color: 'success',
-      position: 'top'
-    });
-    await toast.present();
+      const created = await this.data.createProduct({
+        title: title.trim(),
+        category,
+        condition,
+        price,
+        negotiable: this.sellForm.negotiable,
+        city: city.trim(),
+        description: this.sellForm.description.trim() || '',
+        images: imageUrls,
+        specs: [],
+        sellerId,
+      });
+      if (!created) {
+        this.sellError = 'MARKETPLACE_PAGE.SELL_ERROR_REQUIRED';
+        return;
+      }
+      await this.data.loadProducts();
+      this.syncProducts(this.data.products);
+      this.showSellModal = false;
+
+      const toast = await this.toastController.create({
+        message: this.translate.instant('MARKETPLACE_PAGE.SELL_SUCCESS'),
+        duration: 2500,
+        color: 'success',
+        position: 'top'
+      });
+      await toast.present();
+    } catch (e: any) {
+      this.sellError = typeof e?.message === 'string' ? e.message : 'MARKETPLACE_PAGE.SELL_ERROR_REQUIRED';
+    } finally {
+      this.sellLoading = false;
+    }
   }
 }

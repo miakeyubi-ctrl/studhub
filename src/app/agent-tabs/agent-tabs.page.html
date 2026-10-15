@@ -1,5 +1,4 @@
 <ion-tabs>
-
   <ion-tab-bar slot="bottom">
     <ion-tab-button tab="dashboard" href="/agent-dashboard/dashboard">
       <ion-icon aria-hidden="true" name="grid-outline"></ion-icon>
@@ -21,5 +20,83 @@
       <ion-label>{{ 'AGENT_TABS.PROFILE' | translate }}</ion-label>
     </ion-tab-button>
   </ion-tab-bar>
-
 </ion-tabs>
+
+<!-- Offcanvas menu agent -->
+<ion-modal
+  class="agent-menu-modal"
+  [isOpen]="menuOpen"
+  [backdropDismiss]="true"
+  (didDismiss)="closeMenu()">
+  <ng-template>
+    <div class="agent-menu">
+      <div class="agent-menu__hero">
+        <button type="button" class="agent-menu__close" (click)="closeMenu()" aria-label="Fermer">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+
+        <div class="agent-menu__avatar">
+          <span *ngIf="displayName">{{ displayName.charAt(0).toUpperCase() }}</span>
+          <ion-icon *ngIf="!displayName" name="business-outline"></ion-icon>
+        </div>
+
+        <h2 class="agent-menu__name">{{ displayName || ('AGENT_MENU.GUEST' | translate) }}</h2>
+        <p class="agent-menu__email" *ngIf="subtitle">{{ subtitle }}</p>
+        <span class="agent-menu__badge">{{ 'PROFILE_PAGE.AGENT_BADGE' | translate }}</span>
+      </div>
+
+      <div class="agent-menu__body">
+        <button type="button" class="agent-menu__item" (click)="goProfile()">
+          <div class="agent-menu__icon">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span>{{ 'AGENT_MENU.PROFILE' | translate }}</span>
+          <ion-icon name="chevron-forward-outline" class="agent-menu__chevron"></ion-icon>
+        </button>
+
+        <button type="button" class="agent-menu__item" (click)="goMessages()">
+          <div class="agent-menu__icon">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+          </div>
+          <span>{{ 'AGENT_TABS.MESSAGES' | translate }}</span>
+          <ion-icon name="chevron-forward-outline" class="agent-menu__chevron"></ion-icon>
+        </button>
+
+        <div class="agent-menu__section">{{ 'AGENT_MENU.SETTINGS' | translate }}</div>
+
+        <div class="agent-menu__item agent-menu__item--static">
+          <div class="agent-menu__icon">
+            <ion-icon [name]="theme.isDark ? 'moon-outline' : 'sunny-outline'"></ion-icon>
+          </div>
+          <span>{{ 'PROFILE_PAGE.DARK_MODE' | translate }}</span>
+          <ion-toggle
+            [checked]="theme.isDark"
+            (ionChange)="theme.toggleTheme()">
+          </ion-toggle>
+        </div>
+
+        <div class="agent-menu__item agent-menu__item--static">
+          <div class="agent-menu__icon">
+            <ion-icon name="language-outline"></ion-icon>
+          </div>
+          <span>{{ 'LANGUAGE.TITLE' | translate }}</span>
+          <select
+            [ngModel]="language.currentLanguage"
+            (ngModelChange)="language.setLanguage($event)"
+            class="agent-menu__select">
+            <option *ngFor="let lang of language.languages" [value]="lang.code">
+              {{ lang.labelKey | translate }}
+            </option>
+          </select>
+        </div>
+
+        <button type="button" class="agent-menu__item agent-menu__item--danger" (click)="logout()">
+          <div class="agent-menu__icon agent-menu__icon--danger">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </div>
+          <span>{{ 'AGENT_DASHBOARD.LOGOUT' | translate }}</span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

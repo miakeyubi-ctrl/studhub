@@ -1,0 +1,113 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'ADMIN_PARTNERS.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <button type="button" (click)="addPartner()"
+        class="mr-2 flex items-center gap-1 text-xs font-bold px-3 py-2 rounded-full bg-primary-600 text-white active:scale-95 transition">
+        <ion-icon name="add"></ion-icon>{{ 'ADMIN_PARTNERS.ADD' | translate }}
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-4 pb-10">
+
+    <!-- Stats + Chart.js -->
+    <div *ngIf="!loading && !error" class="mb-4 rounded-2xl shadow-lg p-4 dark:bg-primary-800" style="background: var(--stud-surface)">
+      <h3 class="text-sm font-bold text-slate-800 dark:text-white m-0 mb-3">
+        {{ 'ADMIN_PARTNERS.STATS_TITLE' | translate }}
+      </h3>
+
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <div class="rounded-xl bg-primary-50 dark:bg-primary-700/40 px-2 py-2.5 text-center">
+          <p class="text-lg font-extrabold text-primary-700 dark:text-primary-200 m-0">{{ totals.views }}</p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 m-0 mt-0.5">{{ 'ADMIN_PARTNERS.STAT_VIEWS' | translate }}</p>
+        </div>
+        <div class="rounded-xl bg-amber-50 dark:bg-primary-700/40 px-2 py-2.5 text-center">
+          <p class="text-lg font-extrabold text-amber-600 dark:text-amber-300 m-0">{{ totals.likes }}</p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 m-0 mt-0.5">{{ 'ADMIN_PARTNERS.STAT_LIKES' | translate }}</p>
+        </div>
+        <div class="rounded-xl bg-indigo-50 dark:bg-primary-700/40 px-2 py-2.5 text-center">
+          <p class="text-lg font-extrabold text-indigo-600 dark:text-indigo-300 m-0">{{ totals.clicks }}</p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 m-0 mt-0.5">{{ 'ADMIN_PARTNERS.STAT_CLICKS' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="partner-chart-wrap">
+        <canvas #statsChart aria-label="Partner stats chart"></canvas>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 rounded-2xl px-3 h-11 shadow-sm mb-4 dark:bg-primary-800" style="background: var(--stud-surface)">
+      <ion-icon name="search-outline" class="text-slate-400 text-lg"></ion-icon>
+      <input type="search" [(ngModel)]="search" [placeholder]="'COMMON.SEARCH' | translate"
+        class="flex-1 bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder:text-slate-400" />
+    </div>
+
+    <div *ngIf="loading" class="space-y-3">
+      <app-skeleton *ngFor="let i of [0,1,2]" width="100%" height="5rem" radius="1rem"></app-skeleton>
+    </div>
+
+    <div *ngIf="!loading && error" class="text-center py-16">
+      <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'ADMIN_PARTNERS.ERROR' | translate }}</p>
+      <button type="button" (click)="load()" class="mt-3 text-xs font-bold px-4 py-2 rounded-full bg-primary-600 text-white">
+        {{ 'PARTNERS_PAGE.RETRY' | translate }}
+      </button>
+    </div>
+
+    <div *ngIf="!loading && !error && !filtered.length" class="text-center py-16 px-4">
+      <div class="w-14 h-14 mx-auto rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center mb-3">
+        <ion-icon name="people-outline" class="text-primary-600 text-2xl"></ion-icon>
+      </div>
+      <p class="text-sm font-bold text-slate-700 dark:text-white m-0">{{ 'ADMIN_PARTNERS.EMPTY' | translate }}</p>
+    </div>
+
+    <div *ngIf="!loading && !error" class="space-y-3">
+      <div
+        *ngFor="let p of filtered"
+        (click)="editPartner(p.id)"
+        class="rounded-2xl shadow-lg p-3 flex gap-3 items-center dark:bg-primary-800 cursor-pointer active:scale-[0.99] transition"
+        [class.opacity-60]="!p.isActive"
+        style="background: var(--stud-surface)">
+
+        <img [src]="p.logoUrl" [alt]="p.name" class="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-primary-50" referrerpolicy="no-referrer" />
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <h5 class="text-sm font-bold text-slate-800 dark:text-white m-0 truncate">{{ p.name }}</h5>
+            <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full" [ngClass]="status(p).cls">
+              {{ status(p).label | translate }}
+            </span>
+          </div>
+          <p class="text-[11px] text-primary-600 dark:text-primary-300 font-semibold mt-0.5 mb-0">#{{ p.sortOrder }} · {{ p.category }}</p>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 mb-0 flex flex-wrap gap-x-2 gap-y-0.5">
+            <span><ion-icon name="eye-outline" class="align-middle"></ion-icon> {{ p.viewsCount || 0 }}</span>
+            <span><ion-icon name="heart-outline" class="align-middle"></ion-icon> {{ p.likesCount || 0 }}</span>
+            <span><ion-icon name="hand-left-outline" class="align-middle"></ion-icon> {{ p.clicksCount || 0 }}</span>
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-1.5 flex-shrink-0">
+          <button type="button" (click)="toggleActive(p, $event)"
+            class="w-8 h-8 rounded-full bg-slate-100 dark:bg-primary-700 flex items-center justify-center active:scale-90 transition">
+            <ion-icon [name]="p.isActive ? 'eye-outline' : 'eye-off-outline'" class="text-slate-600 dark:text-white"></ion-icon>
+          </button>
+          <button type="button" (click)="confirmDelete(p, $event)"
+            class="w-8 h-8 rounded-full bg-red-50 dark:bg-primary-700 flex items-center justify-center active:scale-90 transition">
+            <ion-icon name="trash-outline" class="text-red-500"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

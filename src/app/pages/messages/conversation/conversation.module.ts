@@ -8,6 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ConversationPageRoutingModule } from './conversation-routing.module';
 
 import { ConversationPage } from './conversation.page';
+import { VoiceNotePlayerComponent } from '../../../shared/voice-note-player/voice-note-player.component';
 
 @NgModule({
   imports: [
@@ -17,6 +18,6 @@ import { ConversationPage } from './conversation.page';
     TranslateModule,
     ConversationPageRoutingModule
   ],
-  declarations: [ConversationPage]
+  declarations: [ConversationPage, VoiceNotePlayerComponent]
 })
 export class ConversationPageModule {}

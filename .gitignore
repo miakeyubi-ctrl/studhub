@@ -68,3 +68,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Local caches / temp
+.npm-cache/
+_tmp_ports.py
+ng-build.log

@@ -1,16 +1,22 @@
 import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { AgentAuthService, RealEstateAgent } from '../services/agent-auth.service';
-import { AgentProperty, AgentPropertiesService } from '../services/agent-properties.service';
+import { AgentMenuService } from '../services/agent-menu.service';
+import { AgentProperty, AgentPropertiesService, PROPERTY_PHOTO_PLACEHOLDER } from '../services/agent-properties.service';
+import { UploadService } from '../services/upload.service';
 
-const NO_PHOTO_PLACEHOLDER =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'>" +
-  "<rect width='400' height='300' fill='%23EFFBFC'/>" +
-  "<g fill='%2356C8D1' opacity='0.35'>" +
-  "<circle cx='140' cy='110' r='28'/>" +
-  "<path d='M40 260 L160 150 L230 210 L280 160 L360 260 Z'/>" +
-  "</g></svg>";
+const NO_PHOTO_PLACEHOLDER = PROPERTY_PHOTO_PLACEHOLDER;
+
+interface PhotoPreview {
+  localFile?: File;
+  url: string;
+  isUploading?: boolean;
+  progress?: number;
+  error?: string;
+}
 
 @Component({
   selector: 'app-agent-tab-gestion',
@@ -22,12 +28,14 @@ export class AgentTabGestionPage implements OnInit {
 
   agent!: RealEstateAgent;
   properties: AgentProperty[] = [];
+  menuInitial = '';
 
   categories = ['Studios', 'Colocations', 'Résidences', 'Chambres'];
 
   showFormModal = false;
   editingId: number | null = null;
   formLoading = false;
+  formUploading = false;
   formError = '';
 
   form = {
@@ -40,28 +48,100 @@ export class AgentTabGestionPage implements OnInit {
     rooms: null as number | null,
     furnished: false,
     description: '',
-    photoDataUrl: null as string | null
+    latitude: null as number | null,
+    longitude: null as number | null,
+    photos: [] as PhotoPreview[],
   };
 
   constructor(
     private agentAuth: AgentAuthService,
     private agentProperties: AgentPropertiesService,
+    private agentMenu: AgentMenuService,
     private alertController: AlertController,
     private toastController: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private uploadService: UploadService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private location: Location,
   ) { }
 
   ngOnInit(): void {
     this.agent = this.agentAuth.currentAgentOrGuest;
-    this.refreshProperties();
+    this.updateMenuInitial();
+    void this.refreshProperties().then(() => this.handleQueryActions());
+    this.route.queryParamMap.subscribe(() => {
+      void this.handleQueryActions();
+    });
+  }
+
+  openMenu(): void {
+    this.agentMenu.open();
+  }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+    void this.router.navigateByUrl('/agent-dashboard/dashboard');
+  }
+
+  private updateMenuInitial(): void {
+    const label = this.agent?.agencyName?.trim() || this.agent?.fullName?.trim() || this.agent?.email || '';
+    this.menuInitial = label ? label.charAt(0).toUpperCase() : '';
   }
 
   ionViewWillEnter(): void {
-    this.refreshProperties();
+    void this.refreshProperties();
   }
 
-  private refreshProperties(): void {
-    this.properties = this.agentProperties.getByAgent(this.agent.id);
+  private async handleQueryActions(): Promise<void> {
+    const params = this.route.snapshot.queryParamMap;
+    const openAdd = params.get('open') === 'add';
+    const editId = Number(params.get('edit'));
+
+    if (openAdd) {
+      this.openAddModal();
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
+      return;
+    }
+
+    if (editId && !Number.isNaN(editId)) {
+      if (!this.properties.length) {
+        await this.refreshProperties();
+      }
+      const property = this.properties.find(p => p.id === editId)
+        || await this.agentProperties.getById(editId);
+      // Voter-like : seule l'annonce de l'agent connecté est modifiable
+      if (property && String(property.agentId) === String(this.agent.id)) {
+        this.openEditModal(property);
+      }
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
+    }
+  }
+
+  photoSrc(property: AgentProperty): string {
+    return this.agentProperties.resolvePhotoUrl(property.image);
+  }
+
+  onPhotoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img && !img.src.startsWith('data:image/svg+xml')) {
+      img.src = NO_PHOTO_PLACEHOLDER;
+    }
+  }
+
+  private async refreshProperties(): Promise<void> {
+    this.properties = await this.agentProperties.getByAgent(this.agent.id);
   }
 
   openAddModal(): void {
@@ -77,14 +157,26 @@ export class AgentTabGestionPage implements OnInit {
       rooms: null,
       furnished: false,
       description: '',
-      photoDataUrl: null
+      latitude: null,
+      longitude: null,
+      photos: [],
     };
     this.showFormModal = true;
   }
 
+  viewProperty(property: AgentProperty): void {
+    void this.router.navigate(['/detailsimmo', property.id]);
+  }
+
   openEditModal(property: AgentProperty): void {
+    if (String(property.agentId) !== String(this.agent.id)) {
+      return;
+    }
     this.editingId = property.id;
     this.formError = '';
+    const imageUrls: string[] = (Array.isArray(property.images) && property.images.length > 0)
+      ? property.images
+      : property.image && property.image !== NO_PHOTO_PLACEHOLDER ? [property.image] : [];
     this.form = {
       title: property.title,
       category: property.category,
@@ -95,7 +187,9 @@ export class AgentTabGestionPage implements OnInit {
       rooms: property.rooms,
       furnished: property.furnished,
       description: property.description,
-      photoDataUrl: property.image === NO_PHOTO_PLACEHOLDER ? null : property.image
+      latitude: property.latitude ?? null,
+      longitude: property.longitude ?? null,
+      photos: imageUrls.map(url => ({ url })),
     };
     this.showFormModal = true;
   }
@@ -104,16 +198,53 @@ export class AgentTabGestionPage implements OnInit {
     this.showFormModal = false;
   }
 
-  onPhotoSelected(event: Event): void {
+  onPhotosSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+    const files = input.files;
+    if (!files || files.length === 0) return;
+    const added = Array.from(files).map((file): PhotoPreview => ({
+      localFile: file,
+      url: URL.createObjectURL(file),
+    }));
+    this.form.photos = [...this.form.photos, ...added].slice(0, 10);
+    input.value = '';
+  }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.form.photoDataUrl = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+  removePhotoAt(index: number): void {
+    const p = this.form.photos[index];
+    if (p?.url?.startsWith('blob:')) URL.revokeObjectURL(p.url);
+    this.form.photos.splice(index, 1);
+  }
+
+  private async uploadPendingPhotos(): Promise<string[]> {
+    const pending = this.form.photos.filter(p => !!p.localFile);
+    if (pending.length === 0) {
+      return this.form.photos.map(p => p.url).filter(u => !!u);
+    }
+    this.formUploading = true;
+    pending.forEach(p => { p.isUploading = true; p.progress = 0; p.error = undefined; });
+    try {
+      const urls: string[] = [];
+      for (const preview of pending) {
+        if (!preview.localFile) continue;
+        preview.progress = 15;
+        try {
+          const uploaded = await this.uploadService.uploadFile(preview.localFile, 'properties');
+          preview.progress = 100;
+          preview.url = uploaded.url;
+          preview.isUploading = false;
+          urls.push(uploaded.url);
+        } catch (err: any) {
+          preview.error = (err && err.message) ? String(err.message) : 'UPLOAD.ERROR';
+          preview.isUploading = false;
+          throw new Error(preview.error);
+        }
+      }
+      const uploadedUrls = this.form.photos.map(p => p.url).filter(u => !!u && !u.startsWith('blob:'));
+      return uploadedUrls;
+    } finally {
+      this.formUploading = false;
+    }
   }
 
   async savePropertyForm(): Promise<void> {
@@ -127,38 +258,57 @@ export class AgentTabGestionPage implements OnInit {
     }
 
     this.formLoading = true;
-
-    const payload = {
-      agentId: this.agent.id,
-      title: title.trim(),
-      category,
-      city: city.trim(),
-      address: address.trim(),
-      price,
-      surface,
-      rooms,
-      furnished: this.form.furnished,
-      description: this.form.description.trim(),
-      image: this.form.photoDataUrl || NO_PHOTO_PLACEHOLDER
-    };
-
-    if (this.editingId !== null) {
-      this.agentProperties.update(this.editingId, payload);
-    } else {
-      this.agentProperties.add(payload);
+    let uploadedImageUrls: string[] = [];
+    try {
+      uploadedImageUrls = await this.uploadPendingPhotos();
+    } catch (err: any) {
+      this.formLoading = false;
+      this.formError = (err && err.message) ? String(err.message) : 'UPLOAD.ERROR';
+      return;
     }
+    const realUrls = uploadedImageUrls.filter(u => !!u && !u.startsWith('blob:') && !u.startsWith('data:'));
+    const mainImage = realUrls[0] || NO_PHOTO_PLACEHOLDER;
 
-    this.refreshProperties();
-    this.formLoading = false;
-    this.showFormModal = false;
+    try {
+      const payload: any = {
+        title: title.trim(),
+        category,
+        city: city.trim(),
+        address: address.trim(),
+        price,
+        surface,
+        rooms,
+        furnished: this.form.furnished,
+        description: this.form.description.trim(),
+        image: mainImage,
+        images: realUrls,
+      };
+      if (this.form.latitude != null && this.form.longitude != null) {
+        payload.latitude = Number(this.form.latitude);
+        payload.longitude = Number(this.form.longitude);
+      }
 
-    const toast = await this.toastController.create({
-      message: this.translate.instant(this.editingId !== null ? 'AGENT_DASHBOARD.SUCCESS_UPDATED' : 'AGENT_DASHBOARD.SUCCESS_PUBLISHED'),
-      duration: 2500,
-      color: 'success',
-      position: 'top'
-    });
-    await toast.present();
+      if (this.editingId !== null) {
+        await this.agentProperties.update(this.editingId, payload);
+      } else {
+        await this.agentProperties.add(payload);
+      }
+
+      await this.refreshProperties();
+      this.formLoading = false;
+      this.showFormModal = false;
+
+      const toast = await this.toastController.create({
+        message: this.translate.instant(this.editingId !== null ? 'AGENT_DASHBOARD.SUCCESS_UPDATED' : 'AGENT_DASHBOARD.SUCCESS_PUBLISHED'),
+        duration: 2500,
+        color: 'success',
+        position: 'top'
+      });
+      await toast.present();
+    } catch (err: any) {
+      this.formLoading = false;
+      this.formError = (err && err.message) ? String(err.message) : 'AGENT_DASHBOARD.ERROR_SAVE';
+    }
   }
 
   async confirmDelete(property: AgentProperty): Promise<void> {
@@ -181,8 +331,8 @@ export class AgentTabGestionPage implements OnInit {
   }
 
   private async deleteProperty(id: number): Promise<void> {
-    this.agentProperties.delete(id);
-    this.refreshProperties();
+    await this.agentProperties.delete(id);
+    await this.refreshProperties();
 
     const toast = await this.toastController.create({
       message: this.translate.instant('AGENT_DASHBOARD.SUCCESS_DELETED'),
@@ -193,3 +343,4 @@ export class AgentTabGestionPage implements OnInit {
     await toast.present();
   }
 }
+

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { MockDataService, Property } from '../services/mock-data.service';
 
-interface Property {
+interface PropertyCard {
   id: number;
   title: string;
   city: string;
@@ -8,6 +10,8 @@ interface Property {
   image: string;
   category: string;
   rating: number;
+  viewsCount: number;
+  likesCount: number;
 }
 
 @Component({
@@ -16,78 +20,55 @@ interface Property {
   styleUrls: ['./tab2.page.scss'],
   standalone: false
 })
-export class Tab2Page implements OnInit {
+export class Tab2Page implements OnInit, OnDestroy {
 
   loading = true;
-
   searchText = '';
   selectedCategory = 'Tous';
-
   categories = ['Tous', 'Studios', 'Colocations', 'Résidences', 'Chambres'];
+  properties: PropertyCard[] = [];
 
-  properties: Property[] = [
-    {
-      id: 1,
-      title: 'Studio moderne près du campus',
-      city: 'Tunis, El Manar',
-      price: 450,
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop',
-      category: 'Studios',
-      rating: 4.8
-    },
-    {
-      id: 2,
-      title: 'Colocation lumineuse',
-      city: 'Sousse, Khezama',
-      price: 320,
-      image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format&fit=crop',
-      category: 'Colocations',
-      rating: 4.5
-    },
-    {
-      id: 3,
-      title: 'Résidence universitaire sécurisée',
-      city: 'Sfax, Route de l\'Aéroport',
-      price: 280,
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800&auto=format&fit=crop',
-      category: 'Résidences',
-      rating: 4.6
-    },
-    {
-      id: 4,
-      title: 'Chambre meublée avec balcon',
-      city: 'Ariana, Centre urbain',
-      price: 250,
-      image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=800&auto=format&fit=crop',
-      category: 'Chambres',
-      rating: 4.3
-    },
-    {
-      id: 5,
-      title: 'Appartement proche fac de médecine',
-      city: 'Monastir',
-      price: 400,
-      image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800&auto=format&fit=crop',
-      category: 'Studios',
-      rating: 4.7
-    },
-    {
-      id: 6,
-      title: 'Colocation étudiante conviviale',
-      city: 'La Marsa',
-      price: 380,
-      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format&fit=crop',
-      category: 'Colocations',
-      rating: 4.4
-    }
-  ];
+  private propsSub?: Subscription;
 
-  favoriteIds = new Set<number>();
-
-  constructor() {}
+  constructor(private data: MockDataService) {}
 
   ngOnInit() {
-    setTimeout(() => this.loading = false, 900);
+    this.sync();
+    this.propsSub = this.data.properties$.subscribe(() => this.sync());
+    void this.reload();
+  }
+
+  ionViewWillEnter(): void {
+    void this.data.loadProperties({ limit: 100 }).then(() => this.sync());
+  }
+
+  ngOnDestroy(): void {
+    this.propsSub?.unsubscribe();
+  }
+
+  async reload(event?: CustomEvent): Promise<void> {
+    this.loading = true;
+    try {
+      await this.data.loadProperties({ limit: 100 });
+      this.sync();
+    } finally {
+      this.loading = false;
+      (event?.target as HTMLIonRefresherElement | undefined)?.complete?.();
+    }
+  }
+
+  private sync(): void {
+    this.properties = this.data.properties.map((p: Property) => ({
+      id: p.id,
+      title: p.title,
+      city: p.city,
+      price: p.price,
+      image: p.images?.[0] || '',
+      category: p.category,
+      rating: p.rating,
+      viewsCount: p.viewsCount ?? 0,
+      likesCount: p.likesCount ?? 0,
+    }));
   }
 
   onSearchChange(event: any) {
@@ -98,32 +79,35 @@ export class Tab2Page implements OnInit {
     this.selectedCategory = category;
   }
 
-  toggleFavorite(id: number, event: Event) {
+  async toggleFavorite(id: number, event: Event) {
     event.stopPropagation();
     event.preventDefault();
-
-    if (this.favoriteIds.has(id)) {
-      this.favoriteIds.delete(id);
-    } else {
-      this.favoriteIds.add(id);
-    }
+    await this.data.toggleFavorite(id);
   }
 
   isFavorite(id: number): boolean {
-    return this.favoriteIds.has(id);
+    return this.data.isFavorite(id);
   }
 
-  get filteredProperties(): Property[] {
-    return this.properties.filter(item => {
+  async toggleLike(id: number, event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    await this.data.togglePropertyLike(id);
+    this.sync();
+  }
 
+  isLiked(id: number): boolean {
+    return this.data.isPropertyLiked(id);
+  }
+
+  get filteredProperties(): PropertyCard[] {
+    return this.properties.filter(item => {
       const matchesSearch =
         item.title.toLowerCase().includes(this.searchText.toLowerCase()) ||
         item.city.toLowerCase().includes(this.searchText.toLowerCase());
-
       const matchesCategory =
         this.selectedCategory === 'Tous' ||
         item.category === this.selectedCategory;
-
       return matchesSearch && matchesCategory;
     });
   }

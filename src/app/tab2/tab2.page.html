@@ -1,23 +1,29 @@
 <ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
 
-    <ion-buttons slot="start">
-      <img
-        src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"
-        class="w-9 h-9 ml-2 rounded-full object-cover" />
-    </ion-buttons>
-
     <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'IMMO_PAGE.TITLE' | translate }}</ion-title>
+
+    <ion-buttons slot="end">
+      <button
+        type="button"
+        routerLink="/tabs/campus-map"
+        class="w-9 h-9 mr-2 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="map-outline" class="text-primary-700 dark:text-primary-200 text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
 
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="reload($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
   <div class="container py-4">
 
     <!-- Barre recherche -->
-    <div class="relative mb-4">
+    <div class="relative mb-3">
 
       <ion-icon
         name="search-outline"
@@ -31,6 +37,21 @@
         class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-primary-50/60 dark:bg-primary-800/60 text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none shadow-lg transition" />
 
     </div>
+
+    <button
+      type="button"
+      routerLink="/tabs/campus-map"
+      class="mb-4 w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left active:scale-[0.99] transition"
+      style="background: linear-gradient(135deg, #effbfc 0%, #daf4f6 100%); border: 1px solid rgba(46,157,166,0.25)">
+      <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shrink-0">
+        <ion-icon name="map-outline" class="text-lg"></ion-icon>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-extrabold text-primary-800 m-0">{{ 'CAMPUS_MAP.TITLE' | translate }}</p>
+        <p class="text-[11px] text-primary-700/80 m-0 mt-0.5">{{ 'CAMPUS_MAP.BANNER' | translate }}</p>
+      </div>
+      <ion-icon name="chevron-forward" class="text-primary-600 text-lg"></ion-icon>
+    </button>
 
     <!-- Catégories -->
     <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
@@ -109,6 +130,21 @@
             <ion-icon name="location-outline" class="text-primary-600"></ion-icon>
             {{ property.city }}
           </p>
+
+          <div class="flex items-center gap-3 mt-1 text-[10px] text-slate-400 dark:text-slate-400">
+            <span class="inline-flex items-center gap-0.5">
+              <ion-icon name="eye-outline" class="text-primary-600"></ion-icon>
+              {{ property.viewsCount || 0 }}
+            </span>
+            <button
+              type="button"
+              (click)="toggleLike(property.id, $event)"
+              class="inline-flex items-center gap-0.5 border-0 bg-transparent p-0"
+              [class]="isLiked(property.id) ? 'text-primary-600 font-semibold' : ''">
+              <ion-icon [name]="isLiked(property.id) ? 'thumbs-up' : 'thumbs-up-outline'"></ion-icon>
+              {{ property.likesCount || 0 }}
+            </button>
+          </div>
 
           <div class="flex items-center justify-between mt-auto">
 

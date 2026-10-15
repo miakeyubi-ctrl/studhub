@@ -1,0 +1,81 @@
+input {
+  border: none;
+  box-shadow: none;
+}
+
+.role-switch {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 1rem;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+.role-switch button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.65rem 0.35rem;
+  border-radius: 0.75rem;
+  color: #64748b;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.role-switch button.active {
+  background: #ffffff;
+  color: #1F7379;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+}
+
+:host-context(.dark) .role-switch {
+  background: rgba(14, 51, 54, 0.45);
+}
+
+:host-context(.dark) .role-switch button {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .role-switch button.active {
+  background: #0E3336;
+  color: #8FDDE3;
+}
+
+.session-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(86, 200, 209, 0.12);
+  border: 1px solid rgba(46, 157, 166, 0.25);
+}
+
+.session-pill .name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #164F53;
+}
+
+.session-pill .sub {
+  font-size: 0.68rem;
+  color: #1F7379;
+}
+
+.login-enter {
+  animation: loginFadeSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes loginFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

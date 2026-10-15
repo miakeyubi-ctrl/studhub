@@ -1,0 +1,166 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'AGENT_PROFILE.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" *ngIf="loading">
+  <div class="container py-8 space-y-4">
+    <div class="flex flex-col items-center gap-3">
+      <app-skeleton width="5.5rem" height="5.5rem" [circle]="true" logoSize="1.6rem"></app-skeleton>
+      <app-skeleton width="50%" height="1rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+      <app-skeleton width="35%" height="0.75rem" radius="0.5rem" [showLogo]="false"></app-skeleton>
+    </div>
+    <div class="grid grid-cols-3 gap-2 mt-6">
+      <app-skeleton *ngFor="let i of [0,1,2]" height="4.5rem" radius="1rem" logoSize="1.2rem"></app-skeleton>
+    </div>
+  </div>
+</ion-content>
+
+<ion-content [fullscreen]="true" *ngIf="!loading && notFound">
+  <div class="container py-16 text-center">
+    <ion-icon name="person-outline" class="text-6xl text-primary-100 mb-4" style="display:block"></ion-icon>
+    <p class="text-slate-700 dark:text-slate-200 font-semibold">{{ 'AGENT_PROFILE.NOT_FOUND' | translate }}</p>
+    <button
+      type="button"
+      (click)="goBack()"
+      class="mt-5 bg-primary-500 text-white text-sm font-bold px-6 py-3 rounded-xl active:scale-95 transition">
+      {{ 'COMMON.BACK' | translate }}
+    </button>
+  </div>
+</ion-content>
+
+<ion-content [fullscreen]="true" *ngIf="!loading && agent">
+  <div class="container py-6 pb-10">
+
+    <!-- En-tête profil -->
+    <div class="flex flex-col items-center text-center">
+      <img
+        [src]="avatar"
+        [alt]="agent.agencyName"
+        referrerpolicy="no-referrer"
+        class="w-24 h-24 rounded-full object-cover bg-slate-100 shadow-lg" />
+
+      <div class="flex items-center gap-1.5 mt-3">
+        <h1 class="text-lg font-extrabold text-slate-800 dark:text-white m-0">{{ agent.agencyName }}</h1>
+        <ion-icon *ngIf="agent.verified" name="shield-checkmark" class="text-primary-600 text-lg"></ion-icon>
+      </div>
+
+      <p class="text-xs text-slate-500 dark:text-slate-300 mt-1 m-0" *ngIf="agent.address">
+        <ion-icon name="location-outline" class="align-middle"></ion-icon>
+        {{ agent.address }}
+      </p>
+
+      <p class="text-sm text-slate-500 dark:text-slate-300 mt-3 leading-relaxed max-w-sm" *ngIf="agent.description">
+        {{ agent.description }}
+      </p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-2.5 mt-6">
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" style="background: var(--stud-surface)">
+        <p class="text-lg font-extrabold text-primary-700 dark:text-primary-300 m-0">{{ agent.listingsCount }}</p>
+        <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 mt-0.5 m-0">{{ 'AGENT_PROFILE.LISTINGS' | translate }}</p>
+      </div>
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" style="background: var(--stud-surface)">
+        <p class="text-lg font-extrabold text-primary-700 dark:text-primary-300 m-0">{{ agent.followersCount }}</p>
+        <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 mt-0.5 m-0">{{ 'AGENT_PROFILE.FOLLOWERS' | translate }}</p>
+      </div>
+      <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-3 text-center" style="background: var(--stud-surface)">
+        <p class="text-[11px] font-extrabold text-primary-700 dark:text-primary-300 m-0 leading-4">{{ createdLabel }}</p>
+        <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 mt-0.5 m-0">{{ 'AGENT_PROFILE.JOINED' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-2.5 mt-5" *ngIf="!isOwnProfile">
+      <button
+        type="button"
+        (click)="toggleFollow()"
+        [disabled]="followBusy"
+        class="flex-1 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-60"
+        [ngClass]="following
+          ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+          : 'bg-primary-500 text-white'">
+        <ion-icon [name]="following ? 'checkmark-circle' : 'person-add-outline'" class="text-base"></ion-icon>
+        {{ (following ? 'AGENT_PROFILE.FOLLOWING' : 'AGENT_PROFILE.FOLLOW') | translate }}
+      </button>
+    </div>
+
+    <p class="text-[11px] text-center text-slate-400 mt-2 m-0" *ngIf="following && !isOwnProfile">
+      {{ 'AGENT_PROFILE.ALERTS_HINT' | translate }}
+    </p>
+
+    <!-- Statut + Appeler / Converser -->
+    <div class="mt-4" *ngIf="!isOwnProfile">
+      <p class="text-[11px] text-center m-0 mb-2" *ngIf="peerOnline !== null"
+        [class.text-emerald-600]="peerOnline"
+        [class.text-slate-400]="!peerOnline">
+        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle"
+          [class.bg-emerald-500]="peerOnline"
+          [class.bg-slate-400]="!peerOnline"></span>
+        {{ (peerOnline ? 'MESSAGES_PAGE.ONLINE' : 'CALL.PEER_OFFLINE') | translate }}
+      </p>
+
+      <div class="flex gap-2.5">
+        <button
+          type="button"
+          (click)="call()"
+          [disabled]="calling"
+          class="flex-1 bg-primary-500 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition disabled:opacity-60">
+          <ion-icon name="call" class="text-sm"></ion-icon>
+          {{ 'DETAILS.CLICK_TO_CALL' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="converser()"
+          class="flex-1 bg-primary-700 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <ion-icon name="chatbubbles-outline" class="text-sm"></ion-icon>
+          {{ 'DETAILS.CONVERSER' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Annonces -->
+    <div class="mt-7">
+      <h2 class="font-bold text-slate-800 dark:text-white text-sm mb-3">
+        {{ 'AGENT_PROFILE.LISTINGS_SECTION' | translate }}
+      </h2>
+
+      <div *ngIf="!listings.length" class="rounded-2xl bg-primary-50 dark:bg-primary-800 p-6 text-center">
+        <p class="text-sm text-slate-500 dark:text-slate-300 m-0">{{ 'AGENT_PROFILE.NO_LISTINGS' | translate }}</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3" *ngIf="listings.length">
+        <button
+          type="button"
+          *ngFor="let item of listings"
+          (click)="openListing(item.id)"
+          class="listing-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+          </div>
+          <div class="p-2">
+            <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold mb-0.5 truncate">
+              {{ 'CATEGORIES.' + item.category | translate }}
+            </p>
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2 leading-4">{{ item.title }}</p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

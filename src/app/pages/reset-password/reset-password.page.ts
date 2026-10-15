@@ -31,7 +31,9 @@ export class ResetPasswordPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.email = this.route.snapshot.queryParamMap.get('email') || '';
+    this.email = this.route.snapshot.queryParamMap.get('email')
+      || this.route.snapshot.queryParamMap.get('phone')
+      || '';
     this.code = this.route.snapshot.queryParamMap.get('code') || '';
   }
 
@@ -51,7 +53,7 @@ export class ResetPasswordPage implements OnInit {
       return;
     }
 
-    if (this.password.length < 6) {
+    if (this.password.length < 8) {
       this.errorMessage = 'AUTH.ERROR_PASSWORD_LENGTH';
       return;
     }
@@ -62,7 +64,7 @@ export class ResetPasswordPage implements OnInit {
     }
 
     this.loading = true;
-    const result = this.authService.resetPassword(this.email, this.code, this.password);
+    const result = await this.authService.resetPassword(this.email, this.code, this.password);
     this.loading = false;
 
     if (!result.success) {

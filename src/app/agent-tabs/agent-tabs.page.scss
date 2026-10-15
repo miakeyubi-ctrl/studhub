@@ -1,59 +1,188 @@
-ion-tab-bar {
-  --background: var(--stud-surface);
-  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 -4px 6px -4px rgba(0, 0, 0, 0.1);
-  padding: 6px 10px;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom));
-  height: auto;
-  min-height: 62px;
-  justify-content: center;
-  gap: 4px;
-}
-
-/* Onglet actif */
-ion-tab-button.tab-selected {
-  background: #164F53;
-  border-radius: 10px;
-  padding: 0 10px;
-  max-width: 120px;
-  flex-direction: row;
-  gap: 6px;
-  transition: all 0.3s ease;
-}
-
-/* Icône active */
-ion-tab-button.tab-selected ion-icon {
-  color: white !important;
-  font-size: 18px;
-  margin: 0;
-}
-
-/* Texte actif */
-ion-tab-button.tab-selected ion-label {
+:host {
   display: block;
-  color: white !important;
-  font-weight: 600;
-  font-size: 12px;
+  height: 100%;
+}
+
+.agent-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--stud-surface, #fff);
+}
+
+.agent-menu__hero {
+  position: relative;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1.25rem 1.35rem;
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
+  color: #fff;
+}
+
+.agent-menu__close {
+  position: absolute;
+  top: calc(0.65rem + env(safe-area-inset-top, 0px));
+  right: 0.75rem;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.agent-menu__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.75rem;
+}
+
+.agent-menu__name {
   margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
-/* Onglets inactifs : icône seule, sans libellé (comme la maquette) */
-ion-tab-button {
-  --background: transparent;
-  --color: #9CA9AB;
-  --color-selected: white;
-  flex: 0 0 auto;
+.agent-menu__email {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  opacity: 0.88;
+}
+
+.agent-menu__badge {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.agent-menu__body {
+  flex: 1;
+  overflow: auto;
+  padding: 0.75rem 0.85rem 1.5rem;
+}
+
+.agent-menu__section {
+  margin: 0.85rem 0.35rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.agent-menu__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0.7rem;
+  margin-bottom: 0.35rem;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.agent-menu__item:active {
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.agent-menu__item--static {
+  cursor: default;
+}
+
+.agent-menu__item--static:active {
+  background: transparent;
+}
+
+.agent-menu__item--danger {
+  color: #ef4444;
+  margin-top: 0.5rem;
+}
+
+.agent-menu__icon {
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
-.dark ion-tab-button {
-  --color: #6FA6AA;
+.agent-menu__icon--danger {
+  background: #fef2f2;
+  color: #ef4444;
 }
 
-ion-tab-button ion-icon {
-  font-size: 22px;
+.agent-menu__chevron {
+  margin-left: auto;
+  color: #cbd5e1;
+  font-size: 1rem;
 }
 
-ion-tab-button ion-label {
-  display: none;
+.agent-menu__select {
+  margin-left: auto;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  outline: none;
+}
+
+:host-context(.dark) .agent-menu__item,
+:host-context(html.dark) .agent-menu__item {
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .agent-menu__icon,
+:host-context(html.dark) .agent-menu__icon {
+  background: rgba(15, 118, 110, 0.25);
+  color: #5eead4;
+}
+
+:host ::ng-deep ion-tab-bar {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: env(safe-area-inset-bottom, 4px);
+}
+
+:host ::ng-deep ion-tab-button {
+  margin: 0 4px;
+  padding-inline: 4px;
+}
+
+:host ::ng-deep ion-tab-button ion-icon {
+  font-size: 20px;
+}
+
+:host ::ng-deep ion-tab-button ion-label {
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 2px;
 }

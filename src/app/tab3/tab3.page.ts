@@ -1,16 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { Subscription, combineLatest } from 'rxjs';
 import { ThemeService } from '../services/theme.service';
-import { MessagesService } from '../services/messages.service';
 import { LanguageService } from '../services/language.service';
 import { AgentAuthService } from '../services/agent-auth.service';
-
-interface Property {
-  id: number;
-  title: string;
-  city: string;
-  price: number;
-  image: string;
-}
+import { AuthService } from '../services/auth.service';
+import { MessagesService } from '../services/messages.service';
+import { MockDataService, Property } from '../services/mock-data.service';
+import { NotificationsInboxService } from '../services/notifications-inbox.service';
+import { Partner, PartnersService } from '../services/partners.service';
+import { hasRealAvatar, initialsBg, initialsFromName } from '../utils/avatar.util';
 
 interface Reservation {
   id: number;
@@ -23,20 +22,13 @@ interface Reservation {
   status: 'confirmee' | 'attente' | 'terminee';
 }
 
-interface Partner {
-  id: number;
-  name: string;
-  category: string;
-  offer: string;
-  logo: string;
-}
-
 interface MenuItem {
   icon: string;
   label: string;
   route?: string;
   badge?: number;
   danger?: boolean;
+  action?: 'logout';
 }
 
 @Component({
@@ -45,109 +37,80 @@ interface MenuItem {
   styleUrls: ['tab3.page.scss'],
   standalone: false,
 })
-export class Tab3Page implements OnInit {
+export class Tab3Page implements OnInit, OnDestroy {
 
   loading = true;
+  userName = 'Visiteur';
+  userEmail = '';
+  userUniversity = '';
+  userAvatar = '';
+  userInitials = 'V';
+  avatarBg = '#0f766e';
+  hasAvatar = false;
+  isLoggedIn = false;
+  isAgent = false;
 
-  userName = 'Yassine Ben Salah';
-  userEmail = 'yassine.bensalah@studhub.tn';
+  private userSub?: Subscription;
+  private agentSub?: Subscription;
+  private favoritesSub?: Subscription;
+  private partnersSub?: Subscription;
+  private notifSub?: Subscription;
 
   stats = [
-    { label: 'PROFILE_PAGE.STATS_FAVORITES', value: 3 },
-    { label: 'PROFILE_PAGE.STATS_RESERVATIONS', value: 2 },
-    { label: 'PROFILE_PAGE.STATS_REVIEWS', value: 5 }
+    { label: 'PROFILE_PAGE.STATS_FAVORITES', value: 0 },
+    { label: 'PROFILE_PAGE.STATS_RESERVATIONS', value: 0 },
+    { label: 'PROFILE_PAGE.STATS_REVIEWS', value: 0 }
   ];
 
-  favoris: Property[] = [
-    {
-      id: 1,
-      title: 'Studio moderne près du campus',
-      city: 'Tunis, El Manar',
-      price: 450,
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-      id: 3,
-      title: 'Résidence universitaire sécurisée',
-      city: 'Sfax',
-      price: 280,
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-      id: 6,
-      title: 'Colocation étudiante conviviale',
-      city: 'La Marsa',
-      price: 380,
-      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format&fit=crop'
-    }
-  ];
+  favoris: Property[] = [];
 
-  reservations: Reservation[] = [
-    {
-      id: 1,
-      title: 'Studio moderne près du campus',
-      city: 'Tunis, El Manar',
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop',
-      dateDebut: '2026-09-15',
-      dateFin: '2027-06-30',
-      price: 450,
-      status: 'confirmee'
-    },
-    {
-      id: 2,
-      title: 'Colocation lumineuse',
-      city: 'Sousse, Khezama',
-      image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format&fit=crop',
-      dateDebut: '2026-10-01',
-      dateFin: '2027-06-30',
-      price: 320,
-      status: 'attente'
-    }
-  ];
+  /** Réservations réelles (vide tant que le backend n'expose pas encore l'API). */
+  reservations: Reservation[] = [];
 
-  partners: Partner[] = [
-    {
-      id: 1,
-      name: 'Talan Tunisie',
-      category: 'Entreprise IT',
-      offer: 'Stages & offres d\'emploi pour étudiants',
-      logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?q=80&w=200&auto=format&fit=crop'
-    },
-    {
-      id: 2,
-      name: 'Club Entrepreneurs ESPRIT',
-      category: 'Association étudiante',
-      offer: 'Ateliers et événements networking',
-      logo: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=200&auto=format&fit=crop'
-    },
-    {
-      id: 3,
-      name: 'InstaDeco',
-      category: 'Ameublement',
-      offer: '-15% sur le mobilier étudiant',
-      logo: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=200&auto=format&fit=crop'
-    }
-  ];
+  partners: Partner[] = [];
+  isAdmin = false;
 
   menuItems: MenuItem[] = [
+    { icon: 'heart-outline', label: 'PROFILE_PAGE.FAVORITES_TITLE', route: '/favorites' },
     { icon: 'chatbubbles-outline', label: 'PROFILE_PAGE.MENU_MESSAGES', route: '/messages' },
-    { icon: 'notifications-outline', label: 'PROFILE_PAGE.MENU_NOTIFICATIONS', badge: 4 },
+    { icon: 'notifications-outline', label: 'PROFILE_PAGE.MENU_NOTIFICATIONS', route: '/notifications' },
     { icon: 'person-outline', label: 'PROFILE_PAGE.MENU_EDIT_PROFILE', route: '/edit-profile' },
-    { icon: 'flag-outline', label: 'PROFILE_PAGE.MENU_REPORTS' },
-    { icon: 'shield-checkmark-outline', label: 'PROFILE_PAGE.MENU_PRIVACY' },
-    { icon: 'help-circle-outline', label: 'PROFILE_PAGE.MENU_HELP' },
-    { icon: 'log-out-outline', label: 'PROFILE_PAGE.MENU_LOGOUT', danger: true }
+    { icon: 'flag-outline', label: 'PROFILE_PAGE.MENU_REPORTS', route: '/my-reports' },
+    { icon: 'shield-checkmark-outline', label: 'PROFILE_PAGE.MENU_PRIVACY', route: '/privacy-security' },
+    { icon: 'help-circle-outline', label: 'PROFILE_PAGE.MENU_HELP', route: '/help-support' },
+    { icon: 'trash-outline', label: 'PRIVACY_PAGE.DELETE_ACCOUNT', danger: true, route: '/privacy-security' },
+    { icon: 'log-out-outline', label: 'PROFILE_PAGE.MENU_LOGOUT', danger: true, action: 'logout' }
   ];
 
   constructor(
     public theme: ThemeService,
     public language: LanguageService,
     public agentAuth: AgentAuthService,
-    private messagesService: MessagesService
+    private auth: AuthService,
+    private router: Router,
+    private messagesService: MessagesService,
+    private data: MockDataService,
+    private partnersService: PartnersService,
+    private notificationsInbox: NotificationsInboxService,
   ) {}
 
   ngOnInit(): void {
-    setTimeout(() => this.loading = false, 900);
+    this.refreshProfile();
+    this.userSub = this.auth.user$.subscribe(() => this.refreshProfile());
+    this.agentSub = this.agentAuth.agent$.subscribe(() => this.refreshProfile());
+    this.favoritesSub = combineLatest([this.data.properties$, this.data.favorites$]).subscribe(() => {
+      this.favoris = this.data.getFavoriteProperties().slice(0, 8);
+      this.stats[0].value = this.data.favorites.size;
+    });
+    void this.auth.hydrateFromApi();
+    void this.agentAuth.hydrateFromApi();
+    void this.data.loadProperties().catch(() => {});
+    this.partnersSub = this.partnersService.partners$.subscribe(list => this.partners = list.slice(0, 8));
+
+    // Le squelette reste affiché tant que les partenaires ne sont pas chargés (min. 900 ms)
+    const minDelay = new Promise(resolve => setTimeout(resolve, 900));
+    const partnersLoaded = this.partnersService.loadPartners().catch(() => []);
+    void Promise.all([minDelay, partnersLoaded]).then(() => this.loading = false);
 
     const messagerieItem = this.menuItems.find(item => item.route === '/messages');
     const totalUnread = this.messagesService.conversations.reduce((sum, c) => sum + c.unreadCount, 0);
@@ -155,6 +118,100 @@ export class Tab3Page implements OnInit {
     if (messagerieItem && totalUnread > 0) {
       messagerieItem.badge = totalUnread;
     }
+
+    this.notifSub = this.notificationsInbox.notifications$.subscribe(() => {
+      const notifItem = this.menuItems.find(item => item.route === '/notifications');
+      if (!notifItem) return;
+      const count = this.notificationsInbox.unreadCount;
+      notifItem.badge = count > 0 ? count : undefined;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.userSub?.unsubscribe();
+    this.agentSub?.unsubscribe();
+    this.favoritesSub?.unsubscribe();
+    this.partnersSub?.unsubscribe();
+    this.notifSub?.unsubscribe();
+  }
+
+  private refreshProfile(): void {
+    const user = this.auth.currentUser;
+    const agent = this.agentAuth.currentAgent;
+    this.isAdmin = this.auth.isAdmin;
+
+    if (user) {
+      this.isLoggedIn = true;
+      this.isAgent = false;
+      this.isAdmin = this.auth.isAdmin;
+      this.userName = user.fullName?.trim() || user.email.split('@')[0];
+      this.userEmail = user.email;
+      this.userUniversity = this.isAdmin
+        ? 'Administrateur'
+        : (user.university?.trim() || '');
+      this.userAvatar = user.avatarUrl || '';
+      this.hasAvatar = hasRealAvatar(user.avatarUrl);
+      this.userInitials = initialsFromName(user.fullName, user.email);
+      this.avatarBg = initialsBg(user.fullName, user.email);
+      return;
+    }
+
+    if (agent) {
+      this.isLoggedIn = true;
+      this.isAgent = true;
+      this.userName = agent.agencyName?.trim() || agent.fullName?.trim() || agent.email.split('@')[0];
+      this.userEmail = agent.email;
+      this.userUniversity = agent.agencyName?.trim() || 'Agent immobilier';
+      this.userAvatar = agent.avatarUrl || '';
+      this.hasAvatar = hasRealAvatar(agent.avatarUrl);
+      this.userInitials = initialsFromName(agent.fullName || agent.agencyName, agent.email);
+      this.avatarBg = initialsBg(agent.fullName || agent.agencyName, agent.email);
+      return;
+    }
+
+    this.isLoggedIn = false;
+    this.isAgent = false;
+    this.userName = 'Visiteur';
+    this.userEmail = '';
+    this.userUniversity = '';
+    this.userAvatar = '';
+    this.hasAvatar = false;
+    this.userInitials = 'V';
+    this.avatarBg = '#0f766e';
+  }
+
+  private readonly adminMenuItem: MenuItem = {
+    icon: 'briefcase-outline', label: 'PROFILE_PAGE.MENU_ADMIN_PARTNERS', route: '/admin/partners',
+  };
+
+  get visibleMenuItems(): MenuItem[] {
+    // Admin a son propre espace (/admin) — pas le menu étudiant ni agent
+    if (this.isAdmin) {
+      return [
+        this.adminMenuItem,
+        { icon: 'shield-outline', label: 'ADMIN_HOME.TITLE', route: '/admin' },
+        { icon: 'log-out-outline', label: 'PROFILE_PAGE.MENU_LOGOUT', danger: true, action: 'logout' },
+      ];
+    }
+    if (!this.isAgent) return this.menuItems;
+    return this.menuItems.filter(item => item.route !== '/edit-profile');
+  }
+
+  openPartner(id: number): void {
+    void this.router.navigate(['/partners', id]);
+  }
+
+  onMenuClick(item: MenuItem, event: Event): void {
+    if (item.action === 'logout') {
+      event.preventDefault();
+      this.auth.logout();
+      this.agentAuth.logout();
+      this.router.navigateByUrl('/login', { replaceUrl: true });
+    }
+  }
+
+  openFavori(id: number): void {
+    void this.router.navigate(['/detailsimmo', id]);
   }
 
   statusLabel(status: Reservation['status']): string {
@@ -173,9 +230,9 @@ export class Tab3Page implements OnInit {
     }
   }
 
-  removeFavori(id: number, event: Event) {
+  async removeFavori(id: number, event: Event): Promise<void> {
     event.stopPropagation();
-    this.favoris = this.favoris.filter(p => p.id !== id);
+    await this.data.toggleFavorite(id);
   }
 
 }

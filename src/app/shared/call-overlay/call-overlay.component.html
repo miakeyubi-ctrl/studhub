@@ -1,0 +1,79 @@
+<div class="call-overlay" *ngIf="visible">
+  <div
+    class="call-card"
+    [class.peer-muted]="state.peerMuted && state.phase === 'active'"
+    [class.on-hold]="state.onHold || state.peerOnHold">
+    <div class="call-avatar">
+      <ion-icon
+        [name]="state.onHold || state.peerOnHold ? 'pause' : (state.peerMuted && state.phase === 'active' ? 'mic-off' : 'call')"
+        class="text-3xl text-white">
+      </ion-icon>
+    </div>
+
+    <h2 class="call-name">{{ state.peerName }}</h2>
+
+    <p class="call-timer" *ngIf="state.phase === 'active' && !state.onHold && !state.peerOnHold">
+      {{ durationLabel }}
+    </p>
+    <p class="call-status" *ngIf="statusKey">
+      {{ statusKey | translate:{ name: state.peerName } }}
+    </p>
+
+    <p class="call-peer-hold" *ngIf="peerMuteMessage">
+      {{ peerMuteMessage | translate:{ name: state.peerName } }}
+    </p>
+
+    <p class="call-mute-hint" *ngIf="state.phase === 'active' && state.muted && !state.onHold">
+      {{ 'CALL.MIC_OFF' | translate }}
+    </p>
+
+    <div class="call-actions" *ngIf="state.phase === 'incoming'">
+      <button type="button" class="btn-reject" (click)="calls.rejectIncoming()" [attr.aria-label]="'CALL.REJECT' | translate">
+        <ion-icon name="call" class="reject-icon"></ion-icon>
+      </button>
+      <button type="button" class="btn-accept" (click)="calls.acceptIncoming()" [attr.aria-label]="'CALL.ACCEPT' | translate">
+        <ion-icon name="call"></ion-icon>
+      </button>
+    </div>
+
+    <div class="call-actions call-actions--in" *ngIf="showInCallControls">
+      <button
+        type="button"
+        class="btn-ctrl"
+        [class.active]="state.muted"
+        [disabled]="state.onHold"
+        (click)="calls.toggleMute()"
+        *ngIf="state.phase === 'connecting' || state.phase === 'active'"
+        [attr.aria-label]="(state.muted ? 'CALL.MIC_ON' : 'CALL.MIC_OFF') | translate">
+        <ion-icon [name]="state.muted ? 'mic-off' : 'mic'"></ion-icon>
+        <span>{{ (state.muted ? 'CALL.MIC_OFF' : 'CALL.MUTE') | translate }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn-ctrl"
+        [class.active]="state.onHold"
+        (click)="calls.toggleHold()"
+        *ngIf="state.phase === 'active'"
+        [attr.aria-label]="'CALL.HOLD' | translate">
+        <ion-icon [name]="state.onHold ? 'play' : 'pause'"></ion-icon>
+        <span>{{ (state.onHold ? 'CALL.RESUME' : 'CALL.HOLD') | translate }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn-ctrl"
+        [class.active]="state.speakerOn"
+        (click)="calls.toggleSpeaker()"
+        *ngIf="state.phase === 'connecting' || state.phase === 'active'"
+        [attr.aria-label]="'CALL.SPEAKER' | translate">
+        <ion-icon [name]="state.speakerOn ? 'volume-high' : 'volume-mute'"></ion-icon>
+        <span>{{ 'CALL.SPEAKER' | translate }}</span>
+      </button>
+
+      <button type="button" class="btn-hangup" (click)="calls.hangUp()" [attr.aria-label]="'CALL.HANGUP' | translate">
+        <ion-icon name="call" class="reject-icon"></ion-icon>
+      </button>
+    </div>
+  </div>
+</div>

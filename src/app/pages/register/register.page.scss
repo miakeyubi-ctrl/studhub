@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 input {
   border: none;
   box-shadow: none;
@@ -5,4 +10,171 @@ input {
 
 input:focus {
   outline: none;
+}
+
+.reg-shell {
+  min-height: 100%;
+  background: #f8fafc;
+}
+
+:host-context(html.dark) .reg-shell,
+:host-context(.dark) .reg-shell {
+  background: var(--ion-background-color, #0f172a);
+}
+
+/* ========== Welcome / ambiance ========== */
+
+.welcome-screen {
+  position: relative;
+  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem calc(2.5rem + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(56, 189, 248, 0.35), transparent 55%),
+    radial-gradient(ellipse at 80% 10%, rgba(37, 99, 235, 0.45), transparent 50%),
+    linear-gradient(165deg, #0b1f4a 0%, #123a7a 45%, #0ea5a8 100%);
+}
+
+.welcome-bubble {
+  position: absolute;
+  bottom: -12%;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08));
+  filter: blur(0.2px);
+  animation-name: bubbleRise;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+@keyframes bubbleRise {
+  0% {
+    transform: translateY(0) scale(0.85);
+  }
+  50% {
+    transform: translateY(-48vh) scale(1.05);
+  }
+  100% {
+    transform: translateY(-95vh) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.welcome-center {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 20rem;
+  animation: welcomeIn 0.7s ease-out both;
+}
+
+.welcome-logo-wrap {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.25rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+}
+
+.welcome-logo-wrap img {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+
+.welcome-center h1 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.welcome-center p {
+  margin: 0.75rem 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.welcome-skip-btn {
+  margin-top: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 10.5rem;
+  padding: 0.85rem 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.welcome-skip-btn:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.welcome-skip-btn:disabled {
+  opacity: 0.7;
+}
+
+.welcome-skip-btn ion-icon {
+  font-size: 1.1rem;
+}
+
+.welcome-skip-btn ion-spinner {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: #fff;
+}
+
+.welcome-from {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: calc(1.75rem + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  animation: welcomeIn 0.9s ease-out 0.25s both;
+}
+
+.welcome-from strong {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@keyframes welcomeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

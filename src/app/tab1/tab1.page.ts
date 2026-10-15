@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import Splide from '@splidejs/splide';
+import { Subscription } from 'rxjs';
 import { ThemeService } from '../services/theme.service';
 import { MessagesService } from '../services/messages.service';
+import { AuthService, StudUser } from '../services/auth.service';
+import { MockDataService } from '../services/mock-data.service';
+import { hasRealAvatar, initialsBg, initialsFromName } from '../utils/avatar.util';
 
 interface Property {
   id: number;
@@ -10,6 +14,8 @@ interface Property {
   price: number;
   image: string;
   category: string;
+  viewsCount: number;
+  likesCount: number;
 }
 
 interface Product {
@@ -36,120 +42,37 @@ interface Prestataire {
   styleUrls: ['tab1.page.scss'],
   standalone: false,
 })
-export class Tab1Page implements OnInit {
+export class Tab1Page implements OnInit, OnDestroy {
 
-  constructor(public theme: ThemeService, private messagesService: MessagesService) {}
+  constructor(
+    public theme: ThemeService,
+    private messagesService: MessagesService,
+    private auth: AuthService,
+    private data: MockDataService,
+  ) {}
 
-  get unreadMessages(): number {
-    return this.messagesService.conversations.reduce((sum, c) => sum + c.unreadCount, 0);
-  }
-
+  unreadMessages = 0;
   loading = true;
 
-  userName = 'Yassine Ben Salah';
+  userName = 'Visiteur';
+  userAvatar = '';
+  userInitials = 'V';
+  avatarBg = '#0f766e';
+  hasAvatar = false;
+
+  private userSub?: Subscription;
+  private propsSub?: Subscription;
+  private productsSub?: Subscription;
+  private msgSub?: Subscription;
 
   categories = ['Tous', 'Studios', 'Colocations', 'Résidences', 'Chambres'];
   selectedCategory = 'Tous';
 
-  featured: Property[] = [
-    {
-      id: 1,
-      title: 'Studio moderne près du campus',
-      city: 'Tunis, El Manar',
-      price: 450,
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop',
-      category: 'Studios'
-    },
-    {
-      id: 2,
-      title: 'Colocation lumineuse',
-      city: 'Sousse, Khezama',
-      price: 320,
-      image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format&fit=crop',
-      category: 'Colocations'
-    },
-    {
-      id: 3,
-      title: 'Résidence universitaire sécurisée',
-      city: 'Sfax, Route de l\'Aéroport',
-      price: 280,
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800&auto=format&fit=crop',
-      category: 'Résidences'
-    }
-  ];
+  featured: Property[] = [];
+  recentlyViewed: Property[] = [];
 
-  recentlyViewed: Property[] = [
-    {
-      id: 4,
-      title: 'Chambre meublée',
-      city: 'Ariana',
-      price: 250,
-      image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=800&auto=format&fit=crop',
-      category: 'Chambres'
-    },
-    {
-      id: 5,
-      title: 'Appartement proche fac',
-      city: 'Monastir',
-      price: 400,
-      image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800&auto=format&fit=crop',
-      category: 'Studios'
-    }
-  ];
-
-  products: Product[] = [
-    {
-      id: 1,
-      title: 'iPhone 12 - 128 Go',
-      price: 950,
-      image: 'https://images.unsplash.com/photo-1592286927505-1def25115558?q=80&w=600&auto=format&fit=crop',
-      category: 'Électronique',
-      condition: 'Très bon état'
-    },
-    {
-      id: 5,
-      title: 'Lot de livres - Génie Informatique',
-      price: 60,
-      image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop',
-      category: 'Livres',
-      condition: 'Bon état'
-    },
-    {
-      id: 3,
-      title: 'Bureau + chaise étudiant',
-      price: 180,
-      image: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=600&auto=format&fit=crop',
-      category: 'Meubles',
-      condition: 'Bon état'
-    }
-  ];
-
-  prestataires: Prestataire[] = [
-    {
-      id: 1,
-      name: 'Ahmed Sassi',
-      profession: 'Développeur mobile',
-      tier: 'Premium',
-      rating: 4.9,
-      image: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=300&auto=format&fit=crop'
-    },
-    {
-      id: 2,
-      name: 'Mariem Chaabane',
-      profession: 'Graphiste',
-      tier: 'Standard',
-      rating: 4.7,
-      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop'
-    },
-    {
-      id: 4,
-      name: 'Ines Gharbi',
-      profession: 'Formatrice en langues',
-      tier: 'Standard',
-      rating: 4.8,
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&auto=format&fit=crop'
-    }
-  ];
+  products: Product[] = [];
+  prestataires: Prestataire[] = [];
 
   tierClass(tier: Prestataire['tier']): string {
     switch (tier) {
@@ -159,21 +82,25 @@ export class Tab1Page implements OnInit {
     }
   }
 
-  favoriteIds = new Set<number>();
-
-  toggleFavorite(id: number, event: Event): void {
+  async toggleFavorite(id: number, event: Event): Promise<void> {
     event.stopPropagation();
     event.preventDefault();
-
-    if (this.favoriteIds.has(id)) {
-      this.favoriteIds.delete(id);
-    } else {
-      this.favoriteIds.add(id);
-    }
+    await this.data.toggleFavorite(id);
   }
 
   isFavorite(id: number): boolean {
-    return this.favoriteIds.has(id);
+    return this.data.isFavorite(id);
+  }
+
+  async toggleLike(id: number, event: Event): Promise<void> {
+    event.stopPropagation();
+    event.preventDefault();
+    await this.data.togglePropertyLike(id);
+    this.syncFromDataService();
+  }
+
+  isLiked(id: number): boolean {
+    return this.data.isPropertyLiked(id);
   }
 
   selectCategory(category: string): void {
@@ -189,12 +116,89 @@ export class Tab1Page implements OnInit {
   }
 
   ngOnInit(): void {
+    this.applyUser(this.auth.currentUser);
+    this.userSub = this.auth.user$.subscribe(u => this.applyUser(u));
+    void this.auth.hydrateFromApi();
+
+    this.unreadMessages = this.messagesService.totalUnread;
+    this.msgSub = this.messagesService.conversations$.subscribe(() => {
+      this.unreadMessages = this.messagesService.totalUnread;
+    });
+    void this.messagesService.getConversations();
+
+    this.syncFromDataService();
+    this.propsSub = this.data.properties$.subscribe(() => this.syncFromDataService());
+    this.productsSub = this.data.products$.subscribe(() => this.syncFromDataService());
+    void this.data.loadAllFromBackend().then(() => this.syncFromDataService());
+
     setTimeout(() => this.mountPromoCarousel(), 0);
 
     setTimeout(() => {
       this.loading = false;
       setTimeout(() => this.mountCarousel(), 0);
     }, 900);
+  }
+
+  ionViewWillEnter(): void {
+    this.unreadMessages = this.messagesService.totalUnread;
+    void this.messagesService.getConversations();
+    void this.data.loadAllFromBackend().then(() => this.syncFromDataService());
+  }
+
+  ngOnDestroy(): void {
+    this.userSub?.unsubscribe();
+    this.propsSub?.unsubscribe();
+    this.productsSub?.unsubscribe();
+    this.msgSub?.unsubscribe();
+  }
+
+  private syncFromDataService(): void {
+    const props = this.data.properties.map(p => ({
+      id: p.id,
+      title: p.title,
+      city: p.city,
+      price: p.price,
+      image: p.images?.[0] || '',
+      category: p.category,
+      viewsCount: p.viewsCount ?? 0,
+      likesCount: p.likesCount ?? 0,
+    }));
+    this.featured = props.slice(0, 6);
+    this.recentlyViewed = props.slice(0, 4);
+
+    this.products = this.data.products.slice(0, 6).map(p => ({
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      image: p.images?.[0] || '',
+      category: p.category,
+      condition: p.condition,
+    }));
+
+    this.prestataires = this.data.prestataires.slice(0, 6).map(p => ({
+      id: p.id,
+      name: p.name,
+      profession: p.profession,
+      tier: p.tier,
+      rating: p.rating,
+      image: p.images?.[0] || '',
+    }));
+  }
+
+  private applyUser(user: StudUser | null): void {
+    if (!user) {
+      this.userName = 'Visiteur';
+      this.userAvatar = '';
+      this.hasAvatar = false;
+      this.userInitials = 'V';
+      this.avatarBg = '#0f766e';
+      return;
+    }
+    this.userName = user.fullName?.trim() || user.email.split('@')[0];
+    this.userAvatar = user.avatarUrl || '';
+    this.hasAvatar = hasRealAvatar(user.avatarUrl);
+    this.userInitials = initialsFromName(user.fullName, user.email);
+    this.avatarBg = initialsBg(user.fullName, user.email);
   }
 
   private mountPromoCarousel(): void {

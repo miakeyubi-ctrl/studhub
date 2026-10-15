@@ -1,0 +1,23 @@
+.admin-hero {
+  background: linear-gradient(135deg, #0f3d3e 0%, #1a6b6c 55%, #2a8f8a 100%);
+}
+
+.admin-badge-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 9999px;
+  background: #0f766e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  border: 2px solid #fff;
+}
+
+button:disabled {
+  opacity: 0.72;
+}

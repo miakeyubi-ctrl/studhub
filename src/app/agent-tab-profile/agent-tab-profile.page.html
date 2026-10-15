@@ -1,5 +1,18 @@
 <ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <button type="button" (click)="goBack()" class="agent-back-btn ml-1" [attr.aria-label]="'COMMON.BACK' | translate">
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
+      <button
+        type="button"
+        (click)="openMenu()"
+        [attr.aria-label]="'AGENT_MENU.OPEN' | translate"
+        class="agent-menu-trigger">
+        <span *ngIf="menuInitial">{{ menuInitial }}</span>
+        <ion-icon *ngIf="!menuInitial" name="menu-outline"></ion-icon>
+      </button>
+    </ion-buttons>
     <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'AGENT_TABS.PROFILE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -18,12 +31,19 @@
         </div>
 
         <div class="min-w-0">
-          <h2 class="text-white font-bold text-lg truncate">{{ agent.agencyName }}</h2>
-          <p class="text-white/80 text-xs mt-1 truncate">{{ agent.fullName }}</p>
+          <h2 class="text-white font-bold text-lg truncate">{{ agent.agencyName || agent.fullName }}</h2>
+          <p class="text-white/80 text-xs mt-1 truncate" *ngIf="agent.phone">{{ agent.phone }}</p>
           <p class="text-white/70 text-[11px] mt-0.5 truncate" *ngIf="agent.email">{{ agent.email }}</p>
         </div>
 
       </div>
+
+      <button
+        type="button"
+        routerLink="/agent-edit-profile"
+        class="mt-4 w-full py-2.5 rounded-xl bg-white/15 text-white text-xs font-bold active:scale-95 transition border-0">
+        {{ 'AGENT_EDIT_PROFILE.TITLE' | translate }}
+      </button>
 
     </div>
 
@@ -73,22 +93,6 @@
       </select>
 
     </div>
-
-    <!-- Espace étudiant -->
-    <a
-      routerLink="/tabs/tab1"
-      class="flex items-center gap-3 rounded-2xl shadow-lg px-4 py-3.5 text-decoration-none"
-      style="background: var(--stud-surface)">
-
-      <div class="w-9 h-9 rounded-full flex items-center justify-center bg-primary-50 dark:bg-primary-700">
-        <ion-icon name="school-outline" class="text-primary-700 dark:text-primary-200"></ion-icon>
-      </div>
-
-      <span class="flex-1 text-sm font-semibold text-slate-700 dark:text-white">{{ 'AGENT_DASHBOARD.BACK_TO_STUDENT' | translate }}</span>
-
-      <ion-icon name="chevron-forward-outline" class="text-slate-300 dark:text-slate-500"></ion-icon>
-
-    </a>
 
     <!-- Déconnexion -->
     <button

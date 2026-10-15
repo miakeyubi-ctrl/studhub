@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { DetailsimmoPage } from './detailsimmo.page';
 import { SkeletonModule } from '../../shared/skeleton/skeleton.module';
 
+import { PhotoGalleryModule } from '../../shared/photo-gallery/photo-gallery.module';
 import { DetailsimmoPageRoutingModule } from './detailsimmo-routing.module';
 
 @NgModule({
@@ -15,6 +16,7 @@ import { DetailsimmoPageRoutingModule } from './detailsimmo-routing.module';
     CommonModule,
     FormsModule,
     SkeletonModule,
+    PhotoGalleryModule,
     DetailsimmoPageRoutingModule
   ],
   declarations: [DetailsimmoPage]

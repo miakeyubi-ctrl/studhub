@@ -12,8 +12,14 @@
       <div class="flex items-center gap-3">
 
         <img
-          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"
+          *ngIf="hasAvatar"
+          [src]="userAvatar"
+          [alt]="userName"
           class="w-11 h-11 rounded-full object-cover shadow-lg" />
+        <div
+          *ngIf="!hasAvatar"
+          class="w-11 h-11 rounded-full shadow-lg flex items-center justify-center text-white text-sm font-extrabold"
+          [style.background]="avatarBg">{{ userInitials }}</div>
 
         <div>
           <p class="text-[11px] text-white/70 leading-none">{{ 'HOME.GREETING' | translate }} 👋</p>
@@ -35,7 +41,7 @@
 
         <!-- Notification -->
         <button
-          routerLink="/login"
+          routerLink="/notifications"
           class="relative w-10 h-10 rounded-full bg-white/15 flex items-center justify-center active:scale-95 transition">
 
           <ion-icon name="notifications-outline" class="text-lg text-white"></ion-icon>
@@ -58,7 +64,7 @@
       <input
         type="text"
         [placeholder]="'HOME.SEARCH_PLACEHOLDER' | translate"
-        class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-sm text-slate-800 placeholder-slate-400 focus:outline-none shadow-lg transition" />
+        class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white dark:bg-primary-900 text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none shadow-lg transition" />
 
     </div>
 
@@ -191,7 +197,7 @@
       <span class="text-[10px] mt-2 text-center text-slate-600 dark:text-slate-300 font-medium">{{ 'HOME.QUICK_FEED' | translate }}</span>
     </a>
 
-    <a routerLink="/tabs/tab3" class="flex flex-col items-center text-decoration-none">
+    <a routerLink="/partners" class="flex flex-col items-center text-decoration-none">
       <div class="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-800 flex items-center justify-center shadow-sm active:scale-95 transition">
         <ion-icon name="people-outline" class="text-primary-700 text-lg"></ion-icon>
       </div>
@@ -241,6 +247,8 @@
             <img
               [src]="property.image"
               [alt]="property.title"
+              referrerpolicy="no-referrer"
+              loading="lazy"
               class="w-full h-full object-cover" />
 
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0"></div>
@@ -260,6 +268,17 @@
               <h5 class="text-sm font-bold drop-shadow">{{ property.title }}</h5>
               <p class="text-[11px] text-white/85 mt-0.5">
                 {{ property.city }} · <span class="font-semibold">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</span>
+              </p>
+              <p class="text-[10px] text-white/80 mt-1 flex items-center gap-3">
+                <span class="inline-flex items-center gap-0.5">
+                  <ion-icon name="eye-outline"></ion-icon> {{ property.viewsCount || 0 }}
+                </span>
+                <span
+                  (click)="toggleLike(property.id, $event)"
+                  class="inline-flex items-center gap-0.5">
+                  <ion-icon [name]="isLiked(property.id) ? 'thumbs-up' : 'thumbs-up-outline'"></ion-icon>
+                  {{ property.likesCount || 0 }}
+                </span>
               </p>
             </div>
 
@@ -294,6 +313,8 @@
       <img
         [src]="property.image"
         [alt]="property.title"
+        referrerpolicy="no-referrer"
+        loading="lazy"
         class="w-full h-full object-cover" />
 
       <button
@@ -311,6 +332,10 @@
       <div class="absolute bottom-2 left-2 right-2 text-white">
         <p class="text-[11px] font-semibold drop-shadow">{{ property.city }}</p>
         <p class="text-[10px] text-white/85">{{ property.price }} {{ 'COMMON.CURRENCY' | translate }}{{ 'COMMON.PER_MONTH' | translate }}</p>
+        <p class="text-[9px] text-white/75 mt-0.5 flex items-center gap-2">
+          <span class="inline-flex items-center gap-0.5"><ion-icon name="eye-outline"></ion-icon>{{ property.viewsCount || 0 }}</span>
+          <span class="inline-flex items-center gap-0.5"><ion-icon name="thumbs-up-outline"></ion-icon>{{ property.likesCount || 0 }}</span>
+        </p>
       </div>
 
     </div>

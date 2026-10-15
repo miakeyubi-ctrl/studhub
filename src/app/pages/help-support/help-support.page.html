@@ -1,0 +1,114 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">
+      {{ 'HELP_PAGE.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-4 pb-10">
+
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-5 m-0">
+      {{ 'HELP_PAGE.SUBTITLE' | translate }}
+    </p>
+
+    <!-- Contact rapide -->
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <button
+        type="button"
+        (click)="openEmail()"
+        class="flex flex-col items-center gap-2 p-4 rounded-2xl shadow-sm active:scale-[0.98] transition"
+        style="background: var(--stud-surface)">
+        <div class="w-11 h-11 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center">
+          <ion-icon name="mail-outline" class="text-xl text-primary-600"></ion-icon>
+        </div>
+        <span class="text-xs font-bold text-slate-700 dark:text-white">{{ 'HELP_PAGE.EMAIL' | translate }}</span>
+        <span class="text-[10px] text-slate-400 truncate max-w-full">{{ supportEmail }}</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="openWhatsApp()"
+        class="flex flex-col items-center gap-2 p-4 rounded-2xl shadow-sm active:scale-[0.98] transition"
+        style="background: var(--stud-surface)">
+        <div class="w-11 h-11 rounded-full bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+          <ion-icon name="logo-whatsapp" class="text-xl text-emerald-600"></ion-icon>
+        </div>
+        <span class="text-xs font-bold text-slate-700 dark:text-white">{{ 'HELP_PAGE.WHATSAPP' | translate }}</span>
+        <span class="text-[10px] text-slate-400">{{ 'HELP_PAGE.WHATSAPP_HINT' | translate }}</span>
+      </button>
+    </div>
+
+    <!-- FAQ -->
+    <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-3">
+      {{ 'HELP_PAGE.FAQ_TITLE' | translate }}
+    </h3>
+
+    <div class="space-y-2 mb-8">
+      <div
+        *ngFor="let item of faqs"
+        class="rounded-2xl overflow-hidden shadow-sm"
+        style="background: var(--stud-surface)">
+        <button
+          type="button"
+          (click)="toggleFaq(item)"
+          class="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left active:opacity-80">
+          <span class="text-sm font-semibold text-slate-800 dark:text-white">{{ item.q | translate }}</span>
+          <ion-icon
+            [name]="item.open ? 'chevron-up' : 'chevron-down'"
+            class="text-slate-400 text-base flex-shrink-0"></ion-icon>
+        </button>
+        <div *ngIf="item.open" class="px-4 pb-4 pt-0">
+          <p class="text-xs text-slate-500 dark:text-slate-400 m-0 leading-5">{{ item.a | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire contact -->
+    <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-3">
+      {{ 'HELP_PAGE.CONTACT_TITLE' | translate }}
+    </h3>
+
+    <div class="rounded-2xl p-4 shadow-sm space-y-3" style="background: var(--stud-surface)">
+      <div>
+        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+          {{ 'HELP_PAGE.SUBJECT_LABEL' | translate }}
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="subject"
+          [placeholder]="'HELP_PAGE.SUBJECT_PLACEHOLDER' | translate"
+          class="mt-1.5 w-full px-3.5 py-3 rounded-xl border border-slate-200 dark:border-primary-700 bg-transparent text-sm text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:border-primary-500" />
+      </div>
+
+      <div>
+        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+          {{ 'HELP_PAGE.MESSAGE_LABEL' | translate }}
+        </label>
+        <textarea
+          [(ngModel)]="message"
+          rows="4"
+          [placeholder]="'HELP_PAGE.MESSAGE_PLACEHOLDER' | translate"
+          class="mt-1.5 w-full px-3.5 py-3 rounded-xl border border-slate-200 dark:border-primary-700 bg-transparent text-sm text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:border-primary-500 resize-none"></textarea>
+      </div>
+
+      <button
+        type="button"
+        (click)="sendMessage()"
+        [disabled]="sending"
+        class="w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition disabled:opacity-60">
+        {{ 'HELP_PAGE.SEND_BUTTON' | translate }}
+      </button>
+    </div>
+
+  </div>
+</ion-content>

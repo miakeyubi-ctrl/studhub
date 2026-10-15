@@ -1,0 +1,10 @@
+ion-modal {
+  --height: 100%;
+  --width: 100%;
+  --border-radius: 0;
+  --box-shadow: none;
+}
+
+.publish-modal-content {
+  --background: var(--stud-surface, #fff);
+}

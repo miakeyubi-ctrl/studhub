@@ -4,19 +4,16 @@
 
     <!-- Barre du haut -->
     <div class="flex items-center justify-between pt-5">
-
       <button
         (click)="goBack()"
         style="background: var(--stud-surface)" class="w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-slate-600 dark:text-white active:scale-95 transition">
         <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
       </button>
-
       <button
         (click)="theme.toggleTheme()"
         style="background: var(--stud-surface)" class="w-10 h-10 rounded-full shadow-sm flex items-center justify-center text-slate-600 dark:text-white active:scale-95 transition">
         <ion-icon [name]="theme.isDark ? 'sunny-outline' : 'moon-outline'" class="text-lg"></ion-icon>
       </button>
-
     </div>
 
     <!-- Icône -->
@@ -27,124 +24,269 @@
       <h1 class="text-base font-extrabold text-primary-700 dark:text-white mt-3 tracking-tight">{{ 'AGENT_AUTH.SPACE_NAME' | translate }}</h1>
     </div>
 
-    <!-- Titre -->
+    <!-- Titre adaptatif step -->
     <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
-      {{ 'AGENT_AUTH.REGISTER_TITLE' | translate }}
+      {{ step === 1 ? ('AGENT_AUTH.REGISTER_TITLE' | translate) : (step === 2 ? ('AUTH.OTP_TITLE' | translate) : ('AUTH.OTP_FINAL_STEP_TITLE' | translate)) }}
     </h2>
-    <p class="text-sm text-slate-400 dark:text-slate-300 mt-1 mb-6">
-      {{ 'AGENT_AUTH.REGISTER_SUBTITLE' | translate }}
+    <p class="text-sm text-slate-400 dark:text-slate-300 mt-1 mb-5">
+      {{ step === 1
+        ? ('AGENT_AUTH.REGISTER_SUBTITLE' | translate)
+        : step === 2
+          ? (('AUTH.OTP_SUBTITLE_EMAIL_PREFIX' | translate) + ' ' + otpSentEmail)
+          : ('AUTH.OTP_FINAL_STEP_SUBTITLE' | translate) }}
     </p>
 
-    <form>
-
-      <!-- Nom complet -->
-      <div class="mb-4">
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.FULL_NAME_LABEL' | translate }}</label>
-
-        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
-          <ion-icon name="person-outline" class="text-lg text-primary-500"></ion-icon>
-          <input
-            type="text"
-            name="fullName"
-            [(ngModel)]="fullName"
-            [placeholder]="'AUTH.FULL_NAME_PLACEHOLDER' | translate"
-            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
-        </div>
+    <!-- Stepper -->
+    <div class="flex items-center gap-2 mb-5">
+      <div class="flex items-center gap-2 flex-1">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-bold text-white bg-primary-600 shadow-sm">1</div>
+        <div class="flex-1 h-1 rounded-full" [style.background]="step >= 2 ? 'var(--ion-color-primary)' : 'rgba(148,163,184,0.35)'"></div>
       </div>
-
-      <!-- Nom de l'agence -->
-      <div class="mb-4">
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AGENT_AUTH.AGENCY_NAME_LABEL' | translate }}</label>
-
-        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
-          <ion-icon name="business-outline" class="text-lg text-primary-500"></ion-icon>
-          <input
-            type="text"
-            name="agencyName"
-            [(ngModel)]="agencyName"
-            [placeholder]="'AGENT_AUTH.AGENCY_NAME_PLACEHOLDER' | translate"
-            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
-        </div>
+      <div class="flex items-center gap-2 flex-1">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-bold shadow-sm transition-colors"
+             [ngClass]="step >= 2 ? 'text-white bg-primary-600' : 'text-slate-400 bg-slate-200 dark:bg-primary-800 dark:text-primary-200'">2</div>
+        <div class="flex-1 h-1 rounded-full" [style.background]="step >= 3 ? 'var(--ion-color-primary)' : 'rgba(148,163,184,0.35)'"></div>
       </div>
-
-      <!-- Email -->
-      <div class="mb-4">
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.EMAIL_LABEL' | translate }}</label>
-
-        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
-          <ion-icon name="mail-outline" class="text-lg text-primary-500"></ion-icon>
-          <input
-            type="email"
-            name="email"
-            [(ngModel)]="email"
-            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
-            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
-        </div>
+      <div class="flex items-center gap-2 flex-1">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-bold shadow-sm transition-colors"
+             [ngClass]="step >= 3 ? 'text-white bg-primary-600' : 'text-slate-400 bg-slate-200 dark:bg-primary-800 dark:text-primary-200'">3</div>
       </div>
+    </div>
 
-      <!-- Téléphone -->
-      <div class="mb-4">
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'FIELDS.PHONE_LABEL' | translate }}</label>
+    <!-- Chips switch étudiant/agent (step 1 seulement) -->
+    <div *ngIf="step === 1" class="mb-5 flex gap-2 rounded-2xl bg-slate-200/60 dark:bg-primary-800/50 p-1">
+      <button type="button" (click)="goStudentRegister()" class="flex-1 text-xs font-bold py-2.5 rounded-xl transition-all">🎓 Étudiant</button>
+      <button type="button" (click)="goAgentRegister()" class="flex-1 text-xs font-bold py-2.5 rounded-xl bg-white dark:bg-primary-900 text-primary-700 dark:text-primary-200 shadow-sm transition-all">🏢 Agent</button>
+    </div>
 
-        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-2 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
-          <span class="text-base leading-none">🇹🇳</span>
-          <span class="text-sm font-semibold text-slate-500 dark:text-slate-300">+216</span>
-          <span class="w-px h-4 bg-slate-200 dark:bg-primary-700"></span>
-          <input
-            type="tel"
-            inputmode="numeric"
-            maxlength="8"
-            name="phone"
-            [(ngModel)]="phone"
-            [placeholder]="'SERVICES_PAGE.PROPOSE_PHONE_PLACEHOLDER' | translate"
-            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+    <!-- ============= ÉTAPE 1 : FORMULAIRE AGENT ============= -->
+    <ng-container *ngIf="step === 1">
+      <form (ngSubmit)="goStep2SendOtp()">
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.FIRST_NAME_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="person-outline" class="text-lg text-primary-500"></ion-icon>
+            <input type="text" name="firstName" [(ngModel)]="firstName" autocomplete="given-name" [placeholder]="'AUTH.FIRST_NAME_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
         </div>
-      </div>
 
-      <!-- Password -->
-      <div class="mb-4">
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.PASSWORD_LABEL' | translate }}</label>
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.LAST_NAME_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="id-card-outline" class="text-lg text-primary-500"></ion-icon>
+            <input type="text" name="lastName" [(ngModel)]="lastName" autocomplete="family-name" [placeholder]="'AUTH.LAST_NAME_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
 
-        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
-          <ion-icon name="lock-closed-outline" class="text-lg text-primary-500"></ion-icon>
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            name="password"
-            [(ngModel)]="password"
-            [placeholder]="'AUTH.PASSWORD_MIN_PLACEHOLDER' | translate"
-            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
-          <button type="button" (click)="togglePassword()">
-            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" class="text-lg text-slate-400"></ion-icon>
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AGENT_AUTH.ACTIVITY_TYPE_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="briefcase-outline" class="text-lg text-primary-500"></ion-icon>
+            <select name="activityType" [(ngModel)]="activityType" class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white">
+              <option value="">{{ 'AGENT_AUTH.ACTIVITY_TYPE_PLACEHOLDER' | translate }}</option>
+              <option *ngFor="let t of activityTypes" [value]="t.value">{{ t.labelKey | translate }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">
+            {{ 'AGENT_AUTH.AGENCY_NAME_LABEL' | translate }}
+            <span *ngIf="!needsAgencyName" class="normal-case font-normal text-slate-400">({{ 'AGENT_AUTH.OPTIONAL' | translate }})</span>
+          </label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="apartment-outline" class="text-lg text-primary-500"></ion-icon>
+            <input type="text" name="agencyName" [(ngModel)]="agencyName" [placeholder]="'AGENT_AUTH.AGENCY_NAME_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.EMAIL_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="mail-outline" class="text-lg text-primary-500"></ion-icon>
+            <input type="email" name="email" [(ngModel)]="email" [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AGENT_AUTH.PHONE_PRO_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="call-outline" class="text-lg text-primary-500"></ion-icon>
+            <input type="tel" name="phone" [(ngModel)]="phone" placeholder="+216 00 000 000"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AGENT_AUTH.ACTIVITY_CITY_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="location-outline" class="text-lg text-primary-500"></ion-icon>
+            <select name="activityCity" [(ngModel)]="activityCity" class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white">
+              <option value="">{{ 'FIELDS.CITY_PLACEHOLDER' | translate }}</option>
+              <option *ngFor="let c of cities" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.PASSWORD_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="lock-closed-outline" class="text-lg text-primary-500"></ion-icon>
+            <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="password" [placeholder]="'AUTH.PASSWORD_MIN_PLACEHOLDER' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+            <button type="button" (click)="togglePassword()">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" class="text-lg text-slate-400"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.CONFIRM_PASSWORD_LABEL' | translate }}</label>
+          <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
+            <ion-icon name="lock-closed-outline" class="text-lg text-primary-500"></ion-icon>
+            <input [type]="showPassword ? 'text' : 'password'" name="confirmPassword" [(ngModel)]="confirmPassword" [placeholder]="'AUTH.CONFIRM_PASSWORD_LABEL' | translate"
+              class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2 mb-6">
+          <ion-checkbox name="acceptTerms" [(ngModel)]="acceptTerms" class="mt-0.5"></ion-checkbox>
+          <span class="text-xs text-slate-400 dark:text-slate-300 leading-relaxed">
+            {{ 'AUTH.ACCEPT_TERMS_PREFIX' | translate }}
+            <a class="text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'AUTH.TERMS_LINK' | translate }}</a>
+            {{ 'AUTH.ACCEPT_TERMS_MIDDLE' | translate }}
+            <a class="text-primary-600 dark:text-primary-300 text-decoration-none">{{ 'AUTH.PRIVACY_LINK' | translate }}</a>
+            {{ 'AUTH.ACCEPT_TERMS_SUFFIX' | translate }}
+          </span>
+        </div>
+
+        <button type="submit" [disabled]="sendingOtp"
+          class="block text-center w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 border-0 cursor-pointer flex items-center justify-center gap-2">
+          <ion-spinner *ngIf="sendingOtp" name="crescent" class="text-white"></ion-spinner>
+          <span>{{ sendingOtp ? ('AUTH.OTP_SENDING' | translate) : ('AUTH.SEND_OTP_BUTTON' | translate) }}</span>
+        </button>
+      </form>
+    </ng-container>
+
+    <!-- ============= ÉTAPE 2 : SAISIE OTP AGENT ============= -->
+    <ng-container *ngIf="step === 2">
+
+      <div class="mb-6 rounded-2xl px-4 py-3 flex items-center justify-between" style="background: var(--stud-surface)">
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-primary-200 font-bold">{{ 'AUTH.OTP_EXPIRES_IN' | translate }}</span>
+          <span class="text-sm font-extrabold text-primary-600 dark:text-primary-300 font-mono tracking-wider">{{ remainingExpireSecFmt }}</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <button type="button" (click)="resendOtp()" [disabled]="!canResend"
+            class="text-xs font-bold px-3 py-1.5 rounded-xl transition-colors active:scale-95"
+            [ngClass]="canResend ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-primary-800 text-slate-400 dark:text-primary-300/70 cursor-not-allowed'">
+            {{ canResend ? ('AUTH.OTP_RESEND' | translate) : (countdownResendSec + 's') }}
           </button>
         </div>
       </div>
 
-      <!-- Confirmation -->
-      <div class="mb-8">
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">{{ 'AUTH.CONFIRM_PASSWORD_LABEL' | translate }}</label>
+      <form (ngSubmit)="verifyAndGoStep3()" class="mb-6">
+        <div class="grid grid-cols-6 gap-2.5 mb-2" (paste)="pasteOtp($event)">
+          <div *ngFor="let _ of otp; let i = index; trackBy: trackOtpIndex" class="aspect-square">
+            <input
+              [id]="'agent-otp-' + i"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              [attr.autocomplete]="i === 0 ? 'one-time-code' : 'off'"
+              (input)="onOtpDigitInput($event, i)"
+              (keydown)="onOtpKeyDown($event, i)"
+              [attr.aria-label]="'Digit ' + (i + 1)"
+              class="w-full h-full rounded-2xl text-center text-2xl font-extrabold outline-none border-2 transition-colors focus:border-primary-500"
+              [style.background]="'var(--stud-surface)'"
+              [ngClass]="otp[i]
+                ? 'border-primary-400 text-slate-800 dark:text-white'
+                : 'border-slate-200 dark:border-primary-700 text-primary-500'">
+          </div>
+        </div>
+        <div class="text-center mt-1">
+          <p class="text-[11px] text-slate-400 dark:text-primary-200/80">
+            {{ 'AUTH.OTP_COPY_PASTE_HINT' | translate }}
+            <span *ngIf="devLastOtpCode" class="font-mono font-bold text-primary-600 dark:text-primary-300">DEV code: {{ devLastOtpCode }}</span>
+          </p>
+        </div>
 
-        <div style="background: var(--stud-surface)" class="mt-2 flex items-center gap-3 border border-slate-200 dark:border-primary-700 rounded-2xl px-4 py-3.5 focus-within:border-primary-500 transition-colors">
-          <ion-icon name="lock-closed-outline" class="text-lg text-primary-500"></ion-icon>
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            name="confirmPassword"
-            [(ngModel)]="confirmPassword"
-            [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
-            class="w-full bg-transparent outline-none text-sm text-slate-800 dark:text-white placeholder-slate-400">
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <button type="button" (click)="step = 1"
+            class="py-3.5 rounded-2xl text-sm font-bold bg-slate-200 dark:bg-primary-800 text-slate-600 dark:text-primary-100 active:scale-95 transition-all border-0 cursor-pointer">
+            ← {{ 'AUTH.GO_BACK_INFO' | translate }}
+          </button>
+          <button type="submit"
+            class="py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all border-0 cursor-pointer">
+            {{ 'AUTH.OTP_VERIFY_CONTINUE' | translate }}
+          </button>
+        </div>
+      </form>
+    </ng-container>
+
+    <!-- ============= ÉTAPE 3 : CRÉATION COMPTE AGENT ============= -->
+    <ng-container *ngIf="step === 3">
+
+      <div class="mb-6 rounded-2xl p-4" style="background: var(--stud-surface); border: 1px solid rgba(99,102,241,0.15);">
+        <h3 class="text-xs font-extrabold uppercase tracking-wide text-primary-600 dark:text-primary-300 mb-3">{{ 'AUTH.OTP_RECAP_TITLE' | translate }}</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AUTH.FIRST_NAME_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right">{{ firstName || '—' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AUTH.LAST_NAME_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right">{{ lastName || '—' }}</span>
+          </div>
+          <div class="flex justify-between" *ngIf="agencyName">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AGENT_AUTH.AGENCY_NAME_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right">{{ agencyName }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AGENT_AUTH.ACTIVITY_TYPE_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right">{{ activityTypeLabel || '—' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AGENT_AUTH.ACTIVITY_CITY_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right">{{ activityCity || '—' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AUTH.EMAIL_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right break-all">{{ otpSentEmail || email || '—' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AUTH.OTP_CODE' | translate }}</span>
+            <span class="font-mono font-bold text-primary-600 dark:text-primary-300 tracking-widest">{{ otpCode }}</span>
+          </div>
+          <div *ngIf="phone" class="flex justify-between">
+            <span class="text-slate-500 dark:text-primary-200/80">{{ 'AGENT_AUTH.PHONE_PRO_LABEL' | translate }}</span>
+            <span class="font-semibold text-slate-800 dark:text-white text-right">{{ phone }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Bouton Inscription -->
-      <a
-        routerLink="/agent-dashboard"
-        class="block text-center w-full py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-700 shadow-md shadow-primary-700/20 active:scale-95 transition-all duration-200 text-decoration-none">
-        {{ 'AGENT_AUTH.CREATE_ACCOUNT_BUTTON' | translate }}
-      </a>
+      <form (ngSubmit)="onSubmit()" class="mb-6">
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" (click)="step = 2"
+            class="py-3.5 rounded-2xl text-sm font-bold bg-slate-200 dark:bg-primary-800 text-slate-600 dark:text-primary-100 active:scale-95 transition-all border-0 cursor-pointer">
+            ← {{ 'AUTH.GO_BACK_OTP' | translate }}
+          </button>
+          <button type="submit"
+            class="py-3.5 rounded-2xl text-white text-sm font-bold bg-primary-600 shadow-md shadow-primary-600/20 active:scale-95 transition-all border-0 cursor-pointer">
+            🎉 {{ 'AUTH.CREATE_ACCOUNT_BUTTON' | translate }}
+          </button>
+        </div>
+      </form>
 
-    </form>
+    </ng-container>
 
-    <!-- Connexion -->
-    <div class="text-center mt-8 pb-10">
+    <!-- Déjà un compte -->
+    <div class="text-center mt-6 pb-10">
       <span class="text-sm text-slate-400 dark:text-slate-300">{{ 'AUTH.HAVE_ACCOUNT' | translate }}</span>
       <a routerLink="/agent-login" class="text-sm font-semibold text-primary-600 dark:text-primary-300 ml-1 text-decoration-none">{{ 'AUTH.SIGN_IN_LINK' | translate }}</a>
     </div>

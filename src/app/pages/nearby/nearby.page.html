@@ -1,0 +1,105 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="w-9 h-9 ml-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center active:scale-90 transition">
+        <ion-icon name="chevron-back" class="text-slate-700 dark:text-white text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title class="text-slate-800 dark:text-white font-bold">{{ 'NEARBY.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-4 pb-10">
+
+    <div class="rounded-2xl bg-primary-50 dark:bg-primary-800 px-4 py-3 mb-4 flex items-start gap-2">
+      <ion-icon name="navigate-outline" class="text-primary-600 text-lg mt-0.5"></ion-icon>
+      <div>
+        <p class="text-sm font-bold text-slate-800 dark:text-white m-0">{{ 'NEARBY.AROUND' | translate: { city: cityLabel } }}</p>
+        <p class="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5 m-0">{{ 'NEARBY.SUBTITLE' | translate }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="grid grid-cols-2 gap-3">
+      <div *ngFor="let i of [0,1,2,3,4,5]" class="rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg">
+        <app-skeleton height="7rem" radius="0"></app-skeleton>
+        <div class="p-2 space-y-2">
+          <app-skeleton width="70%" height="0.7rem" radius="0.4rem" [showLogo]="false"></app-skeleton>
+          <app-skeleton width="40%" height="0.8rem" radius="0.4rem" [showLogo]="false"></app-skeleton>
+        </div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!loading && kind === 'immo'">
+      <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">
+        {{ 'NEARBY.COUNT' | translate: { count: properties.length } }}
+      </p>
+      <div *ngIf="!properties.length" class="text-center py-12 text-slate-500 text-sm">
+        {{ 'NEARBY.EMPTY' | translate }}
+      </div>
+      <div class="grid grid-cols-2 gap-3" *ngIf="properties.length">
+        <button
+          type="button"
+          *ngFor="let item of properties"
+          (click)="openItem(item.id)"
+          class="nearby-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+          </div>
+          <div class="p-2">
+            <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold truncate">
+              {{ 'CATEGORIES.' + item.category | translate }}
+            </p>
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2 leading-4">{{ item.title }}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-0.5 truncate">
+              <ion-icon name="location-outline" class="text-primary-600"></ion-icon>
+              {{ item.city }}
+            </p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!loading && kind === 'product'">
+      <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">
+        {{ 'NEARBY.COUNT' | translate: { count: products.length } }}
+      </p>
+      <div *ngIf="!products.length" class="text-center py-12 text-slate-500 text-sm">
+        {{ 'NEARBY.EMPTY' | translate }}
+      </div>
+      <div class="grid grid-cols-2 gap-3" *ngIf="products.length">
+        <button
+          type="button"
+          *ngFor="let item of products"
+          (click)="openItem(item.id)"
+          class="nearby-card text-left rounded-2xl overflow-hidden dark:bg-primary-800 shadow-lg active:scale-[0.98] transition"
+          style="background: var(--stud-surface)">
+          <div class="h-28 bg-primary-50 dark:bg-primary-900 overflow-hidden">
+            <img [src]="item.images[0]" [alt]="item.title" class="w-full h-full object-cover" />
+          </div>
+          <div class="p-2">
+            <p class="text-[10px] text-primary-600 dark:text-primary-300 font-semibold truncate">
+              {{ 'CATEGORIES.' + item.category | translate }}
+            </p>
+            <p class="text-[11px] font-bold text-slate-800 dark:text-white line-clamp-2 leading-4">{{ item.title }}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-0.5 truncate">
+              <ion-icon name="location-outline" class="text-primary-600"></ion-icon>
+              {{ item.city }}
+            </p>
+            <p class="text-xs font-extrabold text-primary-700 dark:text-primary-300 mt-1">
+              {{ item.price }} <span class="text-[10px] font-medium">{{ 'COMMON.CURRENCY' | translate }}</span>
+            </p>
+          </div>
+        </button>
+      </div>
+    </ng-container>
+
+  </div>
+</ion-content>

@@ -1,0 +1,189 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-title class="font-bold text-slate-800 dark:text-white">
+      {{ 'PARTNER_AUTH.DASHBOARD_TITLE' | translate }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <button
+        type="button"
+        (click)="theme.toggleTheme()"
+        class="w-9 h-9 mr-1 rounded-full bg-primary-50 dark:bg-primary-800 flex items-center justify-center">
+        <ion-icon [name]="theme.isDark ? 'sunny-outline' : 'moon-outline'" class="text-slate-700 dark:text-white"></ion-icon>
+      </button>
+      <button
+        type="button"
+        (click)="logout()"
+        class="w-9 h-9 mr-2 rounded-full bg-red-50 dark:bg-red-900/40 flex items-center justify-center text-red-600">
+        <ion-icon name="log-out-outline" class="text-lg"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container py-5 space-y-5" *ngIf="partner as p">
+
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 rounded-2xl overflow-hidden bg-primary-50 dark:bg-primary-800 flex items-center justify-center shrink-0">
+        <img *ngIf="p.logoUrl" [src]="p.logoUrl" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+        <ion-icon *ngIf="!p.logoUrl" name="storefront-outline" class="text-3xl text-primary-500"></ion-icon>
+      </div>
+      <div class="min-w-0">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-white m-0 truncate">{{ p.name }}</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-300 m-0 truncate">{{ p.email }}</p>
+        <p *ngIf="p.category" class="text-xs text-primary-600 dark:text-primary-300 m-0 mt-0.5">{{ p.category }}</p>
+      </div>
+    </div>
+
+    <!-- Stats semaine -->
+    <div class="rounded-2xl shadow-lg p-4 dark:bg-primary-800" style="background: var(--stud-surface)">
+      <h3 class="text-sm font-bold text-slate-800 dark:text-white m-0 mb-3">
+        {{ 'PARTNER_AUTH.WEEKLY_STATS' | translate }}
+      </h3>
+
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <div class="rounded-xl bg-primary-50 dark:bg-primary-700/40 px-2 py-2.5 text-center">
+          <p class="text-lg font-extrabold text-primary-700 dark:text-primary-200 m-0">{{ p.viewsCount || 0 }}</p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 m-0 mt-0.5">{{ 'ADMIN_PARTNERS.STAT_VIEWS' | translate }}</p>
+        </div>
+        <div class="rounded-xl bg-amber-50 dark:bg-primary-700/40 px-2 py-2.5 text-center">
+          <p class="text-lg font-extrabold text-amber-600 dark:text-amber-300 m-0">{{ p.likesCount || 0 }}</p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 m-0 mt-0.5">{{ 'ADMIN_PARTNERS.STAT_LIKES' | translate }}</p>
+        </div>
+        <div class="rounded-xl bg-indigo-50 dark:bg-primary-700/40 px-2 py-2.5 text-center">
+          <p class="text-lg font-extrabold text-indigo-600 dark:text-indigo-300 m-0">{{ p.clicksCount || 0 }}</p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 m-0 mt-0.5">{{ 'ADMIN_PARTNERS.STAT_CLICKS' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="partner-chart-wrap">
+        <canvas #statsChart aria-label="Partner stats chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Annonces partenaire -->
+    <section class="space-y-3 pb-8">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-sm font-bold text-slate-800 dark:text-white m-0">
+          {{ 'PARTNER_AUTH.ANNOUNCE_TITLE' | translate }}
+        </h3>
+        <button
+          type="button"
+          (click)="openCreate()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-600 text-white text-xs font-bold active:scale-95 transition">
+          <ion-icon name="add-outline" class="text-base"></ion-icon>
+          {{ 'PARTNER_AUTH.ANNOUNCE_PUBLISH' | translate }}
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400 m-0">
+        {{ 'PARTNER_AUTH.ANNOUNCE_HINT' | translate }}
+      </p>
+
+      <!-- Formulaire -->
+      <form *ngIf="showForm" class="rounded-2xl p-4 space-y-3 dark:bg-primary-800 shadow-lg" style="background: var(--stud-surface)" (ngSubmit)="saveAnnouncement()">
+        <h4 class="text-sm font-bold text-slate-800 dark:text-white m-0">
+          {{ (editingId ? 'PARTNER_AUTH.ANNOUNCE_EDIT' : 'PARTNER_AUTH.ANNOUNCE_NEW') | translate }}
+        </h4>
+
+        <label class="block">
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase">{{ 'PARTNER_AUTH.FIELD_TITLE' | translate }} *</span>
+          <input type="text" name="title" [(ngModel)]="form.title" maxlength="200"
+            class="mt-1 w-full rounded-xl border border-slate-200 dark:border-primary-700 px-3 py-2.5 text-sm bg-transparent text-slate-800 dark:text-white outline-none focus:border-primary-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase">{{ 'PARTNER_AUTH.FIELD_DESC' | translate }}</span>
+          <textarea name="description" [(ngModel)]="form.description" rows="3" maxlength="2000"
+            class="mt-1 w-full rounded-xl border border-slate-200 dark:border-primary-700 px-3 py-2.5 text-sm bg-transparent text-slate-800 dark:text-white outline-none focus:border-primary-500 resize-none"></textarea>
+        </label>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase">{{ 'PARTNER_AUTH.FIELD_DISCOUNT' | translate }}</span>
+            <input type="text" name="discount" [(ngModel)]="form.discount" maxlength="30" placeholder="-15%"
+              class="mt-1 w-full rounded-xl border border-slate-200 dark:border-primary-700 px-3 py-2.5 text-sm bg-transparent text-slate-800 dark:text-white outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase">{{ 'PARTNER_AUTH.FIELD_PROMO' | translate }}</span>
+            <input type="text" name="promoCode" [(ngModel)]="form.promoCode" maxlength="50"
+              class="mt-1 w-full rounded-xl border border-slate-200 dark:border-primary-700 px-3 py-2.5 text-sm bg-transparent text-slate-800 dark:text-white outline-none" />
+          </label>
+        </div>
+
+        <label class="block">
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase">{{ 'PARTNER_AUTH.FIELD_VALID' | translate }}</span>
+          <input type="date" name="validUntil" [(ngModel)]="form.validUntil"
+            class="mt-1 w-full rounded-xl border border-slate-200 dark:border-primary-700 px-3 py-2.5 text-sm bg-transparent text-slate-800 dark:text-white outline-none" />
+        </label>
+
+        <div>
+          <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase">{{ 'PARTNER_AUTH.FIELD_IMAGE' | translate }}</span>
+          <label class="mt-1 flex flex-col items-center justify-center gap-1 h-24 rounded-xl border-2 border-dashed border-primary-200 dark:border-primary-600 cursor-pointer overflow-hidden">
+            <img *ngIf="form.imageUrl && !uploading" [src]="form.imageUrl" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+            <ion-spinner *ngIf="uploading" name="crescent" class="text-primary-600"></ion-spinner>
+            <ng-container *ngIf="!form.imageUrl && !uploading">
+              <ion-icon name="image-outline" class="text-primary-400 text-2xl"></ion-icon>
+              <span class="text-[11px] text-slate-500">{{ 'ADMIN_PARTNERS.UPLOAD' | translate }}</span>
+            </ng-container>
+            <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" (change)="onImageSelected($event)" />
+          </label>
+        </div>
+
+        <div class="flex items-center justify-between rounded-xl px-3 py-2.5 dark:bg-primary-900/40" style="background: var(--stud-bg, #f8fafc)">
+          <span class="text-sm text-slate-700 dark:text-slate-200">{{ 'PARTNER_AUTH.FIELD_ACTIVE' | translate }}</span>
+          <ion-toggle name="isActive" [(ngModel)]="form.isActive"></ion-toggle>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button type="button" (click)="cancelForm()"
+            class="flex-1 h-11 rounded-xl border border-slate-200 dark:border-primary-700 text-sm font-bold text-slate-600 dark:text-slate-200">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+          <button type="submit" [disabled]="!canSave"
+            class="flex-1 h-11 rounded-xl bg-primary-600 text-white text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2">
+            <ion-spinner *ngIf="saving" name="crescent" class="w-4 h-4"></ion-spinner>
+            {{ 'COMMON.SAVE' | translate }}
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="loadingList" class="text-center py-6 text-slate-400 text-sm">…</div>
+
+      <div *ngIf="!loadingList && announcements.length === 0 && !showForm"
+        class="rounded-2xl p-5 text-center dark:bg-primary-800" style="background: var(--stud-surface)">
+        <ion-icon name="megaphone-outline" class="text-3xl text-primary-400"></ion-icon>
+        <p class="text-sm font-bold text-slate-700 dark:text-white mt-2 mb-0">{{ 'PARTNER_AUTH.ANNOUNCE_EMPTY' | translate }}</p>
+      </div>
+
+      <div *ngFor="let a of announcements" class="rounded-2xl p-3 dark:bg-primary-800 shadow-sm" style="background: var(--stud-surface)">
+        <div class="flex gap-3">
+          <div *ngIf="a.imageUrl" class="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-primary-50">
+            <img [src]="a.imageUrl" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-bold text-slate-800 dark:text-white m-0 truncate">{{ a.title }}</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                [class.bg-green-100]="a.isActive" [class.text-green-700]="a.isActive"
+                [class.bg-slate-100]="!a.isActive" [class.text-slate-500]="!a.isActive">
+                {{ (a.isActive ? 'ADMIN_PARTNERS.ACTIVE' : 'ADMIN_PARTNERS.INACTIVE') | translate }}
+              </span>
+            </div>
+            <p *ngIf="a.discount" class="text-xs font-semibold text-amber-600 m-0 mt-0.5">{{ a.discount }}</p>
+            <p *ngIf="a.description" class="text-xs text-slate-500 dark:text-slate-300 m-0 mt-1 line-clamp-2">{{ a.description }}</p>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button type="button" (click)="openEdit(a)"
+            class="flex-1 h-9 rounded-xl bg-primary-50 dark:bg-primary-700 text-primary-700 dark:text-primary-100 text-xs font-bold">
+            {{ 'COMMON.EDIT' | translate }}
+          </button>
+          <button type="button" (click)="confirmDelete(a)"
+            class="flex-1 h-9 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 text-xs font-bold">
+            {{ 'COMMON.DELETE' | translate }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</ion-content>
