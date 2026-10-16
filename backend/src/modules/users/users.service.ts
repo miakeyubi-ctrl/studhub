@@ -300,4 +300,36 @@ export class UsersService {
       select: ADMIN_AGENT_SELECT,
     });
   }
+
+  async getPrivacy(actor: JwtPayload) {
+    const select = { pushEnabled: true, personalizedTips: true } as const;
+    if (actor.type === 'agent') {
+      const agent = await this.prisma.agent.findUnique({ where: { id: actor.sub }, select });
+      if (!agent) throw new NotFoundException('Agent introuvable');
+      return agent;
+    }
+    if (actor.type !== 'user') {
+      throw new ForbiddenException('Préférences indisponibles pour ce compte');
+    }
+    const user = await this.prisma.user.findUnique({ where: { id: actor.sub }, select });
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    return user;
+  }
+
+  async updatePrivacy(
+    actor: JwtPayload,
+    body: { pushEnabled?: boolean; personalizedTips?: boolean },
+  ) {
+    const data: { pushEnabled?: boolean; personalizedTips?: boolean } = {};
+    if (typeof body?.pushEnabled === 'boolean') data.pushEnabled = body.pushEnabled;
+    if (typeof body?.personalizedTips === 'boolean') data.personalizedTips = body.personalizedTips;
+    const select = { pushEnabled: true, personalizedTips: true } as const;
+    if (actor.type === 'agent') {
+      return this.prisma.agent.update({ where: { id: actor.sub }, data, select });
+    }
+    if (actor.type !== 'user') {
+      throw new ForbiddenException('Préférences indisponibles pour ce compte');
+    }
+    return this.prisma.user.update({ where: { id: actor.sub }, data, select });
+  }
 }

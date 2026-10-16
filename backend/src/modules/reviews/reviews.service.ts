@@ -17,6 +17,20 @@ export class ReviewsService {
     }
   }
 
+  async mine(authorId: number) {
+    const where = { authorId };
+    const [count, items] = await Promise.all([
+      this.prisma.review.count({ where }),
+      this.prisma.review.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: { author: { select: { id: true, fullName: true, avatarUrl: true } } },
+      }),
+    ]);
+    return { count, items };
+  }
+
   async list(targetType: ReviewTargetType, targetId: number) {
     return this.prisma.review.findMany({
       where: this.buildWhereByTarget(targetType, targetId),

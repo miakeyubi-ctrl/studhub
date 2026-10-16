@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { PushNotificationsService } from '../../services/push-notifications.service';
@@ -48,11 +51,13 @@ export class PrivacySecurityPage implements OnInit {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
     private translate: TranslateService,
+    private http: HttpClient,
   ) {}
 
   ngOnInit(): void {
     this.email = this.auth.currentUser?.email || '';
     this.prefs = this.loadPrefs();
+    void this.pullPrefs();
   }
 
   goBack(): void {
@@ -185,6 +190,26 @@ export class PrivacySecurityPage implements OnInit {
 
   private savePrefs(): void {
     localStorage.setItem(PRIVACY_PREFS_KEY, JSON.stringify(this.prefs));
+    void firstValueFrom(
+      this.http.patch(`${environment.apiUrl}/users/me/privacy`, this.prefs),
+    ).catch(() => {});
+  }
+
+  private async pullPrefs(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${environment.apiUrl}/users/me/privacy`),
+      );
+      const data = res?.data ?? res;
+      if (!data || typeof data.pushEnabled !== 'boolean') return;
+      this.prefs = {
+        pushEnabled: data.pushEnabled !== false,
+        personalizedTips: data.personalizedTips !== false,
+      };
+      localStorage.setItem(PRIVACY_PREFS_KEY, JSON.stringify(this.prefs));
+    } catch {
+      /* conserve les préférences locales hors connexion */
+    }
   }
 
   private async toast(key: string, color: 'success' | 'danger' = 'success'): Promise<void> {

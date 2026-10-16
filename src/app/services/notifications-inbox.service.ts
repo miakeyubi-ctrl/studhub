@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type NotifType = 'message' | 'system' | 'favorite' | 'promo' | 'alert' | 'call';
 
@@ -30,10 +32,12 @@ const MAX_ITEMS = 60;
 export class NotificationsInboxService {
   private readonly subject = new BehaviorSubject<InboxNotification[]>([]);
   readonly notifications$ = this.subject.asObservable();
+  private syncing = false;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.purgeLegacy();
     this.subject.next(this.load());
+    void this.sync();
   }
 
   get notifications(): InboxNotification[] {
@@ -77,7 +81,9 @@ export class NotificationsInboxService {
           read: false,
         };
         const rest = this.notifications.filter((n) => n.id !== existing.id);
-        this.persist([updated, ...rest].slice(0, MAX_ITEMS));
+        const list = [updated, ...rest].slice(0, MAX_ITEMS);
+        this.persist(list);
+        void this.pushRemote(updated, true);
         return;
       }
     }
@@ -109,11 +115,34 @@ export class NotificationsInboxService {
       count: 1,
     };
     this.persist([item, ...this.notifications].slice(0, MAX_ITEMS));
+    void this.pushRemote(item, coalesce);
+  }
+
+  /** Charge l'historique serveur et y envoie les notifications encore locales. */
+  async sync(): Promise<void> {
+    if (!this.hasToken() || this.syncing) return;
+    this.syncing = true;
+    try {
+      const pending = this.notifications.filter((n) => !/^\d+$/.test(String(n.id)));
+      for (const item of pending) {
+        await this.pushRemote(item, item.type === 'message' && !!item.route);
+      }
+      const res: any = await firstValueFrom(this.http.get(`${environment.apiUrl}/notifications`));
+      const data = res?.data ?? res;
+      if (Array.isArray(data)) {
+        this.persist(data.map((row) => this.normalize(row)).filter((n) => !!n.title));
+      }
+    } catch {
+      /* conserve le cache local si l'API est injoignable */
+    } finally {
+      this.syncing = false;
+    }
   }
 
   markRead(id: string): void {
     const next = this.notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
     this.persist(next);
+    if (/^\d+$/.test(id)) this.remote('patch', `/${id}/read`);
   }
 
   /** Marque lues les notifs d'une conversation ouverte. */
@@ -123,18 +152,22 @@ export class NotificationsInboxService {
       n.route === route ? { ...n, read: true } : n,
     );
     this.persist(next);
+    this.remote('post', '/read-route', { route });
   }
 
   markAllRead(): void {
     this.persist(this.notifications.map((n) => ({ ...n, read: true })));
+    this.remote('post', '/read-all', {});
   }
 
   remove(id: string): void {
     this.persist(this.notifications.filter((n) => n.id !== id));
+    if (/^\d+$/.test(id)) this.remote('delete', `/${id}`);
   }
 
   clearAll(): void {
     this.persist([]);
+    this.remote('delete', '');
   }
 
   private purgeLegacy(): void {
@@ -166,6 +199,69 @@ export class NotificationsInboxService {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     } catch {
       /* ignore */
+    }
+  }
+
+  private hasToken(): boolean {
+    try {
+      return !!(
+        localStorage.getItem('studhub-access-token') ||
+        localStorage.getItem('studhub-agent-access-token')
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  private normalize(row: any): InboxNotification {
+    return {
+      id: String(row?.id ?? ''),
+      type: row?.type || 'system',
+      title: row?.title || '',
+      body: row?.body || '',
+      createdAt: Number(row?.createdAt) || Date.now(),
+      read: !!row?.read,
+      route: row?.route || undefined,
+      count: Number(row?.count) || 1,
+    };
+  }
+
+  private remote(method: 'post' | 'patch' | 'delete', path: string, body?: unknown): void {
+    if (!this.hasToken()) return;
+    const url = `${environment.apiUrl}/notifications${path}`;
+    const req =
+      method === 'post'
+        ? this.http.post(url, body ?? {})
+        : method === 'patch'
+          ? this.http.patch(url, body ?? {})
+          : this.http.delete(url);
+    void firstValueFrom(req).catch(() => {});
+  }
+
+  private async pushRemote(item: InboxNotification, coalesce: boolean): Promise<void> {
+    if (!this.hasToken() || !item.title) return;
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/notifications`, {
+          type: item.type,
+          title: item.title,
+          body: item.body,
+          route: item.route,
+          clientKey: item.route || item.id,
+          coalesce,
+        }),
+      );
+      const saved = this.normalize(res?.data ?? res);
+      if (!saved.id) return;
+      const next = this.notifications.map((n) => {
+        const same =
+          n.id === item.id ||
+          (!!saved.route && n.route === saved.route && n.type === item.type && !n.read);
+        return same ? { ...n, id: saved.id, body: saved.body, count: saved.count, createdAt: saved.createdAt, read: saved.read } : n;
+      });
+      this.persist(next);
+    } catch {
+      /* reste en local jusqu'au prochain sync */
     }
   }
 }

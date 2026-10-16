@@ -13,6 +13,7 @@ import { AgentAuthService } from '../../services/agent-auth.service';
 import { AuthService } from '../../services/auth.service';
 import { CallService } from '../../services/call.service';
 import { AgentFollowService } from '../../services/agent-follow.service';
+import { ReservationsService } from '../../services/reservations.service';
 
 @Component({
   selector: 'app-detailsimmo',
@@ -42,6 +43,7 @@ export class DetailsimmoPage implements OnInit {
   reviewComment = '';
   reviewSending = false;
   reportBusy = false;
+  reserving = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -57,7 +59,8 @@ export class DetailsimmoPage implements OnInit {
     private toastCtrl: ToastController,
     private translate: TranslateService,
     private http: HttpClient,
-    public data: MockDataService
+    public data: MockDataService,
+    private reservationsApi: ReservationsService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -406,6 +409,24 @@ export class DetailsimmoPage implements OnInit {
       await this.showToast('CALL.NOT_CONNECTED');
     } finally {
       this.calling = false;
+    }
+  }
+
+  async reserve(): Promise<void> {
+    if (!this.property || this.reserving) return;
+    if (!this.auth.currentUser) {
+      await this.showToast('DETAILS.RESERVE_NEED_LOGIN');
+      void this.router.navigateByUrl('/login');
+      return;
+    }
+    this.reserving = true;
+    try {
+      await this.reservationsApi.create(this.property.id);
+      await this.showToast('DETAILS.RESERVE_OK');
+    } catch {
+      await this.showToast('DETAILS.RESERVE_ERROR');
+    } finally {
+      this.reserving = false;
     }
   }
 

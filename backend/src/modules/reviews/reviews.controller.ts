@@ -10,6 +10,14 @@ import { ReviewTargetType } from '@prisma/client';
 export class ReviewsController {
   constructor(private readonly reviews: ReviewsService) {}
 
+  @Get('mine')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-AUTH')
+  mine(@CurrentUser() user: JwtPayload) {
+    if (user.type !== 'user') return { count: 0, items: [] };
+    return this.reviews.mine(user.sub);
+  }
+
   @Get()
   list(
     @Query('targetType') targetType: ReviewTargetType,

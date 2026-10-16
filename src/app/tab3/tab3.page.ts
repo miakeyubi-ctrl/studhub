@@ -9,18 +9,8 @@ import { MessagesService } from '../services/messages.service';
 import { MockDataService, Property } from '../services/mock-data.service';
 import { NotificationsInboxService } from '../services/notifications-inbox.service';
 import { Partner, PartnersService } from '../services/partners.service';
+import { Reservation, ReservationsService } from '../services/reservations.service';
 import { hasRealAvatar, initialsBg, initialsFromName } from '../utils/avatar.util';
-
-interface Reservation {
-  id: number;
-  title: string;
-  city: string;
-  image: string;
-  dateDebut: string;
-  dateFin: string;
-  price: number;
-  status: 'confirmee' | 'attente' | 'terminee';
-}
 
 interface MenuItem {
   icon: string;
@@ -63,9 +53,8 @@ export class Tab3Page implements OnInit, OnDestroy {
   ];
 
   favoris: Property[] = [];
-
-  /** Réservations réelles (vide tant que le backend n'expose pas encore l'API). */
   reservations: Reservation[] = [];
+  private extrasToken = 0;
 
   partners: Partner[] = [];
   isAdmin = false;
@@ -92,6 +81,7 @@ export class Tab3Page implements OnInit, OnDestroy {
     private data: MockDataService,
     private partnersService: PartnersService,
     private notificationsInbox: NotificationsInboxService,
+    private reservationsApi: ReservationsService,
   ) {}
 
   ngOnInit(): void {
@@ -104,6 +94,7 @@ export class Tab3Page implements OnInit, OnDestroy {
     });
     void this.auth.hydrateFromApi();
     void this.agentAuth.hydrateFromApi();
+    void this.notificationsInbox.sync();
     void this.data.loadProperties().catch(() => {});
     this.partnersSub = this.partnersService.partners$.subscribe(list => this.partners = list.slice(0, 8));
 
@@ -153,8 +144,13 @@ export class Tab3Page implements OnInit, OnDestroy {
       this.hasAvatar = hasRealAvatar(user.avatarUrl);
       this.userInitials = initialsFromName(user.fullName, user.email);
       this.avatarBg = initialsBg(user.fullName, user.email);
+      void this.loadAccountExtras();
       return;
     }
+
+    this.reservations = [];
+    this.stats[1].value = 0;
+    this.stats[2].value = 0;
 
     if (agent) {
       this.isLoggedIn = true;
@@ -195,6 +191,23 @@ export class Tab3Page implements OnInit, OnDestroy {
     }
     if (!this.isAgent) return this.menuItems;
     return this.menuItems.filter(item => item.route !== '/edit-profile');
+  }
+
+  private async loadAccountExtras(): Promise<void> {
+    if (!this.auth.currentUser) return;
+    const token = ++this.extrasToken;
+    try {
+      const [reservations, reviewCount] = await Promise.all([
+        this.reservationsApi.loadMine(),
+        this.data.loadMyReviewCount(),
+      ]);
+      if (token !== this.extrasToken || !this.auth.currentUser) return;
+      this.reservations = reservations;
+      this.stats[1].value = reservations.length;
+      this.stats[2].value = reviewCount;
+    } catch {
+      /* le profil reste affiché même si ces compteurs échouent */
+    }
   }
 
   openPartner(id: number): void {

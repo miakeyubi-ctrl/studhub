@@ -25,6 +25,8 @@ import { PushModule } from './modules/push/push.module';
 import { PartnersModule } from './modules/partners/partners.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { SupportModule } from './modules/support/support.module';
+import { ReservationsModule } from './modules/reservations/reservations.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -79,6 +81,8 @@ import { SupportModule } from './modules/support/support.module';
     PartnersModule,
     ReportsModule,
     SupportModule,
+    ReservationsModule,
+    NotificationsModule,
     UploadModule,
     HealthModule,
   ],

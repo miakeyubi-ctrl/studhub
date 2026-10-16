@@ -32,6 +32,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
     this.sub = this.inbox.notifications$.subscribe(list => {
       this.items = [...list].sort((a, b) => b.createdAt - a.createdAt);
     });
+    void this.inbox.sync();
   }
 
   ngOnDestroy(): void {

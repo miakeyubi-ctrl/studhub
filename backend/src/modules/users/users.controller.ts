@@ -78,6 +78,25 @@ export class UsersController {
     return this.users.adminSetBlocked(admin, kind, id, false);
   }
 
+  @Get('me/privacy')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-AUTH')
+  @ApiOperation({ summary: 'Lire mes préférences de confidentialité' })
+  getPrivacy(@CurrentUser() user: JwtPayload) {
+    return this.users.getPrivacy(user);
+  }
+
+  @Patch('me/privacy')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-AUTH')
+  @ApiOperation({ summary: 'Enregistrer mes préférences de confidentialité' })
+  updatePrivacy(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: { pushEnabled?: boolean; personalizedTips?: boolean },
+  ) {
+    return this.users.updatePrivacy(user, body);
+  }
+
   @Delete('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-AUTH')

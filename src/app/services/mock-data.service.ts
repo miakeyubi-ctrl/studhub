@@ -809,6 +809,16 @@ export class MockDataService {
     return this.reviews.filter(r => r.targetType === targetType && r.targetId === targetId);
   }
 
+  async loadMyReviewCount(): Promise<number> {
+    try {
+      const res: any = await firstValueFrom(this.http.get(`${environment.apiUrl}/reviews/mine`));
+      const data = res?.data ?? res;
+      return Number(data?.count || 0);
+    } catch {
+      return 0;
+    }
+  }
+
   async createReview(targetType: 'PROPERTY' | 'PRODUCT' | 'PROVIDER', targetId: number, rating: number, comment: string): Promise<Review | undefined> {
     try {
       const res: any = await firstValueFrom(this.http.post(`${environment.apiUrl}/reviews`, { targetType, targetId, rating, comment }));

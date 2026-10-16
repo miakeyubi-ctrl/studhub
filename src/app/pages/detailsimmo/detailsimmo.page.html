@@ -305,6 +305,16 @@
 
         </div>
 
+        <button
+          *ngIf="!isOwner"
+          type="button"
+          (click)="reserve()"
+          [disabled]="reserving"
+          class="w-full mt-2.5 bg-white dark:bg-primary-900 text-primary-700 dark:text-primary-200 border border-primary-200 dark:border-primary-600 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition disabled:opacity-60">
+          <ion-icon name="calendar-outline" class="text-sm"></ion-icon>
+          {{ 'DETAILS.RESERVE' | translate }}
+        </button>
+
         <div class="flex gap-2.5 mt-3.5" *ngIf="isOwner">
           <button type="button" (click)="editProperty()" class="flex-1 bg-primary-500 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
             <ion-icon name="create-outline" class="text-sm"></ion-icon>

@@ -23,6 +23,22 @@ enum Role {
   PARTNER
 }
 
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum InboxNotifType {
+  MESSAGE
+  SYSTEM
+  FAVORITE
+  PROMO
+  ALERT
+  CALL
+}
+
 enum PropertyCategory {
   STUDIO
   COLOCATION
@@ -113,10 +129,14 @@ model User {
   termsAcceptedAt DateTime?
   /// null = compte actif ; date = bloqué par un admin
   blockedAt    DateTime?
+  pushEnabled       Boolean @default(true)
+  personalizedTips  Boolean @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   products         Product[]
+  reservations     PropertyReservation[]
+  inboxNotifications InboxNotification[]
   posts            FeedPost[]
   likesGiven       Like[]
   commentsWritten  Comment[]
@@ -166,10 +186,13 @@ model Agent {
   documentsVerifiedAt DateTime?
   /// null = compte actif ; date = bloqué par un admin
   blockedAt     DateTime?
+  pushEnabled       Boolean @default(true)
+  personalizedTips  Boolean @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   properties    Property[]
+  inboxNotifications InboxNotification[]
   documents     AgentDocument[]
   refreshTokens RefreshToken[]  @relation("AgentRefreshTokens")
   sentMessages  ChatMessage[]   @relation("AgentSenderMessages")
@@ -231,6 +254,7 @@ model Property {
   likes     PropertyLike[]
   views     PropertyView[]
   reviews   Review[]           @relation("PropertyReviews")
+  reservations PropertyReservation[]
 
   @@index([city])
   @@index([price])
@@ -736,5 +760,45 @@ model ListingReport {
   @@unique([authorId, targetType, targetId])
   @@index([targetType, targetId])
   @@index([createdAt])
+}
+
+// Demande de réservation d'un logement par un étudiant
+model PropertyReservation {
+  id         Int               @id @default(autoincrement())
+  userId     Int
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId Int
+  property   Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  startDate  DateTime?
+  endDate    DateTime?
+  status     ReservationStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([userId, status])
+  @@index([propertyId])
+}
+
+// Historique de notifications (étudiant ou agent)
+model InboxNotification {
+  id        Int            @id @default(autoincrement())
+  userId    Int?
+  user      User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId   Int?
+  agent     Agent?         @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  type      InboxNotifType
+  title     String         @db.VarChar(200)
+  body      String?        @db.Text
+  route     String?        @db.VarChar(300)
+  read      Boolean        @default(false)
+  count     Int            @default(1)
+  clientKey String?        @db.VarChar(120)
+  createdAt DateTime       @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([agentId, createdAt])
+  @@index([userId, clientKey])
+  @@index([agentId, clientKey])
 }
 
